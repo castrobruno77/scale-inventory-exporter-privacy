@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Política de Privacidade — SCALE Inventory Exporter</title>
+  <meta name="description" content="Política de Privacidade do SCALE Inventory Exporter para Microsoft Edge.">
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --accent:#1f4e78;
+      --border:#dbe3ec;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.65;
+    }
+    .wrap{
+      max-width:900px;
+      margin:40px auto;
+      padding:0 20px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:36px;
+      box-shadow:0 8px 24px rgba(0,0,0,.05);
+    }
+    h1,h2{color:var(--accent); line-height:1.25}
+    h1{margin-top:0;font-size:2rem}
+    h2{margin-top:2rem;font-size:1.25rem}
+    p,li{font-size:1rem}
+    .meta{color:var(--muted);margin-bottom:28px}
+    footer{
+      margin-top:36px;
+      padding-top:20px;
+      border-top:1px solid var(--border);
+      color:var(--muted);
+      font-size:.95rem;
+    }
+    code{
+      background:#eef3f8;
+      padding:2px 6px;
+      border-radius:5px;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article class="card">
+      <h1>Política de Privacidade — SCALE Inventory Exporter</h1>
+      <p class="meta">Última atualização: 22 de setembro de 2026</p>
+
+      <h2>1. Finalidade</h2>
+      <p>
+        O SCALE Inventory Exporter é uma extensão para Microsoft Edge destinada a ler
+        o inventário de Counter-Strike 2 disponível na sessão autenticada do usuário em
+        <code>steamcommunity.com</code> e gerar arquivos locais em JSON e Excel para análise.
+      </p>
+
+      <h2>2. Dados acessados</h2>
+      <p>A extensão pode acessar, exclusivamente nas páginas de <code>steamcommunity.com</code> abertas pelo usuário:</p>
+      <ul>
+        <li>SteamID64 público necessário para consultar o inventário;</li>
+        <li>itens do inventário de Counter-Strike 2 e seus identificadores técnicos;</li>
+        <li>nome, coleção, raridade, exterior, float, paint seed, StatTrak e Souvenir;</li>
+        <li>stickers, charms e acessórios quando expostos pela Steam;</li>
+        <li>informações de tradability, marketability e trade lock;</li>
+        <li>links de inspeção e metadados técnicos fornecidos pela Steam.</li>
+      </ul>
+
+      <h2>3. Dados que não são coletados</h2>
+      <p>A extensão não coleta nem armazena:</p>
+      <ul>
+        <li>senha da Steam;</li>
+        <li>códigos Steam Guard ou 2FA;</li>
+        <li>cookies de autenticação;</li>
+        <li>sessionid;</li>
+        <li>chaves de API;</li>
+        <li>credenciais bancárias ou informações de pagamento.</li>
+      </ul>
+
+      <h2>4. Armazenamento e transmissão</h2>
+      <p>
+        Na versão atual, os dados extraídos são processados localmente no navegador e
+        exportados para arquivos JSON e Excel no dispositivo do usuário.
+        A extensão não envia o inventário para servidores da SCALE nem para terceiros.
+      </p>
+
+      <h2>5. Permissões</h2>
+      <p>
+        A extensão solicita acesso somente a <code>steamcommunity.com</code> e às permissões
+        <code>activeTab</code> e <code>scripting</code>, utilizadas para executar a extração
+        quando o próprio usuário inicia a ação.
+      </p>
+
+      <h2>6. Compartilhamento de dados</h2>
+      <p>
+        A extensão não vende, aluga ou compartilha os dados do usuário com anunciantes,
+        corretores de dados ou terceiros.
+      </p>
+
+      <h2>7. Alterações futuras</h2>
+      <p>
+        Se uma versão futura passar a transmitir dados para um backend da SCALE ou para
+        qualquer serviço externo, esta política será atualizada antes da disponibilização
+        dessa funcionalidade.
+      </p>
+
+      <h2>8. Contato</h2>
+      <p>
+        O canal de suporte e contato será informado na página oficial da extensão no
+        Microsoft Edge Add-ons.
+      </p>
+
+      <footer>
+        SCALE Inventory Exporter
+      </footer>
+    </article>
+  </main>
+</body>
+</html>
