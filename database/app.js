@@ -6,32 +6,20 @@ const ERROR_MESSAGES={
   RATE_LIMITED:'Muitas consultas em pouco tempo. Tente novamente em instantes.',
   ORIGIN_NOT_ALLOWED:'Este ambiente não está autorizado a consultar o catálogo.'
 };
-let lastItems=[];
 const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'');
-function fmt(v){return v===null||v===undefined||v===''?'N/D':String(v)}
+const fmt=v=>v===null||v===undefined||v===''?'N/D':String(v);
+const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const entityHref=x=>'skin/?key='+encodeURIComponent(x.market_key||x.skin_name||'');
 function setState(text,error=false){const b=$('stateBox');b.textContent=text;b.className='state-box'+(error?' error':'')}
 function art(item){
-  if(item.image_url)return '<img src="'+item.image_url+'" alt="'+clean(item.skin_name)+'" loading="lazy">';
+  if(item.image_url)return '<img src="'+esc(item.image_url)+'" alt="'+esc(clean(item.skin_name))+'" loading="lazy">';
   return '<span class="skin-meta">imagem N/D</span>';
 }
 function render(items){
-  lastItems=items;
-  $('results').innerHTML=items.map((x,i)=>'<button class="skin-card" type="button" data-index="'+i+'">'+art(x)+'<h3>'+clean(x.skin_name)+'</h3><div class="skin-meta">'+fmt(x.collection)+' · '+fmt(x.rarity)+'</div><div class="skin-meta">float '+fmt(x.float_min)+'–'+fmt(x.float_max)+'</div></button>').join('');
-  document.querySelectorAll('[data-index]').forEach(btn=>btn.onclick=()=>openHub(lastItems[Number(btn.dataset.index)]));
-}
-function openHub(x){
-  $('skinHub').hidden=false;
-  $('hubArt').innerHTML=art(x);
-  $('hubName').textContent=clean(x.skin_name)||'N/D';
-  $('hubCollection').textContent=fmt(x.collection);
-  $('hubRarity').textContent=fmt(x.rarity);
-  $('hubFloatMin').textContent=fmt(x.float_min);
-  $('hubFloatMax').textContent=fmt(x.float_max);
-  $('skinHub').scrollIntoView({behavior:'smooth',block:'start'});
+  $('results').innerHTML=items.map(x=>'<a class="skin-card skin-link" href="'+entityHref(x)+'">'+art(x)+'<h3>'+esc(clean(x.skin_name))+'</h3><div class="skin-meta">'+esc(fmt(x.collection))+' · '+esc(fmt(x.rarity))+'</div><div class="skin-meta">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</div><span class="card-action">Abrir página da skin →</span></a>').join('');
 }
 async function search(){
   const q=$('skinSearch').value.trim();
-  $('skinHub').hidden=true;
   if(q.length<2){render([]);setState('Digite ao menos 2 caracteres para buscar.',true);return}
   $('searchBtn').disabled=true;$('searchBtn').textContent='Buscando…';setState('Consultando catálogo autorizado…');
   try{
@@ -43,7 +31,7 @@ async function search(){
     }
     const items=Array.isArray(d.items)?d.items:[];
     render(items);
-    setState(items.length?items.length+' resultado(s) do catálogo real. Selecione uma skin para abrir o hub preview.':'Nenhuma skin encontrada para esta busca.');
+    setState(items.length?items.length+' resultado(s) do catálogo real. Abra uma skin para ver sua página de entidade.':'Nenhuma skin encontrada para esta busca.');
   }catch(e){render([]);setState('Falha de conexão ao consultar o catálogo. · NETWORK_ERROR',true)}
   finally{$('searchBtn').disabled=false;$('searchBtn').textContent='Buscar'}
 }

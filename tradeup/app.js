@@ -99,7 +99,7 @@ function renderOutputs(outputs){
     <div class="market-context"><span>Fonte: ${x.market?.source || 'N/D'}</span><span>Confiança: ${x.market?.confidence ?? 'N/D'}</span><span>Atualizado: ${x.market?.updated_at || 'N/D'}</span></div>
     ${patternFlag(x.skin_name)?'<span class="pattern-flag">PATTERN-SENSITIVE · explorar depois</span>':''}
     <div class="output-money"><div><span>Valor realizável</span><strong>${money(x.market?.realizable_usd)}</strong></div><div><span>Lucro / perda</span><strong>${hasNumber(x.profit_usd)?`${Number(x.profit_usd)>=0?'+':'-'}US$ ${Math.abs(Number(x.profit_usd)).toFixed(2)}`:'N/D'}</strong></div></div>
-    <div class="output-actions"><button class="mini-btn" disabled title="Inspect exige um asset/listing real">Inspect</button><button class="mini-btn" disabled>abrir skin</button></div></div></article>`}).join('');
+    <div class="output-actions"><button class="mini-btn" disabled title="Inspect exige um asset/listing real">Inspect</button><a class="mini-btn enabled" href="../database/skin/?key=${encodeURIComponent(x.market_key||x.skin_name||'')}">Abrir skin</a></div></div></article>`}).join('');
 }
 async function simulate(){
   const inputs=state.slots.map(x=>({market_key:x.market_key,float_value:Number(x.float_value),owned:!!x.owned}));
