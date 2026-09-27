@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OPS-010 Review Harness — SCALE CS2 Trade Lab</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#050b0e;color:#e9eef1;font-family:Inter,system-ui,sans-serif}
+  main{padding:24px;display:grid;gap:32px}
+  h1{margin:0;font-size:24px}
+  p{margin:6px 0 0;color:#9fb5bd}
+  section{display:grid;gap:10px}
+  .frame-shell{overflow:auto;border:1px solid #31545f;border-radius:12px;background:#071419;padding:8px}
+  iframe{display:block;border:0;background:#071419;transform-origin:top left}
+  .desktop iframe{width:1440px;height:900px}
+  .tablet iframe{width:768px;height:1024px}
+  .mobile iframe{width:390px;height:844px}
+  .label{font-weight:800}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>OPS-010 · Review Harness</h1>
+    <p>Branch-only QA surface. No merge, no deployment, no production publication.</p>
+  </header>
+  <section class="desktop">
+    <div class="label">Desktop · 1440×900</div>
+    <div class="frame-shell"><iframe src="./index.html?ops010=b7cf19971fb1134f84488cfad5a3b8c774c4e199" title="Desktop 1440x900"></iframe></div>
+  </section>
+  <section class="tablet">
+    <div class="label">Tablet · 768×1024</div>
+    <div class="frame-shell"><iframe src="./index.html?ops010=b7cf19971fb1134f84488cfad5a3b8c774c4e199" title="Tablet 768x1024"></iframe></div>
+  </section>
+  <section class="mobile">
+    <div class="label">Mobile · 390×844</div>
+    <div class="frame-shell"><iframe src="./index.html?ops010=b7cf19971fb1134f84488cfad5a3b8c774c4e199" title="Mobile 390x844"></iframe></div>
+  </section>
+</main>
+</body>
+</html>
