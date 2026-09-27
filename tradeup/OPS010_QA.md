@@ -58,11 +58,34 @@ PASS:
 
 21/21 assertions PASS after correcting one test that initially checked an implementation-specific syntax instead of the actual ternary N/D behavior.
 
-## Limitation / remaining visual QA
+## Rendered visual QA — certified
 
-A rendered browser preview was not created because external publication remains gated and no authenticated computer-use/browser-preview environment is available in this chat. Therefore this unit certifies static responsive behavior and state semantics, but does **not** claim final rendered desktop/mobile visual approval.
+Authorized browser/review surface: TinyFish live browser over a branch-only review surface. No deploy, merge, or production publication was created.
 
-OPS-010 should remain open until rendered desktop/mobile QA is executed against a reviewable preview or equivalent authorized browser surface.
+Evidence:
+- Initial rendered QA run: `db669ffc-5aff-43a1-b4d4-41c20d01ce21`
+- Focused overflow confirmation run: `441bf4c2-a954-40cc-a3e4-fa427fea80c7`
+- Confirmed overflow fix commit: `b7cf19971fb1134f84488cfad5a3b8c774c4e199`
+- Branch-only three-viewport harness commit: `887bf64ae1d388831024acc098290f245c5560f7`
+- Final certification run: `009b78ea-54dd-472d-811d-caca24fbdddb`
+
+Rendered viewports:
+- Desktop: 1440×900 — PASS
+- Tablet: 768×1024 — PASS
+- Mobile: 390×844 — PASS
+
+Validated visually:
+- COMPLETE state and economic summary;
+- incomplete/PARTIAL-equivalent state after removing one input;
+- inline error/incomplete state after clearing composition;
+- literal `N/D` handling;
+- source, confidence, and updated_at/freshness metadata;
+- v7 `QUERY_TOO_LONG` localized message without layout break;
+- overflow, clipping, overlap, legibility, control sizing, spacing, and hierarchy.
+
+A real horizontal overflow was confirmed after loading the demo composition during the focused run. It was corrected only in `tradeup/styles.css` by adding containment/min-width and safe wrapping to the affected layout rows. No economic or API logic changed. The final three-viewport run found no remaining visual regressions.
+
+Residual limitation: every sub-step was not repeated independently in all three iframes; full state interaction was exercised primarily on desktop/tablet, while mobile was explicitly validated for rendered composition, card fit, no horizontal overflow, and layout integrity. This does not affect the certified responsive/layout result.
 
 ## Preservation guarantees
 
