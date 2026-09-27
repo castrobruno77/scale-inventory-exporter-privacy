@@ -16,13 +16,13 @@ const ERROR_MESSAGES = {
   FLOAT_OUT_OF_RANGE:'Um dos floats informados está fora da faixa válida da skin.',
   NO_ELIGIBLE_OUTPUTS:'Nenhum resultado elegível foi encontrado para esta composição.',
   INVALID_PRICE_USD:'Um dos preços informados é inválido. Revise o valor e tente novamente.',
-  RATE_LIMITED:'Muitas avaliações foram feitas em pouco tempo. Tente novamente em instantes.',
-  ORIGIN_NOT_ALLOWED:'Este preview não está autorizado a usar o serviço do Trade Lab.',
+  RATE_LIMITED:'Muitas avaliações em pouco tempo. Tente novamente em instantes.',
+  ORIGIN_NOT_ALLOWED:'Este ambiente não está autorizado a usar o serviço do Trade Lab.',
   PAYLOAD_TOO_LARGE:'Esta solicitação é maior do que o Trade Lab pode processar.',
-  QUERY_TOO_LONG:'A busca é longa demais. Use um nome ou termo mais curto.',
+  QUERY_TOO_LONG:'A busca é longa demais. Use um termo mais curto.',
   REQUEST_URI_TOO_LONG:'Esta solicitação não pôde ser processada porque o endereço ficou longo demais.',
-  INVALID_JSON_BODY:'A solicitação de avaliação não pôde ser interpretada. Reinicie o trade-up e tente novamente.',
-  INTERNAL_ERROR:'O serviço de avaliação retornou um erro interno. Seus itens não foram alterados.'
+  INVALID_JSON_BODY:'A solicitação não pôde ser interpretada. Reinicie o trade-up e tente novamente.',
+  INTERNAL_ERROR:'O serviço retornou um erro interno. Seus dados de entrada não foram alterados.'
 };
 function setResultState(kind,title,detail){
   const box=$('resultState');
@@ -46,7 +46,7 @@ function renderInputs(){
       <div class="float-row"><label>float</label><input data-float="${i}" type="number" step="0.000001" min="${item.float_min}" max="${item.float_max}" value="${item.float_value}"></div>
       <div class="input-foot"><span>${item.rarity}</span><span>${item.is_stattrak?'ST':'normal'}</span></div></div></article>`;
   }).join('');
-  $('slotCounter').textContent=`${state.slots.filter(Boolean).length} de 10 inputs`;
+  $('slotCounter').textContent=`${state.slots.filter(Boolean).length} de 10 itens`;
   document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{state.slots[+b.dataset.remove]=null;state.result=null;renderInputs();resetResult();});
   document.querySelectorAll('[data-float]').forEach(inp=>inp.onchange=()=>{const i=+inp.dataset.float; const it=state.slots[i]; const v=Number(inp.value); if(Number.isFinite(v)){it.float_value=Math.max(Number(it.float_min),Math.min(Number(it.float_max),v)); inp.value=it.float_value;} state.result=null; resetResult(); updateCompatibility();});
   updateCompatibility();
@@ -54,7 +54,7 @@ function renderInputs(){
 function updateCompatibility(){
   const filled=state.slots.filter(Boolean); let msg='Complete os 10 itens para avaliar o trade-up.'; let ok=false;
   if(filled.length){const ranks=new Set(filled.map(x=>x.rarity_rank)),modes=new Set(filled.map(x=>!!x.is_stattrak));
-    if(ranks.size>1) msg=ERROR_MESSAGES.MIXED_RARITY_NOT_ALLOWED; else if(modes.size>1) msg=ERROR_MESSAGES.MIXED_STATTRAK_NOT_ALLOWED; else if(filled.length<10) msg=`${filled.length} de 10 inputs · complete os 10 itens para avaliar o trade-up.`; else {msg='10 de 10 inputs · pronto para avaliar.';ok=true;}}
+    if(ranks.size>1) msg=ERROR_MESSAGES.MIXED_RARITY_NOT_ALLOWED; else if(modes.size>1) msg=ERROR_MESSAGES.MIXED_STATTRAK_NOT_ALLOWED; else if(filled.length<10) msg=`${filled.length} de 10 itens · complete os 10 itens para avaliar o trade-up.`; else {msg='10 de 10 itens · pronto para avaliar.';ok=true;}}
   $('compatibility').textContent=msg; $('simulateBtn').disabled=!ok;
 }
 async function search(){

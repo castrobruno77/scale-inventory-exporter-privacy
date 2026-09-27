@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SCALE CS2 — Database Preview</title>
-<meta name="description" content="Preview reversível da camada canônica de skins da SCALE CS2.">
+<title>SCALE — Database Preview</title>
+<meta name="description" content="Preview reversível da camada de catálogo de skins da SCALE.">
 <meta name="theme-color" content="#071014">
 <link rel="stylesheet" href="../platform.css">
 </head>
@@ -12,33 +12,34 @@
 <a class="skip" href="#main">Ir para o conteúdo</a>
 <header class="site-header">
   <div class="wrap nav-shell">
-    <a class="brand" href="../" aria-label="SCALE CS2 home">SCALE CS2<span>.</span></a>
+    <a class="brand" href="../" aria-label="SCALE home">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
       <a href="../">Home</a>
       <a href="../tradeup/">Trade Lab</a>
       <a class="active" href="./">Database <small>preview</small></a>
-      <span class="nav-future">Markets <small>preview</small></span>
-      <span class="nav-future">Patterns <small>preview</small></span>
+      <span class="nav-future">Markets <small>Em desenvolvimento</small></span>
+      <span class="nav-future">Patterns <small>Em desenvolvimento</small></span>
+      <span class="nav-future">Inventory <small>Em desenvolvimento</small></span>
     </nav>
   </div>
 </header>
 
 <main id="main" class="wrap">
   <section class="page-hero">
-    <p class="eyebrow">SCALE CS2 Database · preview</p>
-    <h1>Uma skin canônica.<br><em>Várias próximas perguntas.</em></h1>
-    <p class="lead">Esta unidade usa somente o catálogo real já exposto pelo endpoint público do Trade Lab. Mercado, pattern, inspect e inventário permanecem indisponíveis quando não estão conectados.</p>
-    <div class="preview-banner"><strong>PREVIEW</strong> · Busca real de catálogo. Nenhum preço, pattern, disponibilidade ou recomendação é inventado nesta página.</div>
+    <p class="eyebrow">Database · preview</p>
+    <h1>Encontre a skin.<br><em>Entenda o contexto.</em></h1>
+    <p class="lead">Consulte atributos estruturais, coleção, raridade, float e relações da skin em um único registro conectado.</p>
+    <div class="preview-banner"><strong>PREVIEW</strong> · Esta página usa somente o catálogo real já disponível. Mercado, pattern, inspect e inventário continuam em desenvolvimento quando não houver capacidade conectada.</div>
   </section>
 
   <section class="search-panel" aria-labelledby="catalog-title">
     <p class="eyebrow">Catálogo autorizado</p>
     <h2 id="catalog-title">Buscar skins</h2>
     <div class="search-row">
-      <input id="skinSearch" autocomplete="off" placeholder="Busque por skin ou nome de mercado" aria-label="Buscar skins">
+      <input id="skinSearch" autocomplete="off" placeholder="Buscar por arma, skin ou coleção" aria-label="Buscar skins">
       <button id="searchBtn" type="button">Buscar</button>
     </div>
-    <p class="search-help">Digite ao menos 2 caracteres. Resultados vêm do mesmo catálogo público usado pelo Trade Lab; ausência de resultado não é convertida em dado fictício.</p>
+    <p class="search-help">Resultados vêm do catálogo público autorizado. Ausência de resultado ou detalhe permanece ausente; não é convertida em dado fictício.</p>
   </section>
 
   <div id="stateBox" class="state-box">Nenhuma busca executada.</div>
@@ -48,8 +49,9 @@
     <div class="skin-hub-head">
       <div id="hubArt" class="skin-hub-art"></div>
       <div>
-        <span class="hub-kicker">PÁGINA-HUB CANÔNICA · PREVIEW</span>
+        <span class="hub-kicker">SKIN HUB · PREVIEW</span>
         <h2 id="hubName">Skin</h2>
+        <p class="section-copy">Uma visão conectada de float, coleção, mercado, pattern e possibilidades relacionadas.</p>
         <p id="hubCollection" class="section-copy"></p>
         <div class="hub-data">
           <div><span>Raridade</span><strong id="hubRarity">N/D</strong></div>
@@ -59,17 +61,17 @@
       </div>
     </div>
     <div class="hub-modules">
-      <div class="hub-module"><strong>Trade Lab</strong><span>Disponível como vertical funcional separado.</span></div>
-      <div class="hub-module"><strong>Markets</strong><span>Preview indisponível nesta unidade.</span></div>
-      <div class="hub-module"><strong>Patterns</strong><span>Preview indisponível nesta unidade.</span></div>
-      <div class="hub-module"><strong>Inspect / Inventory</strong><span>Indisponível sem exemplar ou contexto real.</span></div>
+      <div class="hub-module"><strong>Trade-up</strong><span><a href="../tradeup/">Abrir Trade Lab</a></span></div>
+      <div class="hub-module"><strong>Mercados</strong><span>Este módulo ainda não possui dados disponíveis para esta skin.</span></div>
+      <div class="hub-module"><strong>Pattern</strong><span>Este módulo ainda não possui dados disponíveis para esta skin.</span></div>
+      <div class="hub-module"><strong>Inspect / Inventory</strong><span>Esta experiência ainda está em desenvolvimento.</span></div>
     </div>
   </section>
 </main>
 
 <footer class="footer">
   <div class="wrap footer-row">
-    <span><strong>SCALE CS2 Database</strong> · preview reversível · dados ausentes permanecem N/D/indisponíveis.</span>
+    <span><strong>SCALE Database</strong> · preview reversível · dados ausentes permanecem N/D.</span>
     <span>OPS-011 · VÉRTICE / SCL-DXP-001</span>
   </div>
 </footer>

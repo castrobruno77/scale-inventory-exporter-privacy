@@ -1,10 +1,10 @@
 const API='https://ubtojlrfxoxbuvgajeos.supabase.co/functions/v1/tradeup-public';
 const $=id=>document.getElementById(id);
 const ERROR_MESSAGES={
-  QUERY_TOO_LONG:'A busca é longa demais. Use um nome ou termo mais curto.',
+  QUERY_TOO_LONG:'A busca é longa demais. Use um termo mais curto.',
   REQUEST_URI_TOO_LONG:'A solicitação não pôde ser processada porque o endereço ficou longo demais.',
-  RATE_LIMITED:'Muitas consultas foram feitas em pouco tempo. Tente novamente em instantes.',
-  ORIGIN_NOT_ALLOWED:'Este preview não está autorizado a consultar o catálogo.'
+  RATE_LIMITED:'Muitas consultas em pouco tempo. Tente novamente em instantes.',
+  ORIGIN_NOT_ALLOWED:'Este ambiente não está autorizado a consultar o catálogo.'
 };
 let lastItems=[];
 const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'');
@@ -43,7 +43,7 @@ async function search(){
     }
     const items=Array.isArray(d.items)?d.items:[];
     render(items);
-    setState(items.length?items.length+' resultado(s) do catálogo real. Selecione uma skin para abrir o hub preview.':'Nenhum resultado encontrado. Nenhum dado foi inferido.');
+    setState(items.length?items.length+' resultado(s) do catálogo real. Selecione uma skin para abrir o hub preview.':'Nenhuma skin encontrada para esta busca.');
   }catch(e){render([]);setState('Falha de conexão ao consultar o catálogo. · NETWORK_ERROR',true)}
   finally{$('searchBtn').disabled=false;$('searchBtn').textContent='Buscar'}
 }
