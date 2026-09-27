@@ -1,96 +1,107 @@
-# OPS-011 — Platform Shell v0.1 + Home + Database Preview — QA
+# OPS-011 — Platform Shell v0.1 + Home + Database Preview — QA Final
 
 Date: 2026-09-27  
 Owner: FRONT END — VÉRTICE / SCL-DXP-001  
-Branch: `feature/trade-lab-v0.1`  
-Implementation commit: `8d9120a891f35309d37eae669d51de500060e5d2`  
+Branch: `feature/trade-lab-v0.1`
+
 Certified Trade Lab baseline preserved from OPS-010: `43bf61685885ed40b331745660436cf43414416c`
 
-## Scope frozen before implementation
+OPS-011 implementation commits:
+- `8d9120a891f35309d37eae669d51de500060e5d2` — Platform Shell + Home + Database Preview.
+- `556edde3a3edd25d0a349a66fccbf9863847acb3` — alignment with the latest PRISMA Product Copy Handoff.
 
-OPS-011 is the smallest coherent next unit after certified Trade Lab:
+## Frozen unit and completion criteria
 
-1. reusable global platform shell and navigation;
+OPS-011 is the smallest coherent next RM-002 unit after the certified Trade Lab:
+
+1. reusable global shell and clear navigation;
 2. navigable Home;
-3. navigable Database Preview using only the existing canonical public catalog GET;
-4. certified Trade Lab remains reachable and behaviorally unchanged;
-5. unsupported hubs are visibly marked preview/unavailable;
-6. no parallel economic logic, no new backend contract;
-7. desktop/tablet/mobile QA;
-8. no merge to main and no production publication.
+3. navigable Database Preview using only the existing canonical public catalog GET or explicit N/D/preview states;
+4. certified Trade Lab remains reachable and its contract/state semantics remain intact;
+5. no parallel economic logic and no new backend contract;
+6. desktop/tablet/mobile without horizontal overflow and with legible hierarchy;
+7. static + real rendered visual QA;
+8. canonical evidence/handoff;
+9. no merge or external production publication.
 
-## Canonical inputs reconciled
+## Canonical sources reconciled
 
 - Blueprint Canônico da Plataforma v0.1;
-- PRISMA Deep Brand Review / Brand System Validation v0.2;
-- SCALE CS2 Brand Architecture & Clearance v0.1;
-- SCALE CS2 Trade Lab Copy System v0.1;
 - CAP-SCL-TRADEUP-EVALUATE v1;
-- certified OPS-010 branch state and QA.
+- certified OPS-010 branch state and QA;
+- PRISMA Deep Brand Review / Brand System Validation v0.2;
+- **latest PRISMA handoff:** `HOF-PRISMA-20260927-RM003-PRODUCTCOPY-01`;
+- Product Copy document: `PRISMA — RM-003 — SCALE Product Copy Handoff para VÉRTICE v0.1`.
 
-Brand-system constraints applied to new surfaces:
+The latest PRISMA handoff is authoritative for this cycle:
+- operational brand token bound to `SCALE`;
+- Home core copy uses the APPROVED strings;
+- Database/skin hub copy is used only as reversible PROVISIONAL preview;
+- Markets/Patterns/Inventory are marked `Em desenvolvimento`;
+- Intelligence is not exposed in this P0/P1 shell;
+- no naming migration/publication is implied.
 
-- dark matte product surface;
-- one dominant brand chroma / Signal Cyan candidate;
-- no recurring glow;
-- economic positive/caution/negative colors remain semantically isolated;
-- Evidence Rail concept for source/observation/confidence/coverage;
-- quiet, precise and plain-spoken voice;
-- SCALE CS2 remains WORKING BRAND — NOT CLEARED.
-
-## Navigable surfaces
+## Navigable pages
 
 | Path | State | Data behavior |
 | --- | --- | --- |
-| `/` | Home / Platform Shell v0.1 | Product/navigation state only; no fictitious economic data |
-| `/tradeup/` | Functional certified Trade Lab | Existing CAP v1 behavior preserved |
-| `/database/` | Database Preview | Real catalog GET only; missing values remain N/D |
-| Markets | Unavailable | No route/data fabricated |
-| Patterns | Unavailable | No route/data fabricated |
-| Inventory | Unavailable | No route/data fabricated |
-| Intelligence | Unavailable | No route/data fabricated |
+| `/` | Home / Platform Shell v0.1 | Approved Home copy; proof/evidence semantics; no fictitious market data |
+| `/tradeup/` | Functional certified Trade Lab | CAP v1 behavior preserved; copy aligned to latest PRISMA handoff |
+| `/database/` | Reversible Database Preview | Real catalog GET only; missing values remain N/D |
 
-## Exact-source static QA
+Visible but not navigable:
+- Markets — Em desenvolvimento.
+- Patterns — Em desenvolvimento.
+- Inventory — Em desenvolvimento.
 
-20/20 assertions PASS against GitHub branch source.
+Not exposed in this unit:
+- Intelligence;
+- Watch/alerts;
+- Inspect/3D as a live action;
+- Buy/Obtain actions.
 
-Verified:
+## Exact-source QA
 
-- reversible-preview labeling on Home;
-- Home → Trade Lab navigation;
-- Home → Database Preview navigation;
-- future hubs marked unavailable;
-- Evidence Rail uses N/D rather than zero;
-- no glow declaration in the new platform stylesheet;
-- Signal Cyan token present;
-- responsive breakpoints <=900px and <=620px;
-- Database uses the existing canonical `tradeup-public` endpoint;
-- Database performs no POST and contains no economic formulas;
-- Database preserves N/D;
-- safe v7 GET errors mapped: QUERY_TOO_LONG, REQUEST_URI_TOO_LONG, RATE_LIMITED, ORIGIN_NOT_ALLOWED;
-- Database explicitly states that price/pattern/availability/recommendation are not invented;
-- Trade Lab navigation integrates Home/Database;
+Final result: **23/23 PASS**.
+
+Verified against the GitHub branch source:
+
+- approved Home eyebrow/headline/subheadline;
+- approved Home evidence/proof semantics;
+- approved navigation labels;
+- unavailable destinations marked `Em desenvolvimento`;
+- Intelligence not exposed;
+- Database provisional approved headline/placeholder;
+- Database uses only the existing canonical `tradeup-public` endpoint;
+- Database contains no POST/economic engine;
+- Database preserves literal N/D;
+- Database future modules do not claim availability;
+- Trade Lab approved eyebrow/subheadline/input-progress copy;
 - COMPLETE/PARTIAL/ERROR preserved;
-- Source/Confidence/Updated preserved;
-- N/D formatter behavior preserved;
-- all seven v7 error mappings preserved in Trade Lab;
-- no new real-time/guaranteed/accuracy claims.
+- N/D / source / confidence / updated preserved;
+- seven v7 error mappings preserved;
+- no parallel economics in Database;
+- no new prohibited real-time/accuracy/guarantee/best-price claims;
+- new platform CSS contains responsive breakpoints at <=900px and <=620px;
+- no glow token/effect was introduced in the new platform shell.
 
-Relevant blobs at QA:
+Final relevant blob SHAs:
 
-- `index.html`: `b41e3e6c0b4fa381e2d41c043a6f545bce21c4ee`
+- `index.html`: `f28050aeb099318a6f08bb2c99ab83e394822d11`
 - `platform.css`: `779d5f721b4af2a4e260ad9d77f2bc7461f2d9b5`
-- `database/index.html`: `28e463e29be8681e145d083aa69c34dd0d39f63a`
-- `database/app.js`: `19be4bb0532e5e865b366f2d3be356111152f4c8`
-- `tradeup/index.html`: `d82883e42d630962247ff32c8900cf41041405b0`
-- `tradeup/app.js`: `65950a54cc9f35aa5df886b6783cda1e4f77274d`
+- `database/index.html`: `b183df7b54fb45c84e7fa2fc4862082d1c9ca5d4`
+- `database/app.js`: `b86a4cc1f2b1a44f75b0b1230bb7d8516469d399`
+- `tradeup/index.html`: `c869ebd06133244cc7bec9f17afd6971701ab01e`
+- `tradeup/app.js`: `a14aefbd23e590a3e26fd81c1ed7835d3433e070`
 - `tradeup/styles.css`: `43433f6ec9868ff2a197371b8470953185fc2a26`
 
 ## Rendered visual QA
 
-Rendered in local Chromium/Playwright without external deployment or paid service.
+Real Chromium/Playwright rendering was executed locally after the final PRISMA-copy alignment.
 
-The environment blocked direct localhost/file URL navigation, so the QA harness rendered the exact page structure/styles and Database interaction semantics with Playwright `set_content`. Exact branch source was independently checked by the 20/20 source assertions above.
+No external deployment, paid service or new credential was used.
+
+The execution environment blocked direct localhost/file navigation, so the QA harness rendered the branch page structure/styles with Playwright `set_content`; exact GitHub source was independently verified by the 23/23 source assertions above.
 
 ### Home
 
@@ -98,19 +109,20 @@ The environment blocked direct localhost/file URL navigation, so the QA harness 
 | --- | --- | --- | --- | --- |
 | 1440×900 | No | None | Clear | PASS |
 | 768×1024 | No | None | Clear | PASS |
-| 390×844 | No | None | Clear; single-column product cards | PASS |
+| 390×844 | No | None | Clear | PASS |
 
-Visual review confirmed:
+Visual review after the final copy alignment confirmed:
 
-- readable hero and navigation;
-- live/preview/unavailable states are visually distinct without celebration/gambling language;
-- Evidence Rail remains secondary and legible;
-- no clipping or broken card grids;
-- no economic color used as brand identity.
+- approved headline wraps without clipping;
+- primary and secondary CTAs remain readable;
+- evidence block remains secondary to the value proposition;
+- Functional / Preview / Em desenvolvimento states are distinguishable;
+- product cards collapse cleanly on mobile;
+- no economic semantic color is reused as the primary brand signal.
 
 ### Database Preview
 
-QA-only network fixtures were used solely to exercise rendering and were not added to product code or presented as real platform data.
+QA-only network fixtures were used solely to exercise rendering. They were never committed or presented as platform data.
 
 | Viewport | Horizontal overflow | Console errors | Search results | Skin hub | Result |
 | --- | --- | --- | --- | --- | --- |
@@ -121,37 +133,39 @@ QA-only network fixtures were used solely to exercise rendering and were not add
 Also verified:
 
 - missing image renders as `imagem N/D`;
-- no fake US$/R$ values appear;
-- Markets / Patterns / Inspect / Inventory remain explicitly unavailable in the hub;
-- safe simulated HTTP 429 renders the canonical RATE_LIMITED message in an error state.
+- no fake US$/R$ values are generated;
+- market/pattern modules stay unavailable;
+- safe simulated HTTP 429 renders the RATE_LIMITED error state;
+- page remains readable with provisional copy and explicit PREVIEW labeling.
 
-### Trade Lab regression boundary
+## Trade Lab regression boundary
 
-OPS-011 did not change `tradeup/app.js` or the economic/state model. It changed only the navigation in `tradeup/index.html`.
+The original OPS-011 implementation changed only Trade Lab navigation. The final PRISMA alignment changed Trade Lab text strings only; no request shape, response semantics, economic formula or backend endpoint was altered.
 
-Therefore the certified OPS-010 guarantees remain intact:
+Preserved:
 
 - COMPLETE / PARTIAL / ERROR;
 - N/D preservation;
 - source / confidence / updated_at;
 - v7 error handling;
-- no browser economic engine.
+- canonical endpoint;
+- absence of a browser economic engine.
 
 ## Result
 
-PASS — OPS-011 Platform Shell v0.1 + Home + Database Preview satisfies its frozen completion criteria.
+**PASS — OPS-011 completion criteria satisfied.**
 
-No visual regression requiring source correction was found.
+No proven visual regression required further source correction.
 
-## Preservation / gates
+## Gates preserved
 
-- `main` not changed;
-- no merge performed;
+- `main` unchanged;
+- no merge;
 - no production publication;
-- no new credential;
 - no paid service/cost;
+- no new credential;
 - no CAP v1 change;
 - no breaking change;
 - no fictitious market/pattern/economic data presented as real.
 
-Review may use the existing public GitHub branch through a non-deploy branch renderer; this does not change repository state or create a production release.
+A review surface may use the already-public GitHub branch through a branch renderer. That creates no repository mutation and is not a production release.
