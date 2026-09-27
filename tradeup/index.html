@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE CS2 — Trade Lab</title>
+<meta name="description" content="Análise de trade-up com probabilidades, floats previstos e contexto de mercado.">
+<meta name="theme-color" content="#071419">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-wrap">
+    <a class="brand" href="../index.html" aria-label="SCALE CS2">SCALE CS2<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a class="active" href="./">Trade Lab</a>
+      <a href="#" aria-disabled="true" class="future">Database <small>em breve</small></a>
+      <a href="#" aria-disabled="true" class="future">Markets <small>em breve</small></a>
+      <a href="#" aria-disabled="true" class="future">Patterns <small>em breve</small></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">SCALE CS2 Trade Lab</p>
+      <h1>Monte o trade-up.<br><em>Veja os resultados. Entenda o risco.</em></h1>
+      <p class="lead">Use 10 skins de CS2 para explorar possíveis resultados, floats previstos, probabilidades e a leitura econômica sustentada pelos dados disponíveis agora.</p>
+    </div>
+    <div class="hero-status" aria-live="polite">
+      <div class="status-dot"></div>
+      <div><strong>Serviço do Trade Lab</strong><span id="engineStatus">aguardando avaliação</span></div>
+    </div>
+  </section>
+
+  <section class="lab-shell">
+    <div class="lab-toolbar">
+      <div class="search-shell">
+        <label for="skinSearch">Adicionar skin</label>
+        <div class="search-row">
+          <input id="skinSearch" autocomplete="off" placeholder="Busque por skin ou nome de mercado" />
+          <button id="searchBtn" class="button secondary" type="button">Buscar</button>
+        </div>
+        <div id="searchResults" class="search-results" hidden></div>
+      </div>
+      <div class="toolbar-actions">
+        <button id="demoBtn" class="button ghost" type="button">Carregar exemplo</button>
+        <button id="clearBtn" class="button ghost" type="button">Limpar tudo</button>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div><p class="eyebrow">Itens de entrada</p><h2>Trade-up <span id="slotCounter">0 de 10 inputs</span></h2></div>
+      <p class="hint">Complete os 10 itens para avaliar o trade-up. Ajuste o float diretamente no card.</p>
+    </div>
+
+    <div id="inputGrid" class="input-grid" aria-label="10 slots do contrato"></div>
+
+    <div class="contract-footer">
+      <div class="compat" id="compatibility">Complete os 10 itens para avaliar o trade-up.</div>
+      <button id="simulateBtn" class="button primary" type="button" disabled>Avaliar trade-up</button>
+    </div>
+    <div id="resultState" class="state-banner" role="status" aria-live="polite" hidden>
+      <strong id="resultStateTitle"></strong>
+      <span id="resultStateDetail"></span>
+    </div>
+    <p class="trade-disclaimer">Os resultados de trade-up são probabilísticos. Valores de mercado podem estar incompletos ou mudar após esta avaliação. Revise cobertura, fonte e atualização antes de agir.</p>
+  </section>
+
+  <section id="summarySection" class="summary-section" hidden>
+    <div class="section-head result-head">
+      <div><p class="eyebrow">Leitura econômica</p><h2>Resumo econômico</h2></div>
+      <button id="advancedBtn" class="text-button" type="button">Ver detalhes</button>
+    </div>
+    <div class="metric-grid">
+      <article class="metric"><span>Custo econômico</span><strong id="economicCost">—</strong><small>valor econômico dos itens de entrada</small></article>
+      <article class="metric"><span>Probabilidade de lucro</span><strong id="profitChance">—</strong><small>disponível com cobertura suficiente</small></article>
+      <article class="metric"><span>Valor esperado</span><strong id="expectedValue">—</strong><small>ponderado pelas probabilidades</small></article>
+      <article class="metric"><span>Pior recuperação</span><strong id="worstRecovery">—</strong><small>pior recuperação entre os resultados avaliados</small></article>
+    </div>
+    <div id="advancedPanel" class="advanced-panel" hidden>
+      <div><span>ROI</span><strong id="roi">—</strong></div>
+      <div><span>Lucro / perda esperada</span><strong id="expectedProfit">—</strong></div>
+      <div><span>Desembolso adicional</span><strong id="additionalSpend">—</strong></div>
+      <div><span>Cobertura</span><strong id="coverage">—</strong></div>
+    </div>
+  </section>
+
+  <section id="outputsSection" class="outputs-section" hidden>
+    <div class="section-head">
+      <div><p class="eyebrow">Possíveis resultados</p><h2>Resultados possíveis do trade-up</h2></div>
+      <div class="legend-wrap">
+        <span>perda extrema</span><div class="legend"></div><span>lucro alto</span>
+      </div>
+    </div>
+    <p class="output-note">A cor é apenas um sinal secundário. Os valores e a cobertura de mercado são a referência principal.</p>
+    <div id="outputGrid" class="output-grid"></div>
+  </section>
+
+  <section class="platform-strip">
+    <div><span class="eyebrow">Universo SCALE</span><h2>O simulador é uma porta, não uma ilha.</h2></div>
+    <div class="bridge-grid">
+      <article><strong>Skin</strong><span>abrir página canônica</span></article>
+      <article><strong>Inspect</strong><span>exemplar real no jogo</span></article>
+      <article><strong>Patterns</strong><span>seeds e variações</span></article>
+      <article><strong>Markets</strong><span>comparar e seguir para compra</span></article>
+      <article><strong>Inventory</strong><span>usar o que você já possui</span></article>
+      <article><strong>Como obter</strong><span>abrir caminhos para a skin-alvo</span></article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE CS2</strong> · Trade Lab · working copy</span><span>VÉRTICE · SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>
