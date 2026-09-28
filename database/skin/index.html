@@ -25,7 +25,8 @@
 </header>
 
 <main id="main" class="wrap entity-page">
-  <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../">Database</a><span>›</span><span id="crumbName">Skin</span></nav>
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a id="breadcrumbBack" href="../">Database</a><span>›</span><span id="crumbName">Skin</span></nav>
+  <div id="originContext" class="origin-context" hidden><div><strong id="originText">Você abriu esta skin a partir do Database.</strong><span>Continue a análise sem perder sua busca.</span></div><a id="contextBackBtn" class="button secondary compact" href="../">Voltar aos resultados</a></div>
 
   <div id="entityState" class="state-box">Carregando entidade do catálogo autorizado…</div>
 
@@ -38,7 +39,7 @@
         <p class="lead">Uma visão conectada de float, coleção e possibilidades relacionadas. Módulos sem capacidade real continuam explicitamente indisponíveis.</p>
         <div class="entity-actions">
           <a class="button primary" href="../../tradeup/">Abrir Trade Lab</a>
-          <a class="button secondary" href="../">Voltar ao Database</a>
+          <a id="entityBackBtn" class="button secondary" href="../">Voltar aos resultados</a>
         </div>
       </div>
     </section>
@@ -64,9 +65,7 @@
     </section>
 
     <section class="entity-section">
-      <div class="section-head">
-        <div><p class="eyebrow">Próximas perguntas</p><h2>Experiências conectadas</h2></div>
-      </div>
+      <div class="section-head"><div><p class="eyebrow">Próximas perguntas</p><h2>O que você quer entender agora?</h2></div><p class="section-copy">Escolha a próxima análise. A skin permanece no contexto.</p></div>
       <div class="entity-module-grid">
         <a class="entity-module available" href="../../tradeup/"><span class="status-tag live">DISPONÍVEL</span><strong>Trade-up</strong><p>Abra o Trade Lab para montar uma composição. Esta página não cria prefill ou contrato fictício.</p></a>
         <article class="entity-module unavailable"><span class="status-tag unavailable">EM DESENVOLVIMENTO</span><strong>Mercados</strong><p>Observações multimercado ainda não são expostas neste hub.</p></article>
@@ -82,7 +81,7 @@
 <footer class="footer">
   <div class="wrap footer-row">
     <span><strong>SCALE Skin Hub</strong> · preview reversível · N/D nunca vira zero.</span>
-    <span>OPS-027 · VÉRTICE / SCL-DXP-001</span>
+    <span>OPS-028 · VÉRTICE / SCL-DXP-001</span>
   </div>
 </footer>
 <script src="app.js"></script>

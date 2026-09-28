@@ -9,6 +9,11 @@ const ERROR_MESSAGES={
 const fmt=v=>v===null||v===undefined||v===''?'N/D':String(v);
 const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'');
 function state(text,error=false){const b=$('entityState');b.textContent=text;b.className='state-box'+(error?' error':'');b.hidden=false}
+function applyOriginContext(){
+  const p=new URLSearchParams(location.search);const from=p.get('from')||'';
+  if(!from||!from.startsWith('/'))return;
+  $('originContext').hidden=false;$('breadcrumbBack').href=from;$('contextBackBtn').href=from;$('entityBackBtn').href=from;
+}
 function render(x){
   $('entityHub').hidden=false;$('entityState').hidden=true;
   const name=fmt(x.skin_name);
@@ -27,6 +32,7 @@ function render(x){
   }else{
     const span=document.createElement('span');span.textContent='imagem N/D';$('entityArt').appendChild(span);
   }
+  $('originText').textContent='Você abriu '+clean(name)+' a partir do Database.';
   document.title='SCALE — '+clean(name)+' · Skin Hub Preview';
 }
 async function load(){
@@ -46,4 +52,5 @@ async function load(){
     render(exact);
   }catch(e){state('Falha de conexão ao consultar esta entidade. · NETWORK_ERROR',true)}
 }
+applyOriginContext();
 load();
