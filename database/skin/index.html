@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SCALE — Skin Hub Preview</title>
-<meta name="description" content="Página de entidade de uma skin no preview reversível da SCALE.">
+<title>SCALE — Skin Hub</title>
+<meta name="description" content="Contexto estrutural de uma skin na SCALE.">
 <meta name="theme-color" content="#071014">
 <link rel="stylesheet" href="../../platform.css">
 </head>
@@ -16,7 +16,7 @@
     <nav class="nav" aria-label="Navegação principal">
       <a href="../../">Home</a>
       <a href="../../tradeup/">Trade Lab</a>
-      <a class="active" href="../">Database <small>preview</small></a>
+      <a class="active" href="../">Database</a>
       <span class="nav-future">Markets <small>Em desenvolvimento</small></span>
       <span class="nav-future">Patterns <small>Em desenvolvimento</small></span>
       <span class="nav-future">Inventory <small>Em desenvolvimento</small></span>
@@ -24,55 +24,78 @@
   </div>
 </header>
 
-<main id="main" class="wrap entity-page">
+<main id="main" class="wrap entity-page skinhub-v02">
   <nav class="breadcrumb" aria-label="Breadcrumb"><a id="breadcrumbBack" href="../">Database</a><span>›</span><span id="crumbName">Skin</span></nav>
-  <div id="originContext" class="origin-context" hidden><div><strong id="originText">Você abriu esta skin a partir do Database.</strong><span>Continue a análise sem perder sua busca.</span></div><a id="contextBackBtn" class="button secondary compact" href="../">Voltar aos resultados</a></div>
 
-  <div id="entityState" class="state-box">Carregando entidade do catálogo autorizado…</div>
+  <div id="originContext" class="origin-context" hidden>
+    <div>
+      <strong id="originLabel">Vindo do Database</strong>
+      <span id="originHelper">Sua busca e seus filtros devem continuar reconhecíveis ao retornar.</span>
+    </div>
+    <a id="contextBackBtn" class="button secondary compact" href="../">Voltar aos resultados</a>
+  </div>
+
+  <div id="entityState" class="state-box">Carregando skin…</div>
 
   <article id="entityHub" class="entity-hub" hidden>
-    <section class="entity-hero">
-      <div id="entityArt" class="entity-art"><span>imagem N/D</span></div>
+    <section class="entity-hero skinhub-hero">
+      <div id="entityArt" class="entity-art"><span>Imagem indisponível</span></div>
       <div class="entity-copy">
-        <p id="entityEyebrow" class="eyebrow">Skin · preview</p>
+        <p class="eyebrow">Skin Hub</p>
+        <div id="entityIdentityLine" class="identity-line">N/D · N/D</div>
         <h1 id="entityName">N/D</h1>
-        <p class="lead">Uma visão conectada de float, coleção e possibilidades relacionadas. Módulos sem capacidade real continuam explicitamente indisponíveis.</p>
+        <p id="entitySubline" class="entity-subline">N/D</p>
         <div class="entity-actions">
-          <a class="button primary" href="../../tradeup/">Abrir Trade Lab</a>
-          <a id="entityBackBtn" class="button secondary" href="../">Voltar aos resultados</a>
+          <a id="tradeLabBtn" class="button primary" href="../../tradeup/">Usar no Trade Lab</a>
+          <a id="entityBackBtn" class="button secondary" href="../">Voltar ao Database</a>
         </div>
+        <p class="action-helper">Leve esta skin como ponto de partida para uma composição compatível. A composição não é preenchida automaticamente.</p>
       </div>
     </section>
 
     <section class="entity-section">
       <div class="section-head">
-        <div><p class="eyebrow">Visão geral</p><h2>Dados estruturais</h2></div>
-        <p class="section-copy">Estes campos vêm do mesmo catálogo público autorizado usado pelo Trade Lab. Valores ausentes permanecem N/D.</p>
+        <div><p class="eyebrow">Identidade</p><h2>O que a SCALE conhece</h2></div>
+        <p class="section-copy">Somente atributos estruturais sustentados pelo catálogo vigente. Dado ausente permanece N/D.</p>
       </div>
-      <div class="entity-data-grid">
-        <div><span>Coleção</span><strong id="entityCollection">N/D</strong></div>
+      <div class="entity-data-grid identity-grid">
+        <div><span>Skin</span><strong id="entityFinish">N/D</strong></div>
+        <div><span>Arma</span><strong id="entityWeapon">N/D</strong></div>
         <div><span>Raridade</span><strong id="entityRarity">N/D</strong></div>
-        <div><span>Float mínimo</span><strong id="entityFloatMin">N/D</strong></div>
-        <div><span>Float máximo</span><strong id="entityFloatMax">N/D</strong></div>
+        <div><span>Coleção</span><strong id="entityCollection">N/D</strong></div>
         <div><span>Modalidade</span><strong id="entityMode">N/D</strong></div>
         <div><span>Identificador</span><strong id="entityKey">N/D</strong></div>
       </div>
-      <div class="entity-evidence">
-        <span>Fonte estrutural: catálogo público autorizado</span>
-        <span>Atualização: N/D</span>
-        <span>Dados de mercado: indisponíveis nesta página</span>
+    </section>
+
+    <section class="entity-section float-section">
+      <div class="section-head">
+        <div><p class="eyebrow">Float</p><h2>Faixa estrutural e desgastes</h2></div>
+        <p class="section-copy">Faixa estrutural da skin, não float de um exemplar específico.</p>
+      </div>
+      <div class="float-context-grid">
+        <article class="float-range-card">
+          <span>Faixa de float</span>
+          <strong id="entityFloatRange">N/D</strong>
+          <small id="entityFloatHelper">Faixa estrutural da skin, não float de um exemplar específico.</small>
+        </article>
+        <article class="wear-card">
+          <span>Desgastes possíveis</span>
+          <div id="entityWears" class="wear-list"><span class="wear-chip unknown">N/D</span></div>
+          <small>Derivado da faixa estrutural de float desta skin.</small>
+        </article>
       </div>
     </section>
 
-    <section class="entity-section">
-      <div class="section-head"><div><p class="eyebrow">Próximas perguntas</p><h2>O que você quer entender agora?</h2></div><p class="section-copy">Escolha a próxima análise. A skin permanece no contexto.</p></div>
-      <div class="entity-module-grid">
-        <a class="entity-module available" href="../../tradeup/"><span class="status-tag live">DISPONÍVEL</span><strong>Trade-up</strong><p>Abra o Trade Lab para montar uma composição. Esta página não cria prefill ou contrato fictício.</p></a>
-        <article class="entity-module unavailable"><span class="status-tag unavailable">EM DESENVOLVIMENTO</span><strong>Mercados</strong><p>Observações multimercado ainda não são expostas neste hub.</p></article>
-        <article class="entity-module unavailable"><span class="status-tag unavailable">EM DESENVOLVIMENTO</span><strong>Pattern</strong><p>Classificação e evidência de pattern aguardam capacidade promovida.</p></article>
-        <article class="entity-module unavailable"><span class="status-tag unavailable">INDISPONÍVEL</span><strong>Inspect</strong><p>Inspect exige exemplar real. Uma entidade canônica não recebe link de jogo fictício.</p></article>
-        <article class="entity-module unavailable"><span class="status-tag unavailable">EM DESENVOLVIMENTO</span><strong>Inventory</strong><p>Integração com inventário ainda não está disponível nesta versão.</p></article>
-        <article class="entity-module unavailable"><span class="status-tag unavailable">EM DESENVOLVIMENTO</span><strong>Coleção / case</strong><p>A relação estrutural é mostrada acima; a página dedicada ainda não existe.</p></article>
+    <section class="entity-section action-section">
+      <div>
+        <p class="eyebrow">Próxima ação</p>
+        <h2>Continue a análise</h2>
+        <p class="section-copy">A próxima ação disponível é levar esta identidade como contexto para o Trade Lab. Nenhuma compatibilidade ou composição pronta é presumida.</p>
+      </div>
+      <div class="next-action-panel">
+        <a id="tradeLabBtnBottom" class="button primary" href="../../tradeup/">Usar no Trade Lab</a>
+        <a id="backBtnBottom" class="button secondary" href="../">Voltar ao Database</a>
       </div>
     </section>
   </article>
@@ -80,8 +103,8 @@
 
 <footer class="footer">
   <div class="wrap footer-row">
-    <span><strong>SCALE Skin Hub</strong> · preview reversível · N/D nunca vira zero.</span>
-    <span>OPS-028 · VÉRTICE / SCL-DXP-001</span>
+    <span><strong>SCALE Skin Hub</strong> · atributos estruturais sustentados · N/D nunca vira zero.</span>
+    <span>OPS-029 · VÉRTICE / SCL-DXP-001</span>
   </div>
 </footer>
 <script src="app.js"></script>

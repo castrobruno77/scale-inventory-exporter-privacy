@@ -8,3 +8,5 @@
 
 .state-banner{margin-top:16px;border:1px solid var(--line2);border-radius:11px;padding:13px 15px;background:#0a1d23;display:grid;gap:3px}.state-banner strong{font-size:12px}.state-banner span{font-size:11px;color:var(--muted)}.state-banner.complete{border-color:#2c8a61;background:#0c241d}.state-banner.complete strong{color:#72d5a3}.state-banner.partial{border-color:#9d7a2d;background:#2b2412}.state-banner.partial strong{color:#e1c16f}.state-banner.error{border-color:#a74640;background:#2b1717}.state-banner.error strong{color:#ff9f96}.output-card.partial{--out-bg:#0d2229!important;--out-border:#31545f!important}.output-card.partial .return-pill{color:var(--muted)}
 .trade-disclaimer{margin:16px 0 0;color:var(--muted);font-size:11px;max-width:920px}.market-context{display:grid;gap:2px;margin-top:8px;color:var(--muted);font-size:9px}.market-context span{display:block;overflow-wrap:anywhere}
+
+.trade-origin-context{margin:0 0 18px}.trade-origin-context .context-link{justify-self:start;text-decoration:none;margin-top:5px}

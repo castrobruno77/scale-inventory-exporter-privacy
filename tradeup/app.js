@@ -24,6 +24,21 @@ const ERROR_MESSAGES = {
   INVALID_JSON_BODY:'A solicitação não pôde ser interpretada. Reinicie o trade-up e tente novamente.',
   INTERNAL_ERROR:'O serviço retornou um erro interno. Seus dados de entrada não foram alterados.'
 };
+function applyTradeOriginContext(){
+  const p=new URLSearchParams(location.search);
+  const skin=p.get('skin')?.trim()||'';
+  const from=p.get('from')||'';
+  if(!skin)return;
+  const box=$('tradeOriginContext');if(!box)return;
+  box.hidden=false;
+  $('tradeOriginTitle').textContent='Ponto de partida: '+cleanName(skin);
+  $('tradeOriginDetail').textContent='Leve esta skin como referência para montar uma composição compatível. A composição não foi preenchida automaticamente.';
+  if(from&&from.startsWith('/')&&!from.startsWith('//')){$('tradeOriginBack').href=from;$('tradeOriginBack').textContent='Voltar à skin';}
+}
+function skinEntityHref(x){
+  const from=location.pathname+location.search;
+  return '../database/skin/?key='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(from);
+}
 function setResultState(kind,title,detail){
   const box=$('resultState');
   box.className=`state-banner ${kind}`;
@@ -47,7 +62,8 @@ function renderInputs(){
       <div class="input-foot"><span>${item.rarity}</span><span>${item.is_stattrak?'ST':'normal'}</span></div></div></article>`;
   }).join('');
   $('slotCounter').textContent=`${state.slots.filter(Boolean).length} de 10 itens`;
-  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{state.slots[+b.dataset.remove]=null;state.result=null;renderInputs();resetResult();});
+  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{state.slots[+b.dataset.remove]=null;state.result=null;applyTradeOriginContext();
+renderInputs();resetResult();});
   document.querySelectorAll('[data-float]').forEach(inp=>inp.onchange=()=>{const i=+inp.dataset.float; const it=state.slots[i]; const v=Number(inp.value); if(Number.isFinite(v)){it.float_value=Math.max(Number(it.float_min),Math.min(Number(it.float_max),v)); inp.value=it.float_value;} state.result=null; resetResult(); updateCompatibility();});
   updateCompatibility();
 }
@@ -99,7 +115,7 @@ function renderOutputs(outputs){
     <div class="market-context"><span>Fonte: ${x.market?.source || 'N/D'}</span><span>Confiança: ${x.market?.confidence ?? 'N/D'}</span><span>Atualizado: ${x.market?.updated_at || 'N/D'}</span></div>
     ${patternFlag(x.skin_name)?'<span class="pattern-flag">PATTERN-SENSITIVE · explorar depois</span>':''}
     <div class="output-money"><div><span>Valor realizável</span><strong>${money(x.market?.realizable_usd)}</strong></div><div><span>Lucro / perda</span><strong>${hasNumber(x.profit_usd)?`${Number(x.profit_usd)>=0?'+':'-'}US$ ${Math.abs(Number(x.profit_usd)).toFixed(2)}`:'N/D'}</strong></div></div>
-    <div class="output-actions"><button class="mini-btn" disabled title="Inspect exige um asset/listing real">Inspect</button><a class="mini-btn enabled" href="../database/skin/?key=${encodeURIComponent(x.market_key||x.skin_name||'')}">Abrir skin</a></div></div></article>`}).join('');
+    <div class="output-actions"><button class="mini-btn" disabled title="Inspect exige um asset/listing real">Inspect</button><a class="mini-btn enabled" href="${skinEntityHref(x)}">Abrir skin</a></div></div></article>`}).join('');
 }
 async function simulate(){
   const inputs=state.slots.map(x=>({market_key:x.market_key,float_value:Number(x.float_value),owned:!!x.owned}));
