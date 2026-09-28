@@ -87,7 +87,8 @@ function render(x){
   else{$('entityArt').innerHTML='<span>Imagem indisponível</span>';}
   const hubUrl=currentEntityUrl(x.market_key||x.skin_name||'');
   const tradeHref='../../tradeup/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);
-  $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;\n  const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);$('loadoutBtn').href=loadoutHref;$('loadoutBtnBottom').href=loadoutHref;
+  $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;
+  const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);$('loadoutBtn').href=loadoutHref;$('loadoutBtnBottom').href=loadoutHref;
   document.title='SCALE — '+clean(name)+' · Skin Hub';
 }
 async function load(){
