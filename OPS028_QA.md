@@ -203,3 +203,61 @@ Isso é evidência estática, não substitui a exigência de QA visual exato.
 - sem breaking change;
 - sem lógica econômica nova;
 - Trade Lab e Skin Hub preservados.
+
+
+---
+
+## QA visual final — tablet 768px
+
+Gate final executado em renderização local isolada, sem publicação e sem alteração de produto, usando Chromium/Playwright headless com viewport explicitamente fixado em **768×1024**.
+
+### Database Explorer — 768×1024
+
+Métricas medidas no navegador:
+
+- `window.innerWidth = 768`
+- `window.innerHeight = 1024`
+- `document.documentElement.scrollWidth = 768`
+- overflow horizontal global: **NÃO**
+- filtros: **1 coluna**
+- grid de resultados: **2 colunas**
+- cabeçalho de resultados: **empilhado**
+- contexto/filtros ativos: **empilhado**
+- barra de seleção: **empilhada**
+- paginação / `Carregar mais`: **legível e centralizada**
+- header/nav: sem overflow global; nav mantém scroll horizontal interno previsto pelo shell
+- hero/search: legível, sem clipping
+- chips/multiseleção: legíveis, sem clipping
+- estados e espaçamento: PASS
+
+Foi usado fixture visual de QA somente para materializar simultaneamente estados e cards; os dados não foram apresentados como dados reais de produto. A funcionalidade real do CAP 1.1 já havia sido validada separadamente contra o endpoint canônico.
+
+### Skin Hub + retorno contextual — 768×1024
+
+Métricas medidas no navegador:
+
+- `window.innerWidth = 768`
+- `document.documentElement.scrollWidth = 768`
+- overflow horizontal global: **NÃO**
+- entity hero: **1 coluna**
+- bloco de origem/retorno: **empilhado**
+- dados estruturais: **2 colunas**
+- módulos: **2 colunas**
+- CTA `Voltar aos resultados`: legível e preservado
+- contexto visual Database → Skin Hub → retorno: PASS
+
+### Resultado final
+
+- Desktop visual: PASS
+- Tablet **768×1024** visual: **PASS**
+- Mobile **390×844** visual: PASS
+- Static/source QA: PASS 32/32
+- Live CAP 1.1 functional QA: PASS
+- Trade Lab preservado: PASS
+- Skin Hub preservado: PASS
+- Nenhuma capability futura ativada: PASS
+- Nenhuma correção adicional necessária no tablet.
+
+**OPS-028 — PASS.**
+
+Nenhum merge em `main`, publicação externa, nova credencial, custo, breaking change, endpoint novo, contrato paralelo ou lógica econômica foi criado.
