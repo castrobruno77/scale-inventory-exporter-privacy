@@ -11,7 +11,7 @@ const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+
 function state(text,error=false){const b=$('entityState');b.textContent=text;b.className='state-box'+(error?' error':'');b.hidden=false}
 function applyOriginContext(){
   const p=new URLSearchParams(location.search);const from=p.get('from')||'';
-  if(!from||!from.startsWith('/'))return;
+  if(!from||!from.startsWith('/')||from.startsWith('//'))return;
   $('originContext').hidden=false;$('breadcrumbBack').href=from;$('contextBackBtn').href=from;$('entityBackBtn').href=from;
 }
 function render(x){
