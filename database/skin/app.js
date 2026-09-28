@@ -41,9 +41,15 @@ function safeFrom(){
 function currentEntityUrl(key){return location.pathname+'?key='+encodeURIComponent(key)+(safeFrom()?'&from='+encodeURIComponent(safeFrom()):'');}
 function applyOriginContext(){
   const from=safeFrom();if(!from)return {type:'none',href:'../'};
-  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);
+  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);
   $('originContext').hidden=false;
   $('breadcrumbBack').href=from;$('contextBackBtn').href=from;$('entityBackBtn').href=from;$('backBtnBottom').href=from;
+  if(isLoadout){
+    const q=new URL(from,'https://scale.local').searchParams;const side=q.get('side')||'N/D';const focus=q.get('focus')||'slot';
+    $('originLabel').textContent='Vindo do Loadout';$('originHelper').textContent='Slot: '+side+' · '+focus;
+    $('contextBackBtn').textContent='Voltar ao Loadout';$('entityBackBtn').textContent='Voltar ao Loadout';$('backBtnBottom').textContent='Voltar ao Loadout';$('breadcrumbBack').textContent='Loadout Lab';
+    return {type:'loadout',href:from};
+  }
   if(isTrade){
     $('originLabel').textContent='Vindo do Trade Lab';
     $('originHelper').textContent='Retorne à composição sem perder o contexto atual.';
@@ -81,7 +87,7 @@ function render(x){
   else{$('entityArt').innerHTML='<span>Imagem indisponível</span>';}
   const hubUrl=currentEntityUrl(x.market_key||x.skin_name||'');
   const tradeHref='../../tradeup/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);
-  $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;
+  $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;\n  const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);$('loadoutBtn').href=loadoutHref;$('loadoutBtnBottom').href=loadoutHref;
   document.title='SCALE — '+clean(name)+' · Skin Hub';
 }
 async function load(){

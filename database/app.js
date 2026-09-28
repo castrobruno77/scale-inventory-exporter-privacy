@@ -3,7 +3,7 @@ const PAGE_SIZE=24;
 const $=id=>document.getElementById(id);
 const ERROR_MESSAGES={QUERY_TOO_LONG:'A busca é longa demais. Use um termo mais curto.',REQUEST_URI_TOO_LONG:'A solicitação não pôde ser processada porque o endereço ficou longo demais.',RATE_LIMITED:'Muitas consultas em pouco tempo. Tente novamente em instantes.',ORIGIN_NOT_ALLOWED:'Este ambiente não está autorizado a consultar o catálogo.'};
 const RARITIES=['Consumer Grade','Industrial Grade','Mil-Spec Grade','Restricted','Classified','Covert'];
-const state={q:'',weapons:[],rarities:[],collections:[],stattrak:'',selectMode:false,selected:new Set(),items:[],loading:false,hasMore:false,nextOffset:null,restoreCount:0};
+const state={q:'',weapons:[],rarities:[],collections:[],stattrak:'',selectMode:false,selected:new Set(),items:[],loading:false,hasMore:false,nextOffset:null,restoreCount:0,loadoutSide:'',loadoutWeapon:'',loadoutFrom:''};
 const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'');
 const fmt=v=>v===null||v===undefined||v===''?'N/D':String(v);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -21,11 +21,20 @@ function currentContextUrl(){
  if(state.collections.length)u.searchParams.set('collection',encodeList(state.collections));
  if(state.stattrak!=='')u.searchParams.set('stattrak',state.stattrak);
  if(state.selectMode)u.searchParams.set('select','1');
- if(state.items.length>PAGE_SIZE)u.searchParams.set('loaded',String(state.items.length));
+ if(state.items.length>PAGE_SIZE)u.searchParams.set('loaded',String(state.items.length));\n if(state.loadoutSide)u.searchParams.set('loadoutSide',state.loadoutSide);if(state.loadoutWeapon)u.searchParams.set('loadoutWeapon',state.loadoutWeapon);if(state.loadoutFrom)u.searchParams.set('loadoutFrom',state.loadoutFrom);
  return u.pathname+u.search;
 }
 function syncUrl(){history.replaceState(null,'',currentContextUrl());}
 function entityHref(x){return 'skin/?key='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(currentContextUrl());}
+function safeLocalPath(v){return v&&v.startsWith('/')&&!v.startsWith('//')?v:''}
+function loadoutPickHref(x){if(!state.loadoutSide||!state.loadoutWeapon)return '';return '../loadout/?pick='+encodeURIComponent(x.market_key||x.skin_name||'')+'&side='+encodeURIComponent(state.loadoutSide)+'&weapon='+encodeURIComponent(state.loadoutWeapon)+'&from='+encodeURIComponent(currentContextUrl())}
+function renderLoadoutContext(){
+ const active=(state.loadoutSide==='CT'||state.loadoutSide==='T')&&state.loadoutWeapon;
+ $('loadoutContext').hidden=!active;if(!active)return;
+ $('loadoutContextTitle').textContent='Escolhendo para: '+state.loadoutSide+' · '+state.loadoutWeapon;
+ $('loadoutContextHelper').textContent='Escolha uma skin desta arma para voltar ao rascunho temporário.';
+ $('loadoutBackBtn').href=state.loadoutFrom||('../loadout/?side='+encodeURIComponent(state.loadoutSide)+'&focus='+encodeURIComponent(state.loadoutWeapon));
+}
 function setState(text,error=false){const b=$('stateBox');b.textContent=text;b.className='state-box'+(error?' error':'');b.hidden=false;}
 function setResultsHeading(title,meta=''){$('resultsTitle').textContent=title;$('resultsMeta').textContent=meta;}
 function art(item){if(item.image_url)return '<img src="'+esc(item.image_url)+'" alt="'+esc(clean(item.skin_name))+'" loading="lazy">';return '<span class="skin-meta">imagem N/D</span>';}
@@ -45,7 +54,7 @@ function renderSelection(){$('selectToggle').classList.toggle('active',state.sel
 function render(items){
  state.items=items;
  $('results').innerHTML=items.map(x=>{const key=x.market_key||x.skin_name||'';const selected=state.selected.has(key);const selectControl=state.selectMode?'<button class="select-skin '+(selected?'selected':'')+'" type="button" data-select-key="'+esc(key)+'" aria-pressed="'+String(selected)+'">'+(selected?'Selecionada':'Adicionar à seleção')+'</button>':'';
- return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
+ const useControl=state.loadoutSide&&state.loadoutWeapon?'<a class="select-skin selected" href="'+loadoutPickHref(x)+'">Usar neste slot</a>':'';\n return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
  document.querySelectorAll('[data-select-key]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const key=btn.dataset.selectKey;if(state.selected.has(key))state.selected.delete(key);else state.selected.add(key);render(state.items);renderSelection();});
 }
 function bindFilterRemovers(){document.querySelectorAll('[data-remove-type]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.removeType,btn.dataset.removeValue));document.querySelectorAll('[data-active-remove]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.activeRemove,btn.dataset.activeValue));}
@@ -89,7 +98,7 @@ function removeFilter(type,value){if(type==='weapon')removeValue(state.weapons,v
 function clearFilters(){state.weapons=[];state.rarities=[];state.collections=[];state.stattrak='';renderFilterControls();state.restoreCount=0;executeQuery();}
 function clearAll(){state.q='';state.weapons=[];state.rarities=[];state.collections=[];state.stattrak='';state.selected.clear();state.items=[];state.hasMore=false;state.nextOffset=null;state.restoreCount=0;renderFilterControls();renderSelection();render([]);syncUrl();updatePagination();setResultsHeading('Comece pela busca ou refine pelos filtros.','Nenhuma consulta executada');setState('Comece pela busca ou refine pelos filtros.');}
 function loadFromUrl(){
- const p=new URLSearchParams(location.search);state.q=p.get('q')||'';state.weapons=decodeList(p.get('weapon'));state.rarities=decodeList(p.get('rarity')).filter(x=>RARITIES.includes(x));state.collections=decodeList(p.get('collection'));const st=p.get('stattrak');state.stattrak=st==='true'||st==='false'?st:'';state.selectMode=p.get('select')==='1';state.restoreCount=Math.max(0,Number(p.get('loaded'))||0);
+ const p=new URLSearchParams(location.search);state.q=p.get('q')||'';state.weapons=decodeList(p.get('weapon'));state.rarities=decodeList(p.get('rarity')).filter(x=>RARITIES.includes(x));state.collections=decodeList(p.get('collection'));const st=p.get('stattrak');state.stattrak=st==='true'||st==='false'?st:'';state.selectMode=p.get('select')==='1';state.restoreCount=Math.max(0,Number(p.get('loaded'))||0);state.loadoutSide=['CT','T'].includes(p.get('loadoutSide'))?p.get('loadoutSide'):'';state.loadoutWeapon=p.get('loadoutWeapon')||'';state.loadoutFrom=safeLocalPath(p.get('loadoutFrom')||'');renderLoadoutContext();
  renderFilterControls();renderSelection();$('skinSearch').value=state.q;if(hasQuery())executeQuery({restore:true});else{setResultsHeading('Comece pela busca ou refine pelos filtros.','Nenhuma consulta executada');setState('Explore pelo campo de busca ou pelos filtros.');updatePagination();}
 }
 $('searchBtn').onclick=()=>executeQuery();$('skinSearch').addEventListener('keydown',e=>{if(e.key==='Enter')executeQuery();});
