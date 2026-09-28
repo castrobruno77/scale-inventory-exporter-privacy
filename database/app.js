@@ -21,7 +21,8 @@ function currentContextUrl(){
  if(state.collections.length)u.searchParams.set('collection',encodeList(state.collections));
  if(state.stattrak!=='')u.searchParams.set('stattrak',state.stattrak);
  if(state.selectMode)u.searchParams.set('select','1');
- if(state.items.length>PAGE_SIZE)u.searchParams.set('loaded',String(state.items.length));\n if(state.loadoutSide)u.searchParams.set('loadoutSide',state.loadoutSide);if(state.loadoutWeapon)u.searchParams.set('loadoutWeapon',state.loadoutWeapon);if(state.loadoutFrom)u.searchParams.set('loadoutFrom',state.loadoutFrom);
+ if(state.items.length>PAGE_SIZE)u.searchParams.set('loaded',String(state.items.length));
+ if(state.loadoutSide)u.searchParams.set('loadoutSide',state.loadoutSide);if(state.loadoutWeapon)u.searchParams.set('loadoutWeapon',state.loadoutWeapon);if(state.loadoutFrom)u.searchParams.set('loadoutFrom',state.loadoutFrom);
  return u.pathname+u.search;
 }
 function syncUrl(){history.replaceState(null,'',currentContextUrl());}
@@ -54,7 +55,8 @@ function renderSelection(){$('selectToggle').classList.toggle('active',state.sel
 function render(items){
  state.items=items;
  $('results').innerHTML=items.map(x=>{const key=x.market_key||x.skin_name||'';const selected=state.selected.has(key);const selectControl=state.selectMode?'<button class="select-skin '+(selected?'selected':'')+'" type="button" data-select-key="'+esc(key)+'" aria-pressed="'+String(selected)+'">'+(selected?'Selecionada':'Adicionar à seleção')+'</button>':'';
- const useControl=state.loadoutSide&&state.loadoutWeapon?'<a class="select-skin selected" href="'+loadoutPickHref(x)+'">Usar neste slot</a>':'';\n return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
+ const useControl=state.loadoutSide&&state.loadoutWeapon?'<a class="select-skin selected" href="'+loadoutPickHref(x)+'">Usar neste slot</a>':'';
+ return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
  document.querySelectorAll('[data-select-key]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const key=btn.dataset.selectKey;if(state.selected.has(key))state.selected.delete(key);else state.selected.add(key);render(state.items);renderSelection();});
 }
 function bindFilterRemovers(){document.querySelectorAll('[data-remove-type]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.removeType,btn.dataset.removeValue));document.querySelectorAll('[data-active-remove]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.activeRemove,btn.dataset.activeValue));}
