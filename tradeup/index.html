@@ -133,6 +133,18 @@
           <button type="button" data-selector-origin="INVENTORY">Inventário</button>
           <button type="button" data-selector-origin="DATABASE">Skins</button>
         </div>
+        <div class="selector-filter-panel">
+          <div class="selector-filter-grid">
+            <label>Arma
+              <input id="selectorWeapon" autocomplete="off" placeholder="Ex.: 47, AK47, FAMAS">
+            </label>
+            <label>Coleção
+              <input id="selectorCollection" autocomplete="off" placeholder="Ex.: 2021, Dreams">
+            </label>
+          </div>
+          <div id="selectorRequiredContext" class="selector-required-context">Contexto obrigatório: aguardando backend.</div>
+          <div id="selectorFilterResolution" class="selector-filter-resolution" hidden></div>
+        </div>
         <div class="search-shell selector-search-shell">
           <label for="skinSearch" id="searchLabel">Buscar skin ou coleção</label>
           <div class="search-row">
