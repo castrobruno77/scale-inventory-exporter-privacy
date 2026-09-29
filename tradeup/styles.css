@@ -64,3 +64,8 @@
   .goal-search-main{grid-template-columns:48px minmax(0,1fr)}.prob-delta{grid-column:2;text-align:left;max-width:none}
   .inventory-pick{flex-direction:column}
 }
+
+.candidate-simulation{align-items:end;gap:8px;flex-wrap:wrap}
+.candidate-simulation label{display:grid;gap:4px;flex:1;min-width:180px;color:var(--muted);font-size:9px}
+.candidate-simulation input{width:100%;background:#071419;border:1px solid var(--line2);border-radius:7px;color:var(--ink);padding:8px 9px;font:inherit;font-size:10px}
+.candidate-simulation input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px #5dd1db16}
