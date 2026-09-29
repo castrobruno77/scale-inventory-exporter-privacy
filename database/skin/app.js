@@ -1,5 +1,6 @@
 const API='https://ubtojlrfxoxbuvgajeos.supabase.co/functions/v1/tradeup-public';
-const $=id=>document.getElementById(id);\nconst esc=s=>String(s??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const ERROR_MESSAGES={
   QUERY_TOO_LONG:'A busca usada neste link é longa demais.',
   REQUEST_URI_TOO_LONG:'Este endereço não pôde ser processado porque ficou longo demais.',
