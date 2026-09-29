@@ -1,5 +1,5 @@
 const API='https://ubtojlrfxoxbuvgajeos.supabase.co/functions/v1/tradeup-public';
-const $=id=>document.getElementById(id);
+const $=id=>document.getElementById(id);\nconst esc=s=>String(s??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));
 const ERROR_MESSAGES={
   QUERY_TOO_LONG:'A busca usada neste link é longa demais.',
   REQUEST_URI_TOO_LONG:'Este endereço não pôde ser processado porque ficou longo demais.',
@@ -51,20 +51,20 @@ function applyOriginContext(){
     return {type:'loadout',href:from};
   }
   if(isInventory){
-    $('originLabel').textContent='Vindo do Inventory';$('originHelper').textContent='Este item foi aberto a partir do snapshot importado ativo.';
-    $('contextBackBtn').textContent='Voltar ao Inventory';$('entityBackBtn').textContent='Voltar ao Inventory';$('backBtnBottom').textContent='Voltar ao Inventory';$('breadcrumbBack').textContent='Inventory';
+    $('originLabel').textContent='Vindo do Inventário';$('originHelper').textContent='Este item foi aberto a partir do snapshot importado ativo.';
+    $('contextBackBtn').textContent='Voltar ao Inventário';$('entityBackBtn').textContent='Voltar ao Inventário';$('backBtnBottom').textContent='Voltar ao Inventário';$('breadcrumbBack').textContent='Inventário';
     return {type:'inventory',href:from};
   }
   if(isTrade){
-    $('originLabel').textContent='Vindo do Trade Lab';
+    $('originLabel').textContent='Vindo de Contratos';
     $('originHelper').textContent='Retorne à composição sem perder o contexto atual.';
-    $('contextBackBtn').textContent='Voltar ao Trade Lab';
-    $('entityBackBtn').textContent='Voltar ao Trade Lab';
-    $('backBtnBottom').textContent='Voltar ao Trade Lab';
-    $('breadcrumbBack').textContent='Trade Lab';
+    $('contextBackBtn').textContent='Voltar aos Contratos';
+    $('entityBackBtn').textContent='Voltar aos Contratos';
+    $('backBtnBottom').textContent='Voltar aos Contratos';
+    $('breadcrumbBack').textContent='Contratos';
     return {type:'tradeup',href:from};
   }
-  $('originLabel').textContent='Vindo do Database';
+  $('originLabel').textContent='Vindo de Skins';
   $('originHelper').textContent='Sua busca e seus filtros devem continuar reconhecíveis ao retornar.';
   $('contextBackBtn').textContent='Voltar aos resultados';
   $('entityBackBtn').textContent='Voltar aos resultados';
@@ -110,7 +110,7 @@ function render(x){
 }
 async function load(){
   const key=new URLSearchParams(location.search).get('key')?.trim()||'';
-  if(key.length<2){stateBox('Skin não encontrada.','Volte ao Database e tente outra busca.',true,false);return;}
+  if(key.length<2){stateBox('Skin não encontrada.','Volte a Skins e tente outra busca.',true,false);return;}
   stateBox('Carregando skin…','Consultando o catálogo autorizado.');
   try{
     const r=await fetch(API+'?q='+encodeURIComponent(key)+'&limit=24&ui=1');
@@ -121,7 +121,7 @@ async function load(){
     }
     const items=Array.isArray(d.items)?d.items:[];
     const exact=items.find(x=>x.market_key===key)||items.find(x=>x.skin_name===key);
-    if(!exact){stateBox('Skin não encontrada.','Volte ao Database e tente outra busca.',true,false);return;}
+    if(!exact){stateBox('Skin não encontrada.','Volte a Skins e tente outra busca.',true,false);return;}
     render(exact);
   }catch(e){stateBox('Não foi possível carregar esta skin.','Tente novamente. · NETWORK_ERROR',true,true);}
 }
