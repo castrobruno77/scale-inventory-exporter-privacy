@@ -122,7 +122,7 @@ function setGoalModeUI(){
   if(state.goalMode){
     $('pageTitle').innerHTML='Obtenha a skin-alvo.<br><em>Monte o caminho.</em>';
     $('pageLead').textContent='Defina o desgaste ou float desejado, componha até 10 inputs e acompanhe validade, possibilidade e chance sem transformar probabilidade em promessa.';
-    $('searchLabel').textContent='Buscar candidato compatível';
+    $('searchLabel').textContent='Adicionar skin ao contrato';
     $('inputHint').textContent='Inputs do Inventário preservam asset e float reais. Itens vindos de Skins são simulações com float escolhido.';
     $('simulateBtn').textContent='Calcular contrato';
   }
@@ -170,31 +170,39 @@ function renderGoalState(d){
   $('goalProgress').textContent=(c.selected_count??0)+' de 10 skins';
 
   const cEl=$('contractValidState');
-  cEl.textContent=c.valid===true?'Válido':c.valid===false?'Inválido':'—';
+  cEl.textContent=c.valid===true?'Contrato válido até aqui':c.valid===false?'Este contrato precisa de ajuste':'—';
   cEl.className=c.valid===true?'ok-text':c.valid===false?'bad-text':'';
   $('contractReason').textContent=c.valid===true?'Estrutura aceita pelo contrato VETOR':(c.reasons||[]).map(r=>ERROR_MESSAGES[r]||r).join(' · ')||'Aguardando';
 
-  $('targetPossibleState').textContent=t.possible===true?'Ainda possível':t.possible===false?'Não é mais possível':t.possible===null?'—':'—';
+  $('targetPossibleState').textContent=t.possible===true?'A skin-alvo ainda é possível':t.possible===false?'A skin-alvo não é mais possível com esta composição':t.possible===null?'—':'—';
   $('targetPossibleState').className=t.possible===true?'ok-text':t.possible===false?'bad-text':'';
-  $('targetPossibleReason').textContent=t.possible===true?'A composição ainda preserva caminho para a skin-alvo':t.possible===false?'A composição atual não preserva a skin-alvo':'Depende de uma estrutura válida';
+  $('targetPossibleReason').textContent=t.possible===true
+    ? (Number(t.selected_target_collection_inputs||0)===0
+      ? 'Adicione uma skin da coleção-alvo para começar a garantir participação dessa coleção.'
+      : 'A composição atual mantém esta skin-alvo no contrato.')
+    : t.possible===false
+      ? 'Troque inputs para recuperar um caminho compatível para a skin-alvo.'
+      : 'Depende de uma estrutura válida';
 
-  $('floatReachableState').textContent=o.float_goal_reachable===true?'Ainda possível':o.float_goal_reachable===false?'Impossível com estes inputs':'—';
+  $('floatReachableState').textContent=o.float_goal_reachable===true?'O objetivo de float ainda é alcançável':o.float_goal_reachable===false?'O objetivo de float não é mais alcançável':'—';
   $('floatReachableState').className=o.float_goal_reachable===true?'ok-text':o.float_goal_reachable===false?'bad-text':'';
   $('floatReachableReason').textContent=o.effective_float_range
-    ? 'Faixa efetiva '+formatRange(o.effective_float_range)
+    ? 'Faixa desejada válida: '+formatRange(o.effective_float_range)
     : 'Sem objetivo de desgaste/float';
 
-  $('targetProbability').textContent=pct(p.committed_pct);
-  $('targetProbabilityRange').textContent=p.final_pct!==null&&p.final_pct!==undefined
-    ? 'Chance final: '+pct(p.final_pct)
+  const finalChance=p.final_pct!==null&&p.final_pct!==undefined;
+  $('targetProbabilityLabel').textContent=finalChance?'Chance da skin-alvo':'Chance já comprometida';
+  $('targetProbability').textContent=finalChance?pct(p.final_pct):pct(p.committed_pct);
+  $('targetProbabilityRange').textContent=finalChance
+    ? 'Chance final com 10 inputs válidos.'
     : (hasNumber(p.min_final_pct_if_target_preserved)||hasNumber(p.max_final_pct)
-      ? 'Se preservar o alvo: '+pct(p.min_final_pct_if_target_preserved)+' a '+pct(p.max_final_pct)
-      : 'Final apenas em 10/10');
+      ? 'Faixa possível ao completar: '+pct(p.min_final_pct_if_target_preserved)+'–'+pct(p.max_final_pct)
+      : 'Faixa possível ao completar: —');
 
   const env=d.progressive?.next_normalized_envelope;
   if(env){
     $('progressiveEnvelope').hidden=false;
-    $('progressiveEnvelope').textContent='Próximo input: o serviço preserva um envelope compatível com o objetivo. Os ranges exibidos na busca já vêm convertidos pelo backend para cada skin.';
+    $('progressiveEnvelope').textContent='Para manter o objetivo, use a faixa de float compatível mostrada em cada skin.';
   }else $('progressiveEnvelope').hidden=true;
 
   const count=Number(c.selected_count||0);
@@ -300,25 +308,45 @@ async function search(){
 function showGoalSearch(items){
   state.searchItems=items;
   const box=$('searchResults');
-  if(!items.length){box.innerHTML='<div class="search-item"><span>Nenhum candidato compatível encontrado</span></div>';box.hidden=false;return;}
+  if(!items.length){box.innerHTML='<div class="search-item"><span>Nenhuma skin compatível encontrada</span></div>';box.hidden=false;return;}
   box.innerHTML=items.map((x,i)=>{
     const assets=inventoryMatchesCandidate(x);
-    const allowed=x.allowed_float_range?formatRange(x.allowed_float_range):'faixa canônica';
-    const relation=x.relation_to_target_collection==='TARGET_COLLECTION'?'mesma coleção do alvo':'outra coleção';
+    const allowed=x.allowed_float_range||{min:x.float_min,max:x.float_max,max_inclusive:true};
+    const allowedText=formatRange(allowed);
+    const relation=x.relation_to_target_collection==='TARGET_COLLECTION'
+      ? 'Mantém esta skin-alvo no contrato'
+      : 'Compatível, mas reduz a participação da coleção-alvo';
     const assetHtml=assets.length?'<div class="inventory-match-list">'+assets.slice(0,4).map((a,j)=>
-      '<button type="button" class="inventory-pick" data-candidate="'+i+'" data-asset="'+j+'"><strong>Usar asset '+esc(a.asset_id)+'</strong><span>float '+Number(a.float_value).toFixed(6)+' · Inventário importado</span></button>'
-    ).join('')+(assets.length>4?'<small>+'+(assets.length-4)+' assets compatíveis neste snapshot</small>':'')+'</div>':'';
-    return '<article class="goal-search-item"><div class="goal-search-main"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta">'+esc(x.collection)+' · '+esc(x.rarity)+'</span><span class="meta">float aceito agora: '+esc(allowed)+' · '+relation+'</span></span><span class="prob-delta">após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></div>'+
-      '<div class="candidate-actions"><button type="button" class="button secondary compact simulation-pick" data-candidate="'+i+'">Adicionar simulação</button></div>'+assetHtml+'</article>';
+      '<button type="button" class="inventory-pick" data-candidate="'+i+'" data-asset="'+j+'"><strong>Adicionar do Inventário</strong><span>asset '+esc(a.asset_id)+' · float '+Number(a.float_value).toFixed(6)+'</span></button>'
+    ).join('')+(assets.length>4?'<small>+'+(assets.length-4)+' itens compatíveis neste snapshot</small>':'')+'</div>':'';
+    return '<article class="goal-search-item"><div class="goal-search-main"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta">'+esc(x.collection)+' · '+esc(x.rarity)+'</span><span class="meta">Float compatível agora: '+esc(allowedText)+'</span><span class="meta">'+relation+'</span></span><span class="prob-delta">Após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></div>'+
+      '<div class="candidate-actions candidate-simulation"><label>Float simulado <input class="candidate-float" data-candidate-float="'+i+'" type="number" step="0.000001" min="'+allowed.min+'" max="'+allowed.max+'" placeholder="Informe um float"></label><button type="button" class="button secondary compact simulation-pick" data-candidate="'+i+'" disabled>Adicionar ao contrato</button></div>'+assetHtml+'</article>';
   }).join('');
   box.hidden=false;
-  document.querySelectorAll('.simulation-pick').forEach(b=>b.onclick=()=>pickGoalCandidate(items[+b.dataset.candidate],null));
+  document.querySelectorAll('[data-candidate-float]').forEach(inp=>{
+    const i=+inp.dataset.candidateFloat;
+    const candidate=items[i];
+    const allowed=candidate.allowed_float_range||{min:candidate.float_min,max:candidate.float_max,max_inclusive:true};
+    const btn=box.querySelector('.simulation-pick[data-candidate="'+i+'"]');
+    const validate=()=>{
+      const v=Number(inp.value);
+      const ok=inp.value!==''&&Number.isFinite(v)&&v>=Number(allowed.min)-1e-9&&
+        (allowed.max_inclusive===false?v<Number(allowed.max)-1e-9:v<=Number(allowed.max)+1e-9);
+      btn.disabled=!ok;
+    };
+    inp.addEventListener('input',validate);validate();
+  });
+  document.querySelectorAll('.simulation-pick').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.candidate;
+    const inp=box.querySelector('[data-candidate-float="'+i+'"]');
+    pickGoalCandidate(items[i],null,inp?.value);
+  });
   document.querySelectorAll('.inventory-pick').forEach(b=>{
     const c=items[+b.dataset.candidate],assets=inventoryMatchesCandidate(c);
-    b.onclick=()=>pickGoalCandidate(c,assets[+b.dataset.asset]);
+    b.onclick=()=>pickGoalCandidate(c,assets[+b.dataset.asset],null);
   });
 }
-function pickGoalCandidate(c,asset){
+function pickGoalCandidate(c,asset,simulatedFloat){
   const idx=state.slots.findIndex(v=>!v);if(idx<0)return;
   if(asset){
     state.slots[idx]={
@@ -327,9 +355,10 @@ function pickGoalCandidate(c,asset){
       price_usd:hasNumber(asset.valuation_usd)?Number(asset.valuation_usd):null
     };
   }else{
+    if(!hasNumber(simulatedFloat))return;
     state.slots[idx]={
       ...c,is_stattrak:state.target?.is_stattrak,
-      float_value:defaultFloat(c,c.allowed_float_range),origin:'DATABASE',owned:false
+      float_value:Number(simulatedFloat),origin:'DATABASE',owned:false
     };
   }
   $('searchResults').hidden=true;$('skinSearch').value='';
@@ -431,7 +460,7 @@ $('simulateBtn').onclick=()=>state.goalMode?evaluateGoal():simulateLegacy();
 $('advancedBtn').onclick=()=>{const p=$('advancedPanel');p.hidden=!p.hidden;$('advancedBtn').textContent=p.hidden?'Ver detalhes':'Ocultar detalhes';};
 $('applyGoalBtn').onclick=async()=>{
   $('objectiveHelper').classList.remove('error');
-  $('objectiveHelper').textContent='Você pode usar desgaste, faixa de float ou os dois. Quando ambos existem, o backend calcula a interseção válida.';
+  $('objectiveHelper').textContent='Opcional. O desgaste define uma faixa de float. Se você informar também uma faixa de float, a SCALE considera apenas a interseção possível entre os dois objetivos.';
   resetFinal();await evaluateGoal();
 };
 document.addEventListener('click',e=>{if(!e.target.closest('.search-shell'))$('searchResults').hidden=true;});
