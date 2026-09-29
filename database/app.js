@@ -1,5 +1,8 @@
 const API='https://ubtojlrfxoxbuvgajeos.supabase.co/functions/v1/tradeup-public';
 const PAGE_SIZE=24;
+const SUGGEST_LIMIT=8;
+let suggestTimer=null;
+let suggestSeq=0;
 const $=id=>document.getElementById(id);
 const ERROR_MESSAGES={QUERY_TOO_LONG:'A busca é longa demais. Use um termo mais curto.',REQUEST_URI_TOO_LONG:'A solicitação não pôde ser processada porque o endereço ficou longo demais.',RATE_LIMITED:'Muitas consultas em pouco tempo. Tente novamente em instantes.',ORIGIN_NOT_ALLOWED:'Este ambiente não está autorizado a consultar o catálogo.'};
 const RARITIES=['Consumer Grade','Industrial Grade','Mil-Spec Grade','Restricted','Classified','Covert'];
@@ -59,6 +62,21 @@ function render(items){
  return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
  document.querySelectorAll('[data-select-key]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const key=btn.dataset.selectKey;if(state.selected.has(key))state.selected.delete(key);else state.selected.add(key);render(state.items);renderSelection();});
 }
+function hideSuggestions(){const box=$('searchSuggestions');box.hidden=true;box.innerHTML='';$('skinSearch').setAttribute('aria-expanded','false');}
+function renderSuggestions(items,q){
+ const box=$('searchSuggestions');
+ if(!q||!items.length){hideSuggestions();return;}
+ box.innerHTML=items.slice(0,SUGGEST_LIMIT).map(x=>'<a class="search-suggestion" href="'+entityHref(x)+'"><span><strong>'+esc(clean(x.skin_name))+'</strong><small>'+esc(weaponOf(x))+' · '+esc(fmt(x.collection))+'</small></span><span class="suggestion-rarity">'+esc(fmt(x.rarity))+'</span></a>').join('')+'<button class="search-suggestion-all" type="button" data-search-all>Ver resultados para “'+esc(q)+'”</button>';
+ box.hidden=false;$('skinSearch').setAttribute('aria-expanded','true');
+ const all=box.querySelector('[data-search-all]');if(all)all.onclick=()=>{hideSuggestions();executeQuery();};
+}
+async function fetchSuggestions(raw){
+ const q=String(raw||'').trim();const seq=++suggestSeq;
+ if(!q){hideSuggestions();return;}
+ const p=buildParams(0);p.set('q',q);p.set('limit',String(SUGGEST_LIMIT));p.set('offset','0');
+ try{const r=await fetch(API+'?'+p.toString());const d=await r.json().catch(()=>({status:'ERROR'}));if(seq!==suggestSeq)return;if(!r.ok||d.status==='ERROR'){hideSuggestions();return;}renderSuggestions(Array.isArray(d.items)?d.items:[],q);}catch(e){if(seq===suggestSeq)hideSuggestions();}
+}
+function scheduleSuggestions(){clearTimeout(suggestTimer);const q=$('skinSearch').value;suggestTimer=setTimeout(()=>fetchSuggestions(q),180);}
 function bindFilterRemovers(){document.querySelectorAll('[data-remove-type]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.removeType,btn.dataset.removeValue));document.querySelectorAll('[data-active-remove]').forEach(btn=>btn.onclick=()=>removeFilter(btn.dataset.activeRemove,btn.dataset.activeValue));}
 function updatePagination(){
  const btn=$('loadMoreBtn');btn.hidden=!state.hasMore;btn.disabled=state.loading;
@@ -103,7 +121,7 @@ function loadFromUrl(){
  const p=new URLSearchParams(location.search);state.q=p.get('q')||'';state.weapons=decodeList(p.get('weapon'));state.rarities=decodeList(p.get('rarity')).filter(x=>RARITIES.includes(x));state.collections=decodeList(p.get('collection'));const st=p.get('stattrak');state.stattrak=st==='true'||st==='false'?st:'';state.selectMode=p.get('select')==='1';state.restoreCount=Math.max(0,Number(p.get('loaded'))||0);state.loadoutSide=['CT','T'].includes(p.get('loadoutSide'))?p.get('loadoutSide'):'';state.loadoutWeapon=p.get('loadoutWeapon')||'';state.loadoutFrom=safeLocalPath(p.get('loadoutFrom')||'');renderLoadoutContext();
  renderFilterControls();renderSelection();$('skinSearch').value=state.q;if(hasQuery())executeQuery({restore:true});else{setResultsHeading('Comece pela busca ou refine pelos filtros.','Nenhuma consulta executada');setState('Explore pelo campo de busca ou pelos filtros.');updatePagination();}
 }
-$('searchBtn').onclick=()=>executeQuery();$('skinSearch').addEventListener('keydown',e=>{if(e.key==='Enter')executeQuery();});
+$('searchBtn').onclick=()=>{hideSuggestions();executeQuery();};$('skinSearch').addEventListener('input',scheduleSuggestions);$('skinSearch').addEventListener('focus',()=>{if($('skinSearch').value.trim())scheduleSuggestions();});$('skinSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){hideSuggestions();executeQuery();}if(e.key==='Escape')hideSuggestions();});document.addEventListener('click',e=>{if(!e.target.closest('.reactive-search'))hideSuggestions();});
 $('weaponAdd').onclick=()=>{addUnique(state.weapons,$('weaponInput').value);$('weaponInput').value='';renderFilterControls();state.restoreCount=0;executeQuery();};$('weaponInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('weaponAdd').click();}});
 $('collectionAdd').onclick=()=>{addUnique(state.collections,$('collectionInput').value);$('collectionInput').value='';renderFilterControls();state.restoreCount=0;executeQuery();};$('collectionInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('collectionAdd').click();}});
 document.querySelectorAll('input[name="rarity"]').forEach(c=>c.onchange=()=>{if(c.checked)addUnique(state.rarities,c.value);else removeValue(state.rarities,c.value);renderFilterControls();state.restoreCount=0;executeQuery();});
