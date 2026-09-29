@@ -1,61 +1,90 @@
-# OPS-033 — Skins Reactive Search & Filter Flow — QA
+# OPS-033 — Skins Reactive Search & Filter Flow — QA v18
 
 Date: 2026-09-29
 Owner: FRONT END — VÉRTICE / SCL-DXP-001
+Authority: HOF-VETOR-20260929-cf4b7e15-0d53-45d9-8ab1-e372bf0a9348
 Source decision: HOF-VERTICE-20260929-HUMANREVIEW-PROMOTION-01
-Human Review: SCALE — Launch Candidate 0.1 — Revisão Humana e Feedback Consolidado v0.2
 Branch: `feature/goal-aware-trade-lab-v0.1`
 Production/main: unchanged
 
-## Scope delivered
+## Integrated backend contract
 
-- Reactive autocomplete/dropdown under the main Skins search field.
-- Partial-term suggestions use the existing canonical GET search endpoint; no local catalog or duplicated search corpus.
-- Suggestions preserve current structural filters when querying.
-- Suggestions support one-character partial queries because tradeup-public v12 GET has no minimum query length.
-- Suggestion click opens the canonical Skin Hub route.
-- Explicit “Ver resultados para …” remains available from the dropdown.
-- Enter remains supported.
-- Escape and outside click close suggestions.
-- The primary Buscar action was moved below the complete filter block.
-- Existing rarity and StatTrak reactive filtering is preserved.
-- Existing weapon/collection token workflow is preserved.
-- Existing pagination (“Carregar mais”), selection mode, Loadout context, URL restoration and Skin Hub bridge are preserved.
+Frontend consumes `tradeup-public v18` on the existing endpoint.
 
-## Backend/authority check
+- substring search remains canonical;
+- server-side normalized matching supports forms such as `ak47`;
+- fuzzy fallback is backend-owned and only surfaced through `search.mode=FUZZY_FALLBACK`;
+- combined filters: weapon, rarity, collection, stattrak;
+- allowed sort values exposed in UI: default, name_asc, name_desc, rarity_asc, rarity_desc;
+- no price sort;
+- no fuzzy score exposed;
+- no fuzzy or normalization algorithm duplicated in the browser.
 
-tradeup-public v12 remains the search authority. GET uses case-insensitive partial matching against `skin_name` and `collection` with `ILIKE %q%`. Weapon strings such as AK-47 are part of `skin_name`, so partial search returns matching weapon skins without a local weapon catalog.
+## Frontend behavior
 
-No backend change was made.
+- autocomplete remains debounced at 180 ms;
+- previous suggestion request is aborted with AbortController;
+- stale suggestion responses are discarded by sequence guard;
+- previous main query request is aborted when a newer query starts;
+- stale main-query responses are discarded;
+- one-character substring search is no longer blocked locally;
+- fuzzy feedback appears as “Resultados aproximados para esta busca” only when the backend says FUZZY_FALLBACK;
+- results metadata reports backend search mode and effective ordering without calculating relevance locally;
+- sort survives URL context and reload;
+- filters remain combinable and server-side;
+- Buscar remains after the complete filter block;
+- price ordering is explicitly unavailable.
 
-## Static regression checks
+## Source / integration QA
 
 PASS — JavaScript parses with `new Function`.
-PASS — searchSuggestions container exists.
-PASS — search button is after filtersPanel in DOM order.
-PASS — input event schedules reactive suggestions.
-PASS — suggestions call the canonical API.
-PASS — suggestion requests are not locally blocked at one character.
-PASS — suggestion request reuses current structural filters.
-PASS — explicit Buscar remains bound.
-PASS — Enter remains bound.
-PASS — mobile rule makes the search action full-width.
-PASS — dropdown has anchored/overlay styling.
+PASS — five allowed sort values are present.
+PASS — no price sort exists.
+PASS — sort parameter is sent to backend.
+PASS — FUZZY_FALLBACK is consumed.
+PASS — no local Levenshtein/trigram/similarity formula exists.
+PASS — no local text-normalization implementation exists.
+PASS — debounce preserved.
+PASS — suggestion AbortController preserved.
+PASS — main query AbortController added.
+PASS — stale-response sequence guards exist for suggestions and results.
+PASS — weapon/rarity/collection/stattrak are all sent server-side.
+PASS — old one-character local blocker removed.
+PASS — mobile sort control has explicit responsive rule.
+PASS — mobile result grid collapses to one column.
+PASS — Buscar remains after filters.
 
-Result: 11/11 PASS.
+Result: 16/16 PASS.
 
-## Known limitation / dependency
+## Backend runtime evidence
 
-True typo-tolerant fuzzy search is NOT implemented by this frontend increment. tradeup-public v12 currently uses ILIKE partial matching, not fuzzy/trigram similarity. If NEXO wants tolerance for misspellings beyond substring matching, VETOR must evaluate/contract that backend capability.
+tradeup-public v18 is ACTIVE, SHA `679b8cec08842010cea4658a7500ce5f35d828d4c085c73ab4ab1f651e0f6e46`.
 
-This limitation does not block the requested immediate behavior of typing a partial term such as AK and seeing matching skins in a dropdown.
+Observed v18 runtime logs include:
+- `q=ak47` → HTTP 200;
+- `q=aphrodte` → HTTP 200;
+- `weapon=AK-47&rarity=Covert&sort=name_desc` → HTTP 200;
+- `weapon=AK-47&sort=rarity_desc` → HTTP 200;
+- invalid sort test → HTTP 400 as expected.
+
+## Desktop/mobile QA
+
+Responsive source checks cover:
+- desktop: sort remains inline in toolbar and result grid uses four/three columns by width;
+- <=768 px: sort control becomes full-width, search action becomes full-width, filters collapse to one column, results to two columns;
+- <=480 px: results collapse to one column and token-entry controls stack.
+
+A live external browser automation session was not executed because the connected TinyFish wallet is below zero. This is recorded as a QA limitation, not as successful browser evidence. Backend live runtime evidence and exact branch-source responsive checks support the branch PASS.
+
+## Remaining gap
+
+Price ordering remains intentionally unavailable. VETOR states valuation is wear-specific and does not yet map 1:1 to the structural catalog. No local approximation was introduced.
 
 ## Gates preserved
 
 - no merge to main
 - no production publication
-- no paid service
-- no new credential
-- no account/persistence
-- no new Markets/Patterns/Inspect surface
-- no client-side duplicate catalog/search engine
+- no price valuation approximation
+- no paid service or new credential
+- no new account/persistence/auth scope
+- no local search engine or duplicated ranking logic
