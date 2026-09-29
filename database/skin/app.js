@@ -17,6 +17,8 @@ const WEARS=[
 const fmt=v=>v===null||v===undefined||v===''?'N/D':String(v);
 const hasNum=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'');
+function rarityMark(rarity,size='hero'){const r=fmt(rarity);return '<span class="rarity-mark '+size+'" data-rarity="'+esc(r)+'"><span>'+esc(r)+'</span></span>';}
+function collectionIdentity(collection,size='standard'){const c=fmt(collection);return '<span class="collection-identity '+size+'" title="'+esc(c)+'"><span class="collection-plate" aria-hidden="true">S</span><span class="collection-name">'+esc(c)+'</span></span>';}
 function parseIdentity(name){
   const cleanName=clean(name);const i=cleanName.indexOf(' | ');
   return {weapon:i>0?cleanName.slice(0,i):'N/D',finish:i>0?cleanName.slice(i+3):cleanName||'N/D'};
@@ -89,12 +91,12 @@ function render(x){
   const wears=possibleWears(x.float_min,x.float_max);
   $('crumbName').textContent=clean(name);
   $('entityName').textContent=clean(name);
-  $('entityIdentityLine').textContent=identity.weapon+' · '+fmt(x.rarity);
-  $('entitySubline').textContent=fmt(x.collection)+(mode!=='N/D'?' · '+mode:'');
+  $('entityIdentityLine').innerHTML='<span>'+esc(identity.weapon)+'</span> · '+rarityMark(x.rarity,'hero');
+  $('entitySubline').innerHTML=collectionIdentity(x.collection,'standard')+(mode!=='N/D'?'<span> · '+esc(mode)+'</span>':'');
   $('entityFinish').textContent=identity.finish;
   $('entityWeapon').textContent=identity.weapon;
-  $('entityCollection').textContent=fmt(x.collection);
-  $('entityRarity').textContent=fmt(x.rarity);
+  $('entityCollection').innerHTML=collectionIdentity(x.collection,'standard');
+  $('entityRarity').innerHTML=rarityMark(x.rarity,'standard');
   $('entityMode').textContent=mode;
   $('entityKey').textContent=fmt(x.market_key);
   $('entityFloatRange').textContent=hasNum(x.float_min)&&hasNum(x.float_max)?Number(x.float_min)+' – '+Number(x.float_max):'N/D';
