@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Inventory Bridge</title>
+<meta name="description" content="Importe localmente um snapshot do SCALE Inventory Exporter e use seu inventário como contexto na plataforma.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../platform.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../">Home</a>
+      <a href="../tradeup/">Trade Lab</a>
+      <a href="../database/">Database</a>
+      <a href="../loadout/">Loadout Lab</a>
+      <a class="active" href="./">Inventory</a>
+      <span class="nav-future">Markets <small>Em desenvolvimento</small></span>
+      <span class="nav-future">Patterns <small>Em desenvolvimento</small></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap inventory-page">
+  <section class="page-hero inventory-hero">
+    <p class="eyebrow">Inventory Bridge</p>
+    <h1>Use seu inventário como contexto.</h1>
+    <p class="lead">Importe um snapshot do SCALE Inventory Exporter para identificar itens reconhecidos e continuar para Skin Hub, Loadout e Trade Lab.</p>
+    <div class="snapshot-note"><strong>Snapshot importado</strong><span>Esta leitura não é sincronização Steam ao vivo e não exige login.</span></div>
+  </section>
+
+  <section id="importPanel" class="import-panel">
+    <div class="import-copy">
+      <p class="eyebrow">Importação local</p>
+      <h2>Selecione o JSON exportado.</h2>
+      <p>O arquivo é lido no navegador. O snapshot não é enviado para a SCALE durante a importação local.</p>
+      <p id="catalogStatus" class="catalog-status">Preparando catálogo público para matching local…</p>
+    </div>
+    <label id="dropZone" class="drop-zone" aria-disabled="true">
+      <input id="fileInput" type="file" accept=".json,application/json" disabled>
+      <strong>Selecionar arquivo</strong>
+      <span>ou arraste o JSON aqui</span>
+      <small>Formato aceito: JSON compatível com SCALE Inventory Exporter.</small>
+    </label>
+  </section>
+
+  <div id="errorBox" class="state-box error" hidden role="alert"></div>
+
+  <section id="snapshotSection" hidden>
+    <section class="snapshot-summary">
+      <div>
+        <p class="eyebrow">Inventário importado</p>
+        <h2 id="snapshotTitle">Snapshot carregado</h2>
+        <p id="snapshotFreshness" class="snapshot-freshness">Origem observada: N/D</p>
+      </div>
+      <div class="snapshot-actions">
+        <label class="button secondary compact">Reimportar<input id="replaceInput" type="file" accept=".json,application/json" hidden></label>
+        <button id="clearSnapshotBtn" class="button ghost compact" type="button">Remover snapshot</button>
+      </div>
+    </section>
+
+    <section class="metric-grid inventory-metrics">
+      <article class="metric"><span>Itens no snapshot</span><strong id="totalCount">0</strong><small>assets preservados individualmente</small></article>
+      <article class="metric"><span>Reconhecidos</span><strong id="matchedCount">0</strong><small>match canônico inequívoco</small></article>
+      <article class="metric"><span>Parciais</span><strong id="partialCount">0</strong><small>dados insuficientes para match completo</small></article>
+      <article class="metric"><span>Fora do catálogo</span><strong id="outsideCount">0</strong><small>registro preservado sem entidade canônica atual</small></article>
+    </section>
+
+    <section class="inventory-toolbar">
+      <div class="inventory-filters" role="group" aria-label="Filtrar inventário">
+        <button class="active" data-filter="ALL" type="button">Todos</button>
+        <button data-filter="MATCHED" type="button">Reconhecidos</button>
+        <button data-filter="PARTIAL" type="button">Parciais</button>
+        <button data-filter="OUTSIDE_CATALOG" type="button">Fora do catálogo</button>
+      </div>
+      <div class="inventory-search"><input id="inventorySearch" placeholder="Buscar neste snapshot" aria-label="Buscar neste snapshot"></div>
+    </section>
+
+    <div id="inventoryState" class="state-box" hidden></div>
+    <section id="inventoryGrid" class="inventory-grid" aria-live="polite"></section>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Inventory</strong> · snapshot local e temporário · N/D nunca vira zero.</span><span>OPS-031 · VÉRTICE / SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>
