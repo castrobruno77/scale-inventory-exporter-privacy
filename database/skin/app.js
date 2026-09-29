@@ -41,7 +41,7 @@ function safeFrom(){
 function currentEntityUrl(key){return location.pathname+'?key='+encodeURIComponent(key)+(safeFrom()?'&from='+encodeURIComponent(safeFrom()):'');}
 function applyOriginContext(){
   const from=safeFrom();if(!from)return {type:'none',href:'../'};
-  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);
+  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);const isInventory=/\/inventory\/?(?:\?|$)/.test(from);
   $('originContext').hidden=false;
   $('breadcrumbBack').href=from;$('contextBackBtn').href=from;$('entityBackBtn').href=from;$('backBtnBottom').href=from;
   if(isLoadout){
@@ -49,6 +49,11 @@ function applyOriginContext(){
     $('originLabel').textContent='Vindo do Loadout';$('originHelper').textContent='Slot: '+side+' · '+focus;
     $('contextBackBtn').textContent='Voltar ao Loadout';$('entityBackBtn').textContent='Voltar ao Loadout';$('backBtnBottom').textContent='Voltar ao Loadout';$('breadcrumbBack').textContent='Loadout Lab';
     return {type:'loadout',href:from};
+  }
+  if(isInventory){
+    $('originLabel').textContent='Vindo do Inventory';$('originHelper').textContent='Este item foi aberto a partir do snapshot importado ativo.';
+    $('contextBackBtn').textContent='Voltar ao Inventory';$('entityBackBtn').textContent='Voltar ao Inventory';$('backBtnBottom').textContent='Voltar ao Inventory';$('breadcrumbBack').textContent='Inventory';
+    return {type:'inventory',href:from};
   }
   if(isTrade){
     $('originLabel').textContent='Vindo do Trade Lab';
