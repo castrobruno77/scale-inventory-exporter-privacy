@@ -1,4 +1,19 @@
 :root{
+  --rarity-color-consumer-grade:#b0c3d9;
+  --rarity-color-industrial-grade:#5e98d9;
+  --rarity-color-mil-spec-grade:#4b69ff;
+  --rarity-color-restricted:#8847ff;
+  --rarity-color-classified:#d32ce6;
+  --rarity-color-covert:#eb4b4b;
+  --rarity-color-unknown:#66737a;
+  --rarity-marker-width-dense:3px;
+  --rarity-marker-width-default:4px;
+  --rarity-marker-height-dense:12px;
+  --rarity-marker-height-compact:16px;
+  --rarity-marker-height-standard:18px;
+  --rarity-marker-height-hero:20px;
+  --rarity-marker-radius:2px;
+  --rarity-marker-gap:8px;
   color-scheme:dark;
   --ink-950:#071014;--ink-900:#0D171B;--graphite-800:#182429;--graphite-700:#25343A;
   --paper-0:#F7F9F9;--text-on-dark:#EAF0F1;--text-muted-dark:#AEBCC0;
@@ -47,3 +62,30 @@ h1{font-size:clamp(42px,6vw,74px);line-height:1.02;letter-spacing:-.045em;margin
 .skinhub-v02 .entity-hub{margin-top:14px}.identity-line{font-family:var(--font-mono);font-size:11px;color:var(--signal-500);margin-bottom:8px}.entity-subline{color:var(--text-muted-dark);font-size:14px;margin:0}.action-helper{color:var(--text-muted-dark);font-size:10px;margin:10px 0 0;max-width:560px}.identity-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.float-context-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.float-range-card,.wear-card{border:1px solid var(--line);border-radius:12px;background:var(--ink-900);padding:20px}.float-range-card>span,.wear-card>span{font-family:var(--font-mono);font-size:9px;color:var(--text-muted-dark)}.float-range-card>strong{display:block;font-size:28px;letter-spacing:-.03em;margin:8px 0}.float-range-card small,.wear-card small{display:block;color:var(--text-muted-dark);font-size:10px;margin-top:10px}.wear-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.wear-chip{border:1px solid var(--signal-700);background:#0c1b1f;color:var(--signal-500);border-radius:99px;padding:6px 9px;font-size:10px}.wear-chip.unknown{border-color:var(--line);color:var(--unknown)}.action-section{display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}.next-action-panel{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.state-box strong,.state-box span{display:block}.state-box span{margin-top:4px}.state-box .text-button{margin-top:10px}
 @media(max-width:900px){.identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.action-section{grid-template-columns:1fr}.next-action-panel{justify-content:flex-start}}
 @media(max-width:620px){.identity-grid,.float-context-grid{grid-template-columns:1fr}.skinhub-v02 .entity-art{min-height:210px}.skinhub-v02 .entity-art img{height:210px}.next-action-panel{flex-direction:column}.next-action-panel .button,.skinhub-v02 .entity-actions .button{width:100%}}
+
+/* Fase B — global item classification + collection identity */
+.rarity-mark{display:inline-flex;align-items:center;gap:var(--rarity-marker-gap);min-width:0;color:var(--text-muted-dark);font-family:var(--font-mono);font-size:9px;line-height:1.25}
+.rarity-mark::before{content:"";flex:0 0 auto;width:var(--rarity-marker-width-default);height:var(--rarity-marker-height-standard);border-radius:var(--rarity-marker-radius);background:var(--rarity-color,var(--rarity-color-unknown))}
+.rarity-mark.compact::before{width:var(--rarity-marker-width-dense);height:var(--rarity-marker-height-compact)}
+.rarity-mark.dense::before{width:var(--rarity-marker-width-dense);height:var(--rarity-marker-height-dense)}
+.rarity-mark.hero::before{height:var(--rarity-marker-height-hero)}
+.rarity-mark[data-rarity="Consumer Grade"]{--rarity-color:var(--rarity-color-consumer-grade)}
+.rarity-mark[data-rarity="Industrial Grade"]{--rarity-color:var(--rarity-color-industrial-grade)}
+.rarity-mark[data-rarity="Mil-Spec Grade"]{--rarity-color:var(--rarity-color-mil-spec-grade)}
+.rarity-mark[data-rarity="Restricted"]{--rarity-color:var(--rarity-color-restricted)}
+.rarity-mark[data-rarity="Classified"]{--rarity-color:var(--rarity-color-classified)}
+.rarity-mark[data-rarity="Covert"]{--rarity-color:var(--rarity-color-covert)}
+.rarity-mark[data-rarity="N/D"]{--rarity-color:var(--rarity-color-unknown)}
+.collection-identity{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;color:var(--text-muted-dark);font-family:var(--font-mono);font-size:9px}
+.collection-plate{width:24px;height:24px;flex:0 0 24px;border:1px solid var(--line);border-radius:4px;background:var(--ink-950);display:inline-flex;align-items:center;justify-content:center;color:var(--text-muted-dark);font-weight:800;font-size:8px;letter-spacing:.08em;overflow:hidden}
+.collection-identity.compact .collection-plate{width:20px;height:20px;flex-basis:20px}
+.collection-identity.dense .collection-plate{width:18px;height:18px;flex-basis:18px;font-size:7px}
+.collection-plate img{width:calc(100% - 4px);height:calc(100% - 4px);object-fit:contain}
+.collection-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-classification{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.output-card .rarity-mark{color:var(--text-muted-dark)}
+.output-card .collection-plate{background:var(--ink-950);border-color:var(--line)}
+@media(max-width:480px){
+ .collection-identity.mobile-text-only .collection-plate{display:none}
+ .rarity-mark{white-space:nowrap}
+}
