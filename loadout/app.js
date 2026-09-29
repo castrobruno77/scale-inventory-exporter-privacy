@@ -24,7 +24,7 @@ function skinHref(side,weapon,item){return '../database/skin/?key='+encodeURICom
 function card(t){
  const item=selected(state.side,t.weapon);
  if(!item)return '<article class="loadout-card empty"><div class="loadout-card-head"><div><strong>'+esc(t.weapon)+'</strong><div class="slot-label">'+esc(t.slot)+'</div></div></div><div class="loadout-art"><span>Nenhuma skin selecionada</span></div><div class="loadout-copy"><h3>Nenhuma skin selecionada</h3><p>Escolha uma skin compatível para esta arma.</p></div><div class="slot-actions single"><a href="'+databaseHref(state.side,t.weapon)+'">Escolher skin</a></div></article>';
- return '<article class="loadout-card selected"><div class="loadout-card-head"><div><strong>'+esc(t.weapon)+'</strong><div class="slot-label">'+esc(t.slot)+'</div></div><span class="selection-status">Selecionada</span></div><div class="loadout-art">'+art(item)+'</div><div class="loadout-copy"><h3>'+esc(clean(item.skin_name))+'</h3><p>'+esc(fmt(item.rarity))+'</p><div class="loadout-meta">'+(item.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">'+esc(t.side)+'</span></div></div><div class="slot-actions"><a href="'+databaseHref(state.side,t.weapon)+'">Trocar</a><a href="'+skinHref(state.side,t.weapon,item)+'">Abrir skin</a><button class="remove" type="button" data-remove="'+esc(t.weapon)+'">Remover</button></div></article>';
+ return '<article class="loadout-card selected"><div class="loadout-card-head"><div><strong>'+esc(t.weapon)+'</strong><div class="slot-label">'+esc(t.slot)+'</div></div><span class="selection-status">Selecionada</span></div><div class="loadout-art">'+art(item)+'</div><div class="loadout-copy"><h3>'+esc(clean(item.skin_name))+'</h3><p>'+esc(fmt(item.rarity))+'</p><div class="loadout-meta">'+(item.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+(item.from_inventory?'<span class="mini-tag">Do inventário importado</span>':'')+'<span class="mini-tag muted">'+esc(t.side)+'</span></div></div><div class="slot-actions"><a href="'+databaseHref(state.side,t.weapon)+'">Trocar</a><a href="'+skinHref(state.side,t.weapon,item)+'">Abrir skin</a><button class="remove" type="button" data-remove="'+esc(t.weapon)+'">Remover</button></div></article>';
 }
 function render(){
  $('ctTab').setAttribute('aria-selected',String(state.side==='CT'));$('tTab').setAttribute('aria-selected',String(state.side==='T'));
@@ -35,31 +35,31 @@ function render(){
  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{delete state.selections[state.side][b.dataset.remove];persist();render()});
  const p=new URLSearchParams(location.search);p.set('side',state.side);history.replaceState(null,'',location.pathname+'?'+p.toString());
 }
-function selectItem(side,weapon,item){
+function selectItem(side,weapon,item,fromInventory=false){
  const t=taxonomyForWeapon(weapon);if(!t||!sideAllowed(t,side)){showArrivalError('Indisponível','Esta arma não está disponível neste lado.');return false}
  if(item.weapon&&item.weapon!==weapon){showArrivalError('Indisponível','Esta skin não corresponde à arma escolhida.');return false}
- state.selections[side][weapon]={market_key:item.market_key,skin_name:item.skin_name,rarity:item.rarity??null,is_stattrak:item.is_stattrak??null,image_url:item.image_url??null,weapon:item.weapon||weapon,weapon_category:item.weapon_category||t.category,loadout_slot:item.loadout_slot||t.slot,side:item.side||t.side};
+ state.selections[side][weapon]={market_key:item.market_key,skin_name:item.skin_name,rarity:item.rarity??null,is_stattrak:item.is_stattrak??null,image_url:item.image_url??null,weapon:item.weapon||weapon,weapon_category:item.weapon_category||t.category,loadout_slot:item.loadout_slot||t.slot,side:item.side||t.side,from_inventory:!!fromInventory};
  state.side=side;persist();$('arrivalPanel').hidden=true;render();return true;
 }
 function showArrivalError(title,detail){$('arrivalPanel').hidden=false;$('arrivalTitle').textContent=title;$('arrivalText').textContent=detail;$('arrivalActions').innerHTML='<a class="button secondary" href="'+esc(currentUrl())+'">Voltar ao Loadout</a>'}
 async function exactItem(key){
  const r=await fetch(API+'?q='+encodeURIComponent(key)+'&limit=24&ui=1');const d=await r.json().catch(()=>({status:'ERROR'}));if(!r.ok||d.status==='ERROR')throw new Error('CATALOG_ERROR');return (d.items||[]).find(x=>x.market_key===key)||null;
 }
-function arrivalButtons(item,origin){
+function arrivalButtons(item,origin,fromInventory=false){
  const t=taxonomyForWeapon(item.weapon);if(!t)return showArrivalError('Erro real','A taxonomia recebida não contém esta arma.');
  const sides=t.side==='BOTH'?['CT','T']:[t.side];
  $('arrivalPanel').hidden=false;$('arrivalTitle').textContent='Adicionando: '+clean(item.skin_name);$('arrivalText').textContent=sides.length>1?'Escolha onde usar esta skin.':'Para '+sides[0]+' · '+item.weapon;
  $('arrivalActions').innerHTML=sides.map(s=>'<button class="button primary" type="button" data-arrival-side="'+s+'">Selecionar em '+s+'</button>').join('')+(origin?'<a class="button secondary" href="'+esc(origin)+'">Voltar à skin</a>':'');
- document.querySelectorAll('[data-arrival-side]').forEach(b=>b.onclick=()=>selectItem(b.dataset.arrivalSide,item.weapon,item));
+ document.querySelectorAll('[data-arrival-side]').forEach(b=>b.onclick=()=>selectItem(b.dataset.arrivalSide,item.weapon,item,fromInventory));
 }
 async function consumeContext(){
- const p=new URLSearchParams(location.search);const pick=p.get('pick')||'';const incoming=p.get('skin')||'';const side=p.get('side');const weapon=p.get('weapon')||'';const origin=safeLocalPath(p.get('from')||'');
+ const p=new URLSearchParams(location.search);const pick=p.get('pick')||'';const incoming=p.get('skin')||'';const side=p.get('side');const weapon=p.get('weapon')||'';const origin=safeLocalPath(p.get('from')||'');const fromInventory=p.get('inventory')==='1';
  if(side==='CT'||side==='T')state.side=side;
  if(pick){
   try{const item=await exactItem(pick);if(!item)return showArrivalError('Erro real','A skin escolhida não foi encontrada no catálogo.');if(!weapon)return showArrivalError('Erro real','O slot de destino não foi informado.');if(selectItem(state.side,weapon,item))history.replaceState(null,'',currentUrl(weapon));}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente pelo Database.')}return;
  }
  if(incoming){
-  try{const item=await exactItem(incoming);if(!item)return showArrivalError('Skin não encontrada.','Volte à skin e tente novamente.');arrivalButtons(item,origin);}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente.')}return;
+  try{const item=await exactItem(incoming);if(!item)return showArrivalError('Skin não encontrada.','Volte à skin e tente novamente.');arrivalButtons(item,origin,fromInventory);}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente.')}return;
  }
  render();
 }
