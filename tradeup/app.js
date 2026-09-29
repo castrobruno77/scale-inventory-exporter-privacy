@@ -35,6 +35,23 @@ function applyTradeOriginContext(){
   $('tradeOriginDetail').textContent='Leve esta skin como referência para montar uma composição compatível. A composição não foi preenchida automaticamente.';
   if(from&&from.startsWith('/')&&!from.startsWith('//')){$('tradeOriginBack').href=from;$('tradeOriginBack').textContent='Voltar à skin';}
 }
+async function applyInventoryTradeContext(){
+  const p=new URLSearchParams(location.search);
+  const key=p.get('inventoryKey')?.trim()||'';
+  if(!key)return;
+  const from=p.get('from')||'';
+  const floatParam=p.get('inventoryFloat');
+  const box=$('tradeOriginContext');if(box){box.hidden=false;$('tradeOriginTitle').textContent='Do inventário importado: '+cleanName(key);$('tradeOriginDetail').textContent='Este exemplar foi trazido como contexto do snapshot importado. Owned vale apenas para este snapshot; tradability não é presumida.';if(from&&from.startsWith('/')&&!from.startsWith('//')){$('tradeOriginBack').href=from;$('tradeOriginBack').textContent='Voltar ao Inventory';}}
+  try{
+    const r=await fetch(API+'?q='+encodeURIComponent(key)+'&limit=24&ui=1');
+    const d=await r.json().catch(()=>({status:'ERROR'}));if(!r.ok||d.status==='ERROR')throw new Error('LOOKUP');
+    const item=(d.items||[]).find(x=>x.market_key===key);if(!item)throw new Error('NOT_FOUND');
+    const raw=Number(floatParam);const float=Number.isFinite(raw)?Math.max(Number(item.float_min),Math.min(Number(item.float_max),raw)):defaultFloat(item);
+    const idx=state.slots.findIndex(v=>!v);if(idx>=0){state.slots[idx]={...item,float_value:float,owned:true,from_inventory:true};renderInputs();resetResult();}
+  }catch(_){
+    if(box){$('tradeOriginDetail').textContent='A identidade veio do snapshot, mas não foi possível carregar a variante canônica agora. Nenhum slot foi preenchido.';}
+  }
+}
 function skinEntityHref(x){
   const from=location.pathname+location.search;
   return '../database/skin/?key='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(from);
@@ -172,3 +189,4 @@ async function loadDemo(){
 $('searchBtn').onclick=search;$('skinSearch').addEventListener('keydown',e=>{if(e.key==='Enter')search();});let timer;$('skinSearch').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(search,280)});$('demoBtn').onclick=loadDemo;$('clearBtn').onclick=()=>{state.slots=Array(10).fill(null);state.result=null;renderInputs();resetResult();};$('simulateBtn').onclick=simulate;$('advancedBtn').onclick=()=>{const p=$('advancedPanel');p.hidden=!p.hidden;$('advancedBtn').textContent=p.hidden?'Ver detalhes':'Ocultar detalhes';};document.addEventListener('click',e=>{if(!e.target.closest('.search-shell'))$('searchResults').hidden=true;});
 applyTradeOriginContext();
 renderInputs();
+applyInventoryTradeContext();
