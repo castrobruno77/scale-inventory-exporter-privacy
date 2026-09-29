@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SCALE — Platform Preview</title>
-<meta name="description" content="Preview reversível da experiência de plataforma SCALE para skins de CS2.">
+<title>SCALE — Launch Candidate 0.1</title>
+<meta name="description" content="Primeira jornada conectada da SCALE para explorar skins, inventário, loadout e trade-ups.">
 <meta name="theme-color" content="#071014">
 <link rel="stylesheet" href="platform.css">
 </head>
@@ -15,12 +15,10 @@
     <a class="brand" href="./" aria-label="SCALE home">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
       <a class="active" href="./">Home</a>
-      <a href="tradeup/">Trade Lab</a>
+      <a href="inventory/">Inventory</a>
       <a href="database/">Database</a>
-      <a href="loadout/">Loadout Lab <small>v0.1</small></a>
-      <span class="nav-future">Markets <small>Em desenvolvimento</small></span>
-      <span class="nav-future">Patterns <small>Em desenvolvimento</small></span>
-      <span class="nav-future">Inventory <small>Em desenvolvimento</small></span>
+      <a href="loadout/">Loadout Lab</a>
+      <a href="tradeup/">Trade Lab</a>
     </nav>
   </div>
 </header>
@@ -36,7 +34,7 @@
         <a class="button primary" href="tradeup/">Abrir Trade Lab</a>
         <a class="button secondary" href="#platform">Explorar a plataforma</a>
       </div>
-      <p class="guardrail">Preview reversível. Nenhuma renomeação, migração ou publicação foi executada nesta branch.</p>
+      <p class="guardrail">Launch Candidate 0.1 em branch isolada. Nenhum merge ou publicação externa foi executado.</p>
     </div>
     <aside class="evidence-card" aria-label="Prova de evidência">
       <p class="eyebrow">Evidência</p>
@@ -74,35 +72,22 @@
         <p>Monte um rascunho temporário de skins por lado e arma, sem alterar seu loadout no CS2.</p>
         <span class="card-action">Montar loadout →</span>
       </a>
-      <article class="product-card unavailable">
-        <span class="status-tag unavailable">EM DESENVOLVIMENTO</span>
-        <h3>Markets</h3>
-        <p>Esta experiência ainda não está disponível nesta versão.</p>
-      </article>
-      <article class="product-card unavailable">
-        <span class="status-tag unavailable">EM DESENVOLVIMENTO</span>
-        <h3>Patterns</h3>
-        <p>Esta experiência ainda não está disponível nesta versão.</p>
-      </article>
-      <article class="product-card unavailable">
-        <span class="status-tag unavailable">EM DESENVOLVIMENTO</span>
+      <a class="product-card available" href="inventory/">
+        <span class="status-tag live">FUNCIONAL</span>
         <h3>Inventory</h3>
-        <p>Esta experiência ainda não está disponível nesta versão.</p>
-      </article>
+        <p>Importe localmente um snapshot do Inventory Exporter e use seus itens como contexto para continuar explorando.</p>
+        <span class="card-action">Importar inventário →</span>
+      </a>
     </div>
   </section>
 
   <section class="wrap section split">
-    <div>
-      <p class="eyebrow">Jornada conectada</p>
-      <h2>Da skin para a próxima pergunta.</h2>
-    </div>
+    <div><p class="eyebrow">Jornada conectada</p><h2>Importe. Entenda. Continue.</h2></div>
     <div class="question-flow">
-      <div><span>01</span><strong>Como ela é?</strong><small>Inspect / 3D · ainda não disponível</small></div>
-      <div><span>02</span><strong>Quanto custa?</strong><small>Markets · em desenvolvimento</small></div>
-      <div><span>03</span><strong>Ela muda?</strong><small>Patterns · em desenvolvimento</small></div>
-      <div><span>04</span><strong>Posso obter por trade-up?</strong><small><a href="tradeup/">Trade Lab · disponível</a></small></div>
-      <div><span>05</span><strong>Já tenho algo que ajuda?</strong><small>Inventory · em desenvolvimento</small></div>
+      <div><span>01</span><strong>O que tenho neste snapshot?</strong><small><a href="inventory/">Inventory · importar localmente</a></small></div>
+      <div><span>02</span><strong>Que skin é esta?</strong><small><a href="database/">Database → Skin Hub</a></small></div>
+      <div><span>03</span><strong>Como fica no meu rascunho?</strong><small><a href="loadout/">Loadout Lab</a></small></div>
+      <div><span>04</span><strong>Posso usar em um trade-up?</strong><small><a href="tradeup/">Trade Lab</a></small></div>
     </div>
   </section>
 </main>
@@ -110,7 +95,7 @@
 <footer class="footer">
   <div class="wrap footer-row">
     <span><strong>SCALE</strong> · preview reversível de plataforma · projeto independente, sem afiliação com Valve ou Steam.</span>
-    <span>VÉRTICE · SCL-DXP-001 · OPS-011</span>
+    <span>VÉRTICE · SCL-DXP-001 · Launch Candidate 0.1</span>
   </div>
 </footer>
 </body>
