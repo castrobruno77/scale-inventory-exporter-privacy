@@ -55,7 +55,7 @@ Skins:
 
 ## Regressão funcional por fonte exata
 
-21/21 PASS.
+30/30 PASS após reconciliação final com HOF-PRISMA-20260929-RM002-GOALAWARE-01.
 
 1. Skins → página da skin.
 2. Skin → Contratos com target preservado.
@@ -78,6 +78,15 @@ Skins:
 19. Nenhum localStorage introduzido.
 20. Markets/Patterns/Inspect não foram abertos.
 21. Navegação visível naturalizada em Início / Inventário / Skins / Loadout / Contratos.
+22. Skin candidata de Skins exige float simulado concreto antes de entrar no slot.
+23. Botão de adicionar simulação permanece desabilitado enquanto o float não estiver dentro da faixa backend-derived.
+24. Probabilidade parcial usa “Chance já comprometida”.
+25. Faixa progressiva usa “Faixa possível ao completar”.
+26. “Chance da skin-alvo” só aparece quando `final_pct` existe.
+27. Skin Hub expõe “Como obter esta skin”.
+28. CTA do Skin Hub usa “Montar contrato para esta skin”.
+29. Candidate search usa faixa real `allowed_float_range`; nenhum normalized envelope é mostrado ao usuário.
+30. Os cinco scripts principais da jornada permanecem sintaticamente válidos após o último passe.
 
 ## Sintaxe
 
@@ -99,6 +108,10 @@ Fixture local com as regras exatas do novo layout Goal-Aware:
 - 390×844: sem overflow horizontal; inputs 1 coluna; estados 1 coluna; objetivo 1 coluna.
 
 A tentativa adicional de sessão externa automatizada sobre raw.githack não iniciou por saldo insuficiente do navegador TinyFish. Portanto, não é registrada como evidência de QA live. Isso não altera a certificação técnica da capability v12, já entregue pelo VETOR, nem os checks de fonte/layout desta branch.
+
+## Reconciliação PRISMA Goal-Aware
+
+O handoff `HOF-PRISMA-20260929-RM002-GOALAWARE-01` foi lido antes da certificação final. Ajustes absorvidos: target-first, labels naturais de validade/possibilidade/float, chance comprometida + faixa possível, CTA “Montar contrato para esta skin”, picker com origem Inventário/Skins e float simulado obrigatório antes de adicionar um candidato de Skins. O contrato EN foi preservado como referência de copy; esta missão implementa pt-BR conforme escopo NEXO e não cria framework i18n novo.
 
 ## Linguagem PRISMA
 
@@ -124,4 +137,4 @@ Aplicado:
 
 ## Resultado
 
-PASS — OPS-032 pronto para handoff ao NEXO dentro do escopo reversível autorizado.
+PASS — OPS-032 pronto para handoff ao NEXO dentro do escopo reversível autorizado, após reconciliação VETOR + PRISMA + ATLAS.
