@@ -66,6 +66,17 @@ function applyOriginContext(){
   $('backBtnBottom').textContent='Voltar aos resultados';
   return {type:'database',href:from};
 }
+function applyInventoryOwnership(x){
+  const box=$('inventoryOwnership');if(!box)return;
+  box.hidden=true;box.textContent='';
+  try{
+    const raw=sessionStorage.getItem('scale_inventory_bridge_v01_session');if(!raw)return;
+    const snap=JSON.parse(raw);const matches=(snap?.items||[]).filter(i=>i.match_state==='MATCHED'&&i.market_key===x.market_key);
+    if(!matches.length)return;
+    box.hidden=false;
+    box.innerHTML='<span>No inventário importado · '+matches.length+'</span><span>Snapshot: '+esc(snap.snapshot_at?new Date(snap.snapshot_at).toLocaleString('pt-BR'):'N/D')+'</span>';
+  }catch(_){}
+}
 function render(x){
   $('entityHub').hidden=false;$('entityState').hidden=true;
   const name=fmt(x.skin_name);const identity=parseIdentity(name);const mode=x.is_stattrak===true?'StatTrak':x.is_stattrak===false?'Normal':'N/D';
@@ -89,6 +100,7 @@ function render(x){
   const tradeHref='../../tradeup/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);
   $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;
   const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);$('loadoutBtn').href=loadoutHref;$('loadoutBtnBottom').href=loadoutHref;
+  applyInventoryOwnership(x);
   document.title='SCALE — '+clean(name)+' · Skin Hub';
 }
 async function load(){
