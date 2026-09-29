@@ -1,102 +1,23 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SCALE — Launch Candidate 0.1</title>
-<meta name="description" content="Primeira jornada conectada da SCALE para explorar skins, inventário, loadout e trade-ups.">
-<meta name="theme-color" content="#071014">
-<link rel="stylesheet" href="platform.css">
+<meta name="description" content="Explore skins, use seu inventário como contexto, monte seu loadout e teste contratos na SCALE.">
+<meta name="theme-color" content="#071014"><link rel="stylesheet" href="platform.css">
 </head>
 <body>
 <a class="skip" href="#main">Ir para o conteúdo</a>
-<header class="site-header">
-  <div class="wrap nav-shell">
-    <a class="brand" href="./" aria-label="SCALE home">SCALE<span>.</span></a>
-    <nav class="nav" aria-label="Navegação principal">
-      <a class="active" href="./">Home</a>
-      <a href="inventory/">Inventory</a>
-      <a href="database/">Database</a>
-      <a href="loadout/">Loadout Lab</a>
-      <a href="tradeup/">Trade Lab</a>
-    </nav>
-  </div>
-</header>
-
+<header class="site-header"><div class="wrap nav-shell"><a class="brand" href="./" aria-label="SCALE">SCALE<span>.</span></a><nav class="nav" aria-label="Navegação principal"><a class="active" href="./">Início</a><a href="inventory/">Inventário</a><a href="database/">Skins</a><a href="loadout/">Loadout</a><a href="tradeup/">Contratos</a></nav></div></header>
 <main id="main">
-  <section class="wrap hero platform-hero">
-    <div>
-      <p class="eyebrow">SCALE</p>
-      <h1>Entenda suas skins.<br><em>Veja a evidência. Decida com mais contexto.</em></h1>
-      <p class="lead">A SCALE conecta inventário, mercado e mecânicas de skins de CS2 para mostrar o que os dados realmente sustentam — e o que ainda está N/D.</p>
-      <p class="section-copy">Menos troca de abas. Mais contexto entre preço, float, trade-up, inventário e evidência.</p>
-      <div class="hero-actions">
-        <a class="button primary" href="inventory/">Importar inventário</a>
-        <a class="button secondary" href="database/">Explorar Database</a>
-      </div>
-      <p class="guardrail">Launch Candidate 0.1 em branch isolada. Nenhum merge ou publicação externa foi executado.</p>
-    </div>
-    <aside class="evidence-card" aria-label="Prova de evidência">
-      <p class="eyebrow">Evidência</p>
-      <h2>A SCALE não transforma ausência de evidência em zero.</h2>
-      <dl class="evidence-rail">
-        <div><dt>Fonte</dt><dd>visível</dd></div>
-        <div><dt>Cobertura</dt><dd>explícita</dd></div>
-        <div><dt>Freshness</dt><dd>preservada</dd></div>
-        <div><dt>N/D</dt><dd>nunca vira zero</dd></div>
-      </dl>
-    </aside>
-  </section>
-
-  <section id="platform" class="wrap section">
-    <div class="section-head">
-      <div><p class="eyebrow">Plataforma</p><h2>Uma entidade. Várias perguntas.</h2></div>
-      <p class="section-copy">Novas experiências serão conectadas à mesma entidade de skin à medida que cada capacidade for materializada.</p>
-    </div>
-    <div class="product-grid">
-      <a class="product-card available" href="tradeup/">
-        <span class="status-tag live">FUNCIONAL</span>
-        <h3>Trade Lab</h3>
-        <p>Monte 10 itens e avalie possíveis resultados, floats previstos, probabilidades e a leitura econômica suportada pelos dados disponíveis.</p>
-        <span class="card-action">Abrir Trade Lab →</span>
-      </a>
-      <a class="product-card preview" href="database/">
-        <span class="status-tag preview">PREVIEW</span>
-        <h3>Database</h3>
-        <p>Encontre a skin e consulte o contexto estrutural já disponível no catálogo autorizado.</p>
-        <span class="card-action">Buscar skins →</span>
-      </a>
-      <a class="product-card available" href="loadout/">
-        <span class="status-tag live">FUNCIONAL</span>
-        <h3>Loadout Lab</h3>
-        <p>Monte um rascunho temporário de skins por lado e arma, sem alterar seu loadout no CS2.</p>
-        <span class="card-action">Montar loadout →</span>
-      </a>
-      <a class="product-card available" href="inventory/">
-        <span class="status-tag live">FUNCIONAL</span>
-        <h3>Inventory</h3>
-        <p>Importe localmente um snapshot do Inventory Exporter e use seus itens como contexto para continuar explorando.</p>
-        <span class="card-action">Importar inventário →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="wrap section split">
-    <div><p class="eyebrow">Jornada conectada</p><h2>Importe. Entenda. Continue.</h2></div>
-    <div class="question-flow">
-      <div><span>01</span><strong>O que tenho neste snapshot?</strong><small><a href="inventory/">Inventory · importar localmente</a></small></div>
-      <div><span>02</span><strong>Que skin é esta?</strong><small><a href="database/">Database → Skin Hub</a></small></div>
-      <div><span>03</span><strong>Como fica no meu rascunho?</strong><small><a href="loadout/">Loadout Lab</a></small></div>
-      <div><span>04</span><strong>Posso usar em um trade-up?</strong><small><a href="tradeup/">Trade Lab</a></small></div>
-    </div>
-  </section>
+<section class="wrap hero platform-hero"><div><p class="eyebrow">SCALE</p><h1>Suas skins, seu inventário,<br><em>seus próximos contratos.</em></h1><p class="lead">Explore skins, monte seu loadout, teste contratos e use seu inventário como contexto — sem perder tempo trocando de ferramenta.</p><div class="hero-actions"><a class="button primary" href="database/">Explorar skins</a><a class="button secondary" href="tradeup/">Testar um contrato</a></div><p class="guardrail">Preview reversível em branch isolada. Nenhum merge ou publicação externa foi executado.</p></div><aside class="evidence-card" aria-label="Evidência"><p class="eyebrow">Confiança</p><h2>Ausência de dado continua ausência de dado.</h2><dl class="evidence-rail"><div><dt>Fonte</dt><dd>visível</dd></div><div><dt>Atualização</dt><dd>visível</dd></div><div><dt>N/D</dt><dd>continua N/D</dd></div></dl></aside></section>
+<section id="platform" class="wrap section"><div class="section-head"><div><p class="eyebrow">Ferramentas</p><h2>Comece pela tarefa.</h2></div><p class="section-copy">A mesma skin acompanha você entre busca, inventário, loadout e contratos quando a capability existe.</p></div><div class="product-grid">
+<a class="product-card preview" href="database/"><span class="status-tag preview">PREVIEW</span><h3>Skins</h3><p>Encontre uma skin por arma, coleção, raridade e atributos disponíveis.</p><span class="card-action">Explorar skins →</span></a>
+<a class="product-card available" href="inventory/"><span class="status-tag live">FUNCIONAL</span><h3>Inventário</h3><p>Importe um snapshot do Inventory Exporter e reconheça seus itens na SCALE.</p><span class="card-action">Importar inventário →</span></a>
+<a class="product-card available" href="loadout/"><span class="status-tag live">FUNCIONAL</span><h3>Loadout</h3><p>Escolha skins para CT e TR em um rascunho temporário.</p><span class="card-action">Montar loadout →</span></a>
+<a class="product-card available" href="tradeup/"><span class="status-tag live">FUNCIONAL</span><h3>Contratos</h3><p>Monte 10 inputs ou parta de uma skin-alvo para acompanhar chances e resultado.</p><span class="card-action">Testar um contrato →</span></a>
+</div></section>
+<section class="wrap section split"><div><p class="eyebrow">Jornada conectada</p><h2>Explore. Use seu contexto. Continue.</h2></div><div class="question-flow"><div><span>01</span><strong>Que skin procuro?</strong><small><a href="database/">Skins</a></small></div><div><span>02</span><strong>O que tenho no snapshot?</strong><small><a href="inventory/">Inventário</a></small></div><div><span>03</span><strong>Como fica no meu rascunho?</strong><small><a href="loadout/">Loadout</a></small></div><div><span>04</span><strong>Como posso obter esta skin?</strong><small><a href="tradeup/">Contratos</a></small></div></div></section>
 </main>
-
-<footer class="footer">
-  <div class="wrap footer-row">
-    <span><strong>SCALE</strong> · preview reversível de plataforma · projeto independente, sem afiliação com Valve ou Steam.</span>
-    <span>VÉRTICE · SCL-DXP-001 · Launch Candidate 0.1</span>
-  </div>
-</footer>
-</body>
-</html>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE</strong> · produto independente, sem afiliação com Valve ou Steam.</span><span>VÉRTICE · SCL-DXP-001 · Launch Candidate 0.1</span></div></footer>
+</body></html>
