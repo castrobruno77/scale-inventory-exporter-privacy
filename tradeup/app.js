@@ -80,8 +80,8 @@ function objectivePayload(){
   }
   return {objective};
 }
-function selectedInputs(){
-  return state.slots.filter(Boolean).map(x=>{
+function selectedInputs(excludeSlot=null){
+  return state.slots.map((x,i)=>({x,i})).filter(({x,i})=>x&&i!==excludeSlot).map(({x})=>{
     const input={market_key:x.market_key,float_value:Number(x.float_value),origin:x.origin||'DATABASE'};
     const effectivePrice=hasNumber(x.manual_price_usd)?Number(x.manual_price_usd):(hasNumber(x.reference_price_usd)?Number(x.reference_price_usd):null);
     if(x.origin==='INVENTORY'){
@@ -178,7 +178,7 @@ function renderInputs(){
       : '<div class="float-row"><label>float simulado</label><input data-float="'+i+'" type="number" step="0.000001" min="'+item.float_min+'" max="'+item.float_max+'" value="'+item.float_value+'"></div>';
     const referencePrice=hasNumber(item.reference_price_usd)?money(item.reference_price_usd):'N/D';
     const manualValue=hasNumber(item.manual_price_usd)?Number(item.manual_price_usd):'';
-    const priceSource=hasNumber(item.manual_price_usd)?'Preço manual do usuário':(hasNumber(item.reference_price_usd)?'Referência SCALE':'Sem preço de referência');
+    const priceSource=hasNumber(item.manual_price_usd)?'Preço manual do usuário':(hasNumber(item.reference_price_usd)?'Referência SCALE disponível':'Referência: resolvida pelo avaliador quando disponível');
     return '<article class="input-card filled '+(inv?'origin-inventory':'origin-database')+'">'+
       '<span class="slot-number">'+String(i+1).padStart(2,'0')+'</span>'+
       '<span class="origin-chip '+(inv?'inventory':'database')+'">'+originLabel+'</span>'+
@@ -280,7 +280,8 @@ function formatRange(r){
 async function postGoal(extra={}){
   const op=objectivePayload();
   if(op.error)throw new Error('OBJECTIVE_UI:'+op.error);
-  const body={mode:'GOAL_AWARE',target:{market_key:state.targetKey},inputs:selectedInputs(),...op,...extra};
+  const replacing=extra?.candidate_query&&state.selectorOpen&&Number.isInteger(state.selectorSlot)&&state.slots[state.selectorSlot]?state.selectorSlot:null;
+  const body={mode:'GOAL_AWARE',target:{market_key:state.targetKey},inputs:selectedInputs(replacing),...op,...extra};
   const r=await fetch(API+'?ui=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({status:'ERROR',error:'INVALID_RESPONSE'}));
   if(!r.ok||d.status!=='OK'){const e=apiError(d,r.status);const err=new Error(e.message);err.code=e.code;err.payload=d;throw err;}
@@ -349,7 +350,6 @@ async function search(){
   try{
     if(state.goalMode){
       const d=await postGoal({candidate_query:{q,limit:18,offset:0}});
-      renderGoalState(d);
       showGoalSearch(d.candidates||[]);
     }else{
       const r=await fetch(API+'?q='+encodeURIComponent(q)+'&limit=18&ui=1');
