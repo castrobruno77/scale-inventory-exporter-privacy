@@ -49,7 +49,7 @@ function arrivalButtons(item,origin,fromInventory=false){
  const t=taxonomyForWeapon(item.weapon);if(!t)return showArrivalError('Erro real','A taxonomia recebida não contém esta arma.');
  const sides=t.side==='BOTH'?['CT','T']:[t.side];
  $('arrivalPanel').hidden=false;$('arrivalTitle').textContent='Adicionando: '+clean(item.skin_name);$('arrivalText').textContent=sides.length>1?'Escolha onde usar esta skin.':'Para '+sides[0]+' · '+item.weapon;
- $('arrivalActions').innerHTML=sides.map(s=>'<button class="button primary" type="button" data-arrival-side="'+s+'">Selecionar em '+s+'</button>').join('')+(origin?'<a class="button secondary" href="'+esc(origin)+'">Voltar à skin</a>':'');
+ $('arrivalActions').innerHTML=sides.map(s=>'<button class="button primary" type="button" data-arrival-side="'+s+'">Selecionar em '+s+'</button>').join('')+(origin?'<a class="button secondary" href="'+esc(origin)+'">'+(fromInventory?'Voltar ao Inventory':'Voltar à skin')+'</a>':'');
  document.querySelectorAll('[data-arrival-side]').forEach(b=>b.onclick=()=>selectItem(b.dataset.arrivalSide,item.weapon,item,fromInventory));
 }
 async function consumeContext(){
