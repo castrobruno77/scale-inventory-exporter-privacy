@@ -225,3 +225,65 @@ Não implementado:
 - sem nova lógica econômica.
 
 **OPS-031 — PASS.**
+
+
+---
+
+## Human review patch — 2026-09-28
+
+The first manual preview exposed two review blockers that were not covered by the previous browser QA:
+
+1. the real Inventory Exporter v0.8.1 JSON uses `assetid` as the item asset identifier;
+2. the raw.githack review origin was not present in the public `tradeup-public` CORS allowlist.
+
+Both were corrected narrowly without reopening product scope.
+
+### Exporter compatibility
+
+Inventory Bridge now accepts these equivalent asset identifier fields:
+- `asset_id`
+- `assetId`
+- `assetid`
+- legacy tabular `ASSET ID`
+
+All existing fail-closed behavior remains:
+- asset identifier is still mandatory;
+- duplicates still fail closed;
+- ownership remains asset-level;
+- no item collapsing occurs.
+
+Validation against the real-export identifier example `53921748880`:
+- asset id preserved;
+- `Galil AR | Grey Smoke (Minimal Wear)` normalized to canonical candidate;
+- catalog match: MATCHED;
+- weapon: Galil AR.
+
+Commit:
+- `8b840c8e62abe2bd132724ae599a3da0f98a05d5`
+
+### Preview CORS
+
+`tradeup-public` was upgraded from v10 to v11 with one additive CORS allowlist entry:
+- `https://raw.githack.com`
+
+No GET filters, pagination, taxonomy, POST contract, economic logic, rate limits or legacy origins were changed.
+
+Supabase function:
+- slug: `tradeup-public`
+- version: `11`
+- verify_jwt: false (unchanged)
+
+This change exists only to allow the isolated review renderer to consume the same certified public endpoint.
+
+### Review status
+
+The remote TinyFish browser could not be re-run because the provider wallet was exhausted, so final verification must be completed by the human review itself.
+
+Recommended preview:
+- use a commit-pinned raw.githack URL after this QA note commit;
+- refresh/reopen the preview;
+- verify catalog becomes ready;
+- import the real v0.8.1 JSON;
+- continue through Skin Hub / Loadout / Trade Lab / Database.
+
+No merge or production-site publication was performed.
