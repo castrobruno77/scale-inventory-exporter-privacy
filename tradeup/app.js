@@ -248,6 +248,14 @@ function renderInputs(){
   document.querySelectorAll('[data-float]').forEach(inp=>inp.onchange=async()=>{
     const i=+inp.dataset.float,it=state.slots[i],v=Number(inp.value);
     if(Number.isFinite(v)){it.float_value=Math.max(Number(it.float_min),Math.min(Number(it.float_max),v));inp.value=it.float_value;}
+    if(state.goalMode&&it?.origin==='DATABASE'){
+      try{
+        const d=await postGoal({candidate:{market_key:it.market_key,float_value:it.float_value}});
+        const cv=d.candidate_validation;
+        it.price_reference=cv?.valid===true&&cv?.float_compatible!==false?(cv.price_reference||null):null;
+      }catch(_){it.price_reference=null;}
+      renderInputs();
+    }
     resetFinal();if(state.goalMode)await evaluateGoal();else updateLegacyProgress();
   });
   document.querySelectorAll('[data-price]').forEach(inp=>inp.onchange=async()=>{
