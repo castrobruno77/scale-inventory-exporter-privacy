@@ -87,7 +87,7 @@ function renderSuggestions(items,q,search){
  const box=$('searchSuggestions');
  if(!q||!items.length){hideSuggestions();return;}
  const approx=search?.mode==='FUZZY_FALLBACK'?'<div class="suggestion-context">Resultados aproximados para esta busca</div>':'';
- box.innerHTML=approx+items.slice(0,SUGGEST_LIMIT).map(x=>'<a class="search-suggestion" href="'+entityHref(x)+'"><span><strong>'+esc(clean(x.skin_name))+'</strong><small>'+esc(weaponOf(x))+' · '+esc(fmt(x.collection))+'</small></span><span class="suggestion-rarity">'+esc(fmt(x.rarity))+'</span></a>').join('')+'<button class="search-suggestion-all" type="button" data-search-all>Ver resultados para “'+esc(q)+'”</button>';
+ box.innerHTML=approx+items.slice(0,SUGGEST_LIMIT).map(x=>'<a class="search-suggestion" href="'+entityHref(x)+'"><span class="search-copy"><strong>'+esc(clean(x.skin_name))+'</strong><small>'+esc(weaponOf(x))+'</small>'+collectionIdentity(x.collection,'dense',true)+'</span>'+rarityMark(x.rarity,'dense')+'</a>').join('')+'<button class="search-suggestion-all" type="button" data-search-all>Ver resultados para “'+esc(q)+'”</button>';
  box.hidden=false;$('skinSearch').setAttribute('aria-expanded','true');
  const all=box.querySelector('[data-search-all]');if(all)all.onclick=()=>{hideSuggestions();executeQuery();};
 }
