@@ -84,7 +84,7 @@ function floatText(x){if(x.float_state==='NOT_APPLICABLE')return 'N/A';return x.
 function art(x){return x.image_url?'<img src="'+esc(x.image_url)+'" alt="'+esc(clean(x.display_name))+'" loading="lazy">':'<span>Imagem N/D</span>'}
 function sourceUrl(){return location.pathname+location.search}
 function skinUrl(x){return '../database/skin/?key='+encodeURIComponent(x.market_key)+'&from='+encodeURIComponent(sourceUrl())}
-function loadoutUrl(x){return '../loadout/?skin='+encodeURIComponent(x.market_key)+'&from='+encodeURIComponent(sourceUrl())}
+function loadoutUrl(x){return '../loadout/?skin='+encodeURIComponent(x.market_key)+'&inventory=1&from='+encodeURIComponent(sourceUrl())}
 function tradeUrl(x){const p=new URLSearchParams();p.set('inventoryKey',x.market_key);if(x.float_value!==null)p.set('inventoryFloat',String(x.float_value));p.set('from',sourceUrl());return '../tradeup/?'+p.toString()}
 function card(x){
  const matched=x.match_state==='MATCHED';
