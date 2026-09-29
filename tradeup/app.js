@@ -7,6 +7,8 @@ const money=v=>hasNumber(v)?'US$ '+Number(v).toFixed(2):'N/D';
 const pct=v=>hasNumber(v)?Number(v).toFixed(1)+'%':'N/D';
 const cleanName=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+/,'').replace(/ \((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)$/,'');
 const short=n=>cleanName(n).split('|').map(x=>x.trim()).slice(-1)[0]?.slice(0,3).toUpperCase()||'SKN';
+function rarityMark(rarity,size='compact'){const r=rarity||'N/D';return '<span class="rarity-mark '+size+'" data-rarity="'+esc(r)+'"><span>'+esc(r)+'</span></span>';}
+function collectionIdentity(collection,size='compact',mobileTextOnly=false){const c=collection||'N/D';return '<span class="collection-identity '+size+(mobileTextOnly?' mobile-text-only':'')+'" title="'+esc(c)+'"><span class="collection-plate" aria-hidden="true">S</span><span class="collection-name">'+esc(c)+'</span></span>';}
 const qp=new URLSearchParams(location.search);
 const state={
   goalMode:Boolean(qp.get('skin')),
@@ -139,9 +141,9 @@ function renderInputs(){
       '<span class="slot-number">'+String(i+1).padStart(2,'0')+'</span><button class="remove-btn" data-remove="'+i+'" aria-label="Remover">×</button>'+
       '<span class="origin-chip '+(inv?'inventory':'database')+'">'+originLabel+'</span>'+
       '<div class="skin-art">'+art(item.skin_name,item.image_url)+'</div>'+
-      '<div class="input-info"><h3 title="'+esc(item.skin_name)+'">'+esc(cleanName(item.skin_name))+'</h3><div class="collection" title="'+esc(item.collection)+'">'+esc(item.collection||'N/D')+'</div>'+
+      '<div class="input-info"><h3 title="'+esc(item.skin_name)+'">'+esc(cleanName(item.skin_name))+'</h3><div class="collection">'+collectionIdentity(item.collection,'dense',true)+'</div>'+
       floatControl+
-      '<div class="input-foot"><span>'+esc(item.rarity||'N/D')+'</span><span>'+(item.is_stattrak?'StatTrak':'Normal')+'</span></div>'+
+      '<div class="input-foot">'+rarityMark(item.rarity,'dense')+'<span>'+(item.is_stattrak?'StatTrak':'Normal')+'</span></div>'+
       (inv?'<div class="asset-note">asset '+esc(item.asset_id||'N/D')+'</div>':'')+
       '</div></article>';
   }).join('');
@@ -258,7 +260,7 @@ async function loadTarget(){
     if(!item)throw new Error('Skin-alvo não encontrada no catálogo.');
     state.target=item;
     $('targetName').textContent=cleanName(item.skin_name);
-    $('targetMeta').textContent=(item.collection||'N/D')+' · '+(item.rarity||'N/D')+' · '+(item.is_stattrak?'StatTrak':'Normal');
+    $('targetMeta').innerHTML='<span class="item-classification">'+collectionIdentity(item.collection,'compact',true)+rarityMark(item.rarity,'compact')+'<span>'+(item.is_stattrak?'StatTrak':'Normal')+'</span></span>';
     $('targetArt').innerHTML=art(item.skin_name,item.image_url);
     document.title='SCALE — Como obter '+cleanName(item.skin_name);
     const g=await postGoal();
@@ -319,7 +321,7 @@ function showGoalSearch(items){
     const assetHtml=assets.length?'<div class="inventory-match-list">'+assets.slice(0,4).map((a,j)=>
       '<button type="button" class="inventory-pick" data-candidate="'+i+'" data-asset="'+j+'"><strong>Adicionar do Inventário</strong><span>asset '+esc(a.asset_id)+' · float '+Number(a.float_value).toFixed(6)+'</span></button>'
     ).join('')+(assets.length>4?'<small>+'+(assets.length-4)+' itens compatíveis neste snapshot</small>':'')+'</div>':'';
-    return '<article class="goal-search-item"><div class="goal-search-main"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta">'+esc(x.collection)+' · '+esc(x.rarity)+'</span><span class="meta">Float compatível agora: '+esc(allowedText)+'</span><span class="meta">'+relation+'</span></span><span class="prob-delta">Após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></div>'+
+    return '<article class="goal-search-item"><div class="goal-search-main"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</span><span class="meta">Float compatível agora: '+esc(allowedText)+'</span><span class="meta">'+relation+'</span></span><span class="prob-delta">Após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></div>'+
       '<div class="candidate-actions candidate-simulation"><label>Float simulado <input class="candidate-float" data-candidate-float="'+i+'" type="number" step="0.000001" min="'+allowed.min+'" max="'+allowed.max+'" placeholder="Informe um float"></label><button type="button" class="button secondary compact simulation-pick" data-candidate="'+i+'" disabled>Adicionar ao contrato</button></div>'+assetHtml+'</article>';
   }).join('');
   box.hidden=false;
@@ -369,7 +371,7 @@ function showSearch(items,error=false,message='Falha ao consultar o catálogo.',
   if(error){box.innerHTML='<div class="search-item error">'+esc(message)+(code?' · '+esc(code):'')+'</div>';box.hidden=false;return;}
   if(!items.length){box.innerHTML='<div class="search-item"><span>Nenhum resultado</span></div>';box.hidden=false;return;}
   state.searchItems=items;
-  box.innerHTML=items.map((x,i)=>'<button class="search-item" data-pick="'+i+'"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta">'+esc(x.collection)+' · '+esc(x.rarity)+' · float '+x.float_min+'–'+x.float_max+'</span></span><span class="badge">'+(x.is_stattrak?'STATTRAK':'NORMAL')+'</span></button>').join('');
+  box.innerHTML=items.map((x,i)=>'<button class="search-item" data-pick="'+i+'"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</span><span class="meta">float '+x.float_min+'–'+x.float_max+'</span></span><span class="badge">'+(x.is_stattrak?'STATTRAK':'NORMAL')+'</span></button>').join('');
   box.hidden=false;document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>pickLegacy(items[+b.dataset.pick]));
 }
 function pickLegacy(x){
@@ -404,7 +406,7 @@ function renderOutputs(outputs){
       (targetClass?'<span class="target-result-badge">Skin-alvo</span>':'')+
       '<div class="skin-art">'+art(x.skin_name,x.image_url)+'</div><div class="output-body"><h3>'+esc(cleanName(x.skin_name))+'</h3>'+
       '<div class="output-meta">Desgaste previsto: '+esc(x.predicted_wear||'N/D')+' · Float previsto: '+(hasNumber(x.predicted_float)?Number(x.predicted_float).toFixed(5):'N/D')+'</div>'+
-      '<div class="output-meta">'+esc(x.collection||'N/D')+'</div>'+
+      '<div class="output-meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</div>'+
       '<div class="market-context"><span>Fonte: '+esc(x.market?.source||'N/D')+'</span><span>Confiança: '+esc(x.market?.confidence??'N/D')+'</span><span>Atualizado: '+esc(x.market?.updated_at||'N/D')+'</span></div>'+
       '<div class="output-money"><div><span>Valor realizável</span><strong>'+money(x.market?.realizable_usd)+'</strong></div><div><span>Lucro ou perda</span><strong>'+(hasNumber(x.profit_usd)?(Number(x.profit_usd)>=0?'+':'-')+'US$ '+Math.abs(Number(x.profit_usd)).toFixed(2):'N/D')+'</strong></div></div>'+
       '<div class="output-actions"><a class="mini-btn enabled" href="'+skinEntityHref(x)+'">Ver skin</a></div></div></article>';
