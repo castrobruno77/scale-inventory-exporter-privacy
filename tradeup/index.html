@@ -106,19 +106,45 @@
 
   <section class="lab-shell">
     <div class="lab-toolbar">
-      <div class="search-shell">
-        <label for="skinSearch" id="searchLabel">Adicionar skin ao contrato</label>
-        <div class="search-row">
-          <input id="skinSearch" autocomplete="off" placeholder="Buscar skin ou coleção">
-          <button id="searchBtn" class="button secondary" type="button">Buscar</button>
-        </div>
-        <div id="searchResults" class="search-results" hidden></div>
+      <div class="selector-launch-copy">
+        <strong>Composição progressiva</strong>
+        <span>Clique em qualquer slot para escolher ou alterar uma skin sem perder o contexto.</span>
       </div>
       <div class="toolbar-actions">
+        <button id="openSelectorBtn" class="button secondary" type="button">Escolher skins</button>
         <button id="demoBtn" class="button ghost" type="button">Carregar exemplo</button>
         <button id="clearBtn" class="button ghost" type="button">Limpar composição</button>
       </div>
     </div>
+
+    <section id="inputSelector" class="input-selector" role="dialog" aria-modal="true" aria-labelledby="selectorTitle" hidden>
+      <div class="selector-backdrop" data-selector-close></div>
+      <div class="selector-panel">
+        <div class="selector-head">
+          <div>
+            <p class="eyebrow">Seletor de inputs</p>
+            <h2 id="selectorTitle">Escolha uma skin</h2>
+            <p id="selectorContext" class="hint">Próximo slot disponível.</p>
+          </div>
+          <button id="selectorCloseBtn" class="selector-close" type="button" aria-label="Fechar seletor">×</button>
+        </div>
+        <div class="selector-origin-tabs" aria-label="Origem do input">
+          <button class="active" type="button" data-selector-origin="ALL">Todos</button>
+          <button type="button" data-selector-origin="INVENTORY">Inventário</button>
+          <button type="button" data-selector-origin="DATABASE">Skins</button>
+        </div>
+        <div class="search-shell selector-search-shell">
+          <label for="skinSearch" id="searchLabel">Buscar skin ou coleção</label>
+          <div class="search-row">
+            <input id="skinSearch" autocomplete="off" placeholder="Busque ou deixe vazio para explorar">
+            <button id="searchBtn" class="button secondary" type="button">Buscar</button>
+          </div>
+          <div id="selectorFeedback" class="selector-feedback" role="status" aria-live="polite" hidden></div>
+          <div id="searchResults" class="search-results selector-results" hidden></div>
+        </div>
+      </div>
+    </section>
+    <div id="addToast" class="add-toast" role="status" aria-live="polite" hidden>Adicionado</div>
 
     <div class="section-head">
       <div><p class="eyebrow">Inputs do contrato</p><h2><span id="slotCounter">0 de 10 skins</span></h2></div>
