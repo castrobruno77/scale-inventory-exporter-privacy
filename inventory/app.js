@@ -41,7 +41,7 @@ function showError(title,detail){$('errorBox').hidden=false;$('errorBox').innerH
 function clearError(){$('errorBox').hidden=true;$('errorBox').textContent=''}
 
 function normalizeItem(raw,index){
- const assetId=String(raw?.asset_id??raw?.assetId??raw?.['ASSET ID']??'').trim();
+ const assetId=String(raw?.asset_id??raw?.assetId??raw?.assetid??raw?.['ASSET ID']??'').trim();
  if(!assetId)throw new Error('ASSET_ID_REQUIRED:'+index);
  const marketHash=String(raw?.market_hash_name??raw?.marketHashName??raw?.market_name??raw?.market_key??'').trim();
  const display=String(raw?.display_name??raw?.skin_name??raw?.ITEM??raw?.item??marketHash??'Registro importado').trim();
