@@ -21,7 +21,10 @@ const state={
   inventory:readInventory(),
   selectorOpen:false,
   selectorSlot:null,
-  selectorOrigin:'ALL'
+  selectorOrigin:'ALL',
+  selectorFilters:{weapon:'',collection:''},
+  selectorRequiredContext:null,
+  selectorResolvedFilters:null
 };
 
 const ERROR_MESSAGES={
@@ -83,12 +86,12 @@ function objectivePayload(){
 function selectedInputs(excludeSlot=null){
   return state.slots.map((x,i)=>({x,i})).filter(({x,i})=>x&&i!==excludeSlot).map(({x})=>{
     const input={market_key:x.market_key,float_value:Number(x.float_value),origin:x.origin||'DATABASE'};
-    const effectivePrice=hasNumber(x.manual_price_usd)?Number(x.manual_price_usd):(hasNumber(x.reference_price_usd)?Number(x.reference_price_usd):null);
+    const manualPrice=hasNumber(x.manual_price_usd)?Number(x.manual_price_usd):null;
     if(x.origin==='INVENTORY'){
       input.asset_id=x.asset_id;
       input.owned=true;
     }else input.owned=false;
-    if(effectivePrice!==null)input.price_usd=effectivePrice;
+    if(manualPrice!==null)input.price_usd=manualPrice;
     return input;
   });
 }
@@ -131,6 +134,50 @@ function setGoalModeUI(){
   }
 }
 
+function priceReferenceAvailable(ref){return ref&&ref.status==='AVAILABLE'&&hasNumber(ref.estimate_usd);}
+function priceReferenceLabel(ref){
+  if(!priceReferenceAvailable(ref))return 'Referência SCALE: N/D';
+  const bits=['Referência SCALE '+money(ref.estimate_usd)];
+  if(ref.source)bits.push('fonte '+ref.source);
+  if(ref.confidence!==null&&ref.confidence!==undefined)bits.push('confiança '+ref.confidence);
+  if(ref.updated_at)bits.push('atualizado '+ref.updated_at);
+  return bits.join(' · ');
+}
+function matchedInventoryAssets(){
+  return (state.inventory?.items||[]).filter(x=>x.match_state==='MATCHED'&&x.asset_id&&x.market_key&&hasNumber(x.float_value))
+    .map(x=>({asset_id:String(x.asset_id),market_key:String(x.market_key),float_value:Number(x.float_value)}));
+}
+function selectorFilterPayload(){
+  const p={};
+  const weapon=$('selectorWeapon')?.value.trim()||state.selectorFilters.weapon||'';
+  const collection=$('selectorCollection')?.value.trim()||state.selectorFilters.collection||'';
+  state.selectorFilters={weapon,collection};
+  if(weapon)p.weapon=weapon;if(collection)p.collection=collection;
+  return p;
+}
+function resolutionText(field){
+  const f=state.selectorResolvedFilters?.[field];
+  const terms=Array.isArray(f?.terms)?f.terms:[];
+  if(!terms.length)return '';
+  return terms.map(t=>{
+    const resolved=Array.isArray(t.resolved)?t.resolved:[];
+    return esc(t.input||'')+' → '+(resolved.length?resolved.map(esc).join(', '):'sem correspondência')+(t.mode?' · '+esc(t.mode):'');
+  }).join('<br>');
+}
+function renderSelectorAuthority(pagination=null,inventory=null){
+  if(pagination){
+    state.selectorRequiredContext=pagination.required_context||state.selectorRequiredContext;
+    state.selectorResolvedFilters=pagination.filters||state.selectorResolvedFilters;
+  }else if(inventory?.filters) state.selectorResolvedFilters=inventory.filters;
+  const ctx=state.selectorRequiredContext;
+  $('selectorRequiredContext').textContent=ctx
+    ? 'Contexto obrigatório do backend: raridade rank '+ctx.rarity_rank+' · '+(ctx.mode==='STATTRAK'?'StatTrak':'Normal')
+    : 'Contexto obrigatório: definido pelo contrato Goal-Aware.';
+  const w=resolutionText('weapon'),c=resolutionText('collection');
+  const box=$('selectorFilterResolution');
+  if(w||c){box.innerHTML=(w?'<div><strong>Arma</strong> '+w+'</div>':'')+(c?'<div><strong>Coleção</strong> '+c+'</div>':'');box.hidden=false;}
+  else{box.hidden=true;box.innerHTML='';}
+}
 function nextEmptySlot(){return state.slots.findIndex(v=>!v);}
 function selectorTargetSlot(){return Number.isInteger(state.selectorSlot)?state.selectorSlot:nextEmptySlot();}
 function selectorOriginLabel(){return state.selectorOrigin==='INVENTORY'?'Inventário':state.selectorOrigin==='DATABASE'?'Skins':'Inventário + Skins';}
@@ -143,6 +190,7 @@ function openSelector(slot=null){
   state.selectorOpen=true;
   state.selectorSlot=Number.isInteger(slot)?slot:(nextEmptySlot()>=0?nextEmptySlot():null);
   $('inputSelector').hidden=false;document.body.classList.add('selector-open');syncSelectorContext();
+  $('selectorWeapon').value=state.selectorFilters.weapon;$('selectorCollection').value=state.selectorFilters.collection;renderSelectorAuthority();
   setTimeout(()=>{$('skinSearch')?.focus();if(state.goalMode&&!$('skinSearch').value.trim())search();},0);
 }
 function closeSelector(){state.selectorOpen=false;state.selectorSlot=null;$('inputSelector').hidden=true;document.body.classList.remove('selector-open');}
@@ -176,16 +224,15 @@ function renderInputs(){
     const floatControl=inv
       ? '<div class="fixed-float"><span>Float real</span><strong>'+Number(item.float_value).toFixed(6)+'</strong></div>'
       : '<div class="float-row"><label>float simulado</label><input data-float="'+i+'" type="number" step="0.000001" min="'+item.float_min+'" max="'+item.float_max+'" value="'+item.float_value+'"></div>';
-    const referencePrice=hasNumber(item.reference_price_usd)?money(item.reference_price_usd):'N/D';
     const manualValue=hasNumber(item.manual_price_usd)?Number(item.manual_price_usd):'';
-    const priceSource=hasNumber(item.manual_price_usd)?'Preço manual do usuário':(hasNumber(item.reference_price_usd)?'Referência SCALE disponível':'Referência: resolvida pelo avaliador quando disponível');
+    const referenceLabel=priceReferenceLabel(item.price_reference);
     return '<article class="input-card filled '+(inv?'origin-inventory':'origin-database')+'">'+
       '<span class="slot-number">'+String(i+1).padStart(2,'0')+'</span>'+
       '<span class="origin-chip '+(inv?'inventory':'database')+'">'+originLabel+'</span>'+
       '<div class="skin-art">'+art(item.skin_name,item.image_url)+'</div>'+
       '<div class="input-info"><h3 title="'+esc(item.skin_name)+'">'+esc(cleanName(item.skin_name))+'</h3><div class="collection">'+collectionIdentity(item.collection,'dense',true)+'</div>'+
       floatControl+
-      '<div class="price-editor"><label>Preço manual · US$ <input data-price="'+i+'" type="number" min="0" step="0.01" placeholder="opcional" value="'+manualValue+'"></label><small>'+esc(priceSource)+(hasNumber(item.reference_price_usd)?' · ref. '+esc(referencePrice):'')+'</small></div>'+
+      '<div class="price-editor"><label>Preço manual · US$ <input data-price="'+i+'" type="number" min="0" step="0.01" placeholder="opcional" value="'+manualValue+'"></label><small class="manual-price-note">'+(hasNumber(item.manual_price_usd)?'Override manual ativo · somente este valor é enviado como price_usd':'Sem override manual')+'</small><small class="reference-price-note">'+esc(referenceLabel)+'</small></div>'+
       '<div class="input-foot">'+rarityMark(item.rarity,'dense')+'<span>'+(item.is_stattrak?'StatTrak':'Normal')+'</span></div>'+
       (inv?'<div class="asset-note">asset '+esc(item.asset_id||'N/D')+'</div>':'')+
       '<div class="input-actions"><button type="button" data-change="'+i+'">Alterar</button><button type="button" data-duplicate="'+i+'" '+(canDuplicate(item)?'':'disabled title="Asset real não pode ser duplicado"')+'>Duplicar</button><button type="button" data-remove="'+i+'">Remover</button></div>'+
@@ -280,7 +327,7 @@ function formatRange(r){
 async function postGoal(extra={}){
   const op=objectivePayload();
   if(op.error)throw new Error('OBJECTIVE_UI:'+op.error);
-  const replacing=extra?.candidate_query&&state.selectorOpen&&Number.isInteger(state.selectorSlot)&&state.slots[state.selectorSlot]?state.selectorSlot:null;
+  const replacing=(extra?.candidate_query||extra?.inventory_query||extra?.candidate)&&state.selectorOpen&&Number.isInteger(state.selectorSlot)&&state.slots[state.selectorSlot]?state.selectorSlot:null;
   const body={mode:'GOAL_AWARE',target:{market_key:state.targetKey},inputs:selectedInputs(replacing),...op,...extra};
   const r=await fetch(API+'?ui=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({status:'ERROR',error:'INVALID_RESPONSE'}));
@@ -333,24 +380,25 @@ async function loadTarget(){
     $('skinSearch').disabled=true;$('searchBtn').disabled=true;
   }
 }
-function inventoryMatchesCandidate(c){
-  const items=state.inventory?.items||[];
-  const a=c.allowed_float_range;
-  return items.filter(x=>{
-    if(x.match_state!=='MATCHED'||x.market_key!==c.market_key||!hasNumber(x.float_value))return false;
-    if(!a)return true;
-    const v=Number(x.float_value),min=Number(a.min),max=Number(a.max);
-    return v>=min-1e-9&&(a.max_inclusive===false?v<max-1e-9:v<=max+1e-9);
-  });
-}
 async function search(){
   const q=$('skinSearch').value.trim();
   if(!state.goalMode&&q.length<2){showSearch([]);return;}
   $('searchBtn').textContent='…';
   try{
     if(state.goalMode){
-      const d=await postGoal({candidate_query:{q,limit:18,offset:0}});
-      showGoalSearch(d.candidates||[]);
+      const filters=selectorFilterPayload();
+      const extra={};
+      if(state.selectorOrigin!=='INVENTORY') extra.candidate_query={q,...filters,limit:18,offset:0};
+      if(state.selectorOrigin!=='DATABASE'){
+        const assets=matchedInventoryAssets();
+        if(assets.length>500){
+          $('selectorFeedback').textContent='Inventário MATCHED excede o limite certificado de 500 assets para uma consulta.';$('selectorFeedback').hidden=false;showGoalSearch([],[],null,null);return;
+        }
+        extra.inventory_query={q,...filters,assets};
+      }
+      const d=await postGoal(extra);
+      renderSelectorAuthority(d.candidate_pagination||null,d.inventory_discovery||null);
+      showGoalSearch(d.candidates||[],(d.inventory_discovery?.items||[]).filter(x=>x.eligible===true),d.candidate_pagination||null,d.inventory_discovery||null);
     }else{
       const r=await fetch(API+'?q='+encodeURIComponent(q)+'&limit=18&ui=1');
       const d=await r.json().catch(()=>({status:'ERROR'}));
@@ -360,70 +408,78 @@ async function search(){
   }catch(e){showSearch([],true,e.message||'Falha ao consultar o catálogo.',e.code||'NETWORK_ERROR')}
   finally{$('searchBtn').textContent='Buscar';}
 }
-function showGoalSearch(items){
-  state.searchItems=items;
+function showGoalSearch(candidates,inventoryItems,pagination,inventoryDiscovery){
+  state.searchItems=candidates;
   const box=$('searchResults');
-  if(!items.length){box.innerHTML='<div class="search-item"><span>Nenhuma skin compatível encontrada</span></div>';box.hidden=false;return;}
-  const visible=items.map((x,i)=>({x,i,assets:inventoryMatchesCandidate(x)})).filter(entry=>{
-    if(state.selectorOrigin==='INVENTORY')return entry.assets.length>0;
-    return true;
-  });
-  if(!visible.length){box.innerHTML='<div class="search-item"><span>Nenhum item disponível nesta origem para a busca atual.</span></div>';box.hidden=false;return;}
-  box.innerHTML=visible.map(({x,i,assets})=>{
+  const databaseHtml=state.selectorOrigin==='INVENTORY'?'':candidates.map((x,i)=>{
     const allowed=x.allowed_float_range||{min:x.float_min,max:x.float_max,max_inclusive:true};
-    const allowedText=formatRange(allowed);
-    const relation=x.relation_to_target_collection==='TARGET_COLLECTION'
-      ? 'Mantém esta skin-alvo no contrato'
-      : 'Compatível, mas reduz a participação da coleção-alvo';
-    const databaseHtml=state.selectorOrigin==='INVENTORY'?'':(
-      '<button type="button" class="candidate-pick database-candidate" data-candidate="'+i+'">'+
-      '<span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</span><span class="meta">Float compatível: '+esc(allowedText)+'</span><span class="meta">'+relation+'</span></span><span class="prob-delta">Após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></button>'+
-      '<div class="candidate-inline-editor"><label>Float simulado <input class="candidate-float" data-candidate-float="'+i+'" type="number" step="0.000001" min="'+allowed.min+'" max="'+allowed.max+'" placeholder="Informe e clique na skin"></label></div>'
-    );
-    const inventoryHtml=state.selectorOrigin==='DATABASE'?'':(assets.length?'<div class="inventory-match-list"><span class="source-caption">Do seu Inventário</span>'+assets.slice(0,8).map((a,j)=>
-      '<button type="button" class="inventory-pick" data-candidate="'+i+'" data-asset="'+j+'"><strong>'+esc(cleanName(x.skin_name))+'</strong><span>asset '+esc(a.asset_id)+' · float '+Number(a.float_value).toFixed(6)+'</span></button>'
-    ).join('')+(assets.length>8?'<small>+'+(assets.length-8)+' exemplares compatíveis neste snapshot</small>':'')+'</div>':'');
-    return '<article class="goal-search-item">'+databaseHtml+inventoryHtml+'</article>';
+    const relation=x.relation_to_target_collection==='TARGET_COLLECTION'?'Mantém esta skin-alvo no contrato':'Compatível, mas reduz a participação da coleção-alvo';
+    return '<article class="goal-search-item"><button type="button" class="candidate-pick database-candidate" data-candidate="'+i+'">'+
+      '<span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</span><span class="meta">Float compatível: '+esc(formatRange(allowed))+'</span><span class="meta">'+relation+'</span><span class="meta candidate-price-preview" data-price-preview="'+i+'">Referência SCALE: informe o float</span></span><span class="prob-delta">Após adicionar: '+pct(x.target_committed_probability_after_pct)+'</span></button>'+
+      '<div class="candidate-inline-editor"><label>Float simulado <input class="candidate-float" data-candidate-float="'+i+'" type="number" step="0.000001" min="'+allowed.min+'" max="'+allowed.max+'" placeholder="Informe e clique na skin"></label></div></article>';
   }).join('');
+  const inventoryHtml=state.selectorOrigin==='DATABASE'?'':inventoryItems.map((x,i)=>
+    '<article class="goal-search-item inventory-discovery-item"><button type="button" class="inventory-pick discovered" data-inventory-index="'+i+'"><span><strong>'+esc(cleanName(x.skin_name||x.market_key))+'</strong><small>'+esc(x.collection||'N/D')+' · '+esc(x.rarity||'N/D')+'</small></span><span>asset '+esc(x.asset_id)+' · float '+Number(x.float_value).toFixed(6)+'</span><span class="inventory-price-reference">'+esc(priceReferenceLabel(x.price_reference))+'</span></button></article>'
+  ).join('');
+  const summary=[];
+  if(pagination?.required_context)summary.push('Skins: contexto '+pagination.required_context.rarity_rank+' / '+pagination.required_context.mode);
+  if(inventoryDiscovery)summary.push('Inventário: '+(inventoryDiscovery.eligible_count??0)+' elegíveis de '+(inventoryDiscovery.submitted_count??0)+' MATCHED enviados');
+  box.innerHTML=(summary.length?'<div class="selector-result-summary">'+esc(summary.join(' · '))+'</div>':'')+databaseHtml+inventoryHtml;
+  if(!databaseHtml&&!inventoryHtml)box.innerHTML+='<div class="search-item"><span>Nenhum item elegível encontrado nesta origem/filtro.</span></div>';
   box.hidden=false;
   document.querySelectorAll('[data-candidate-float]').forEach(inp=>{
-    const i=+inp.dataset.candidateFloat,candidate=items[i],allowed=candidate.allowed_float_range||{min:candidate.float_min,max:candidate.float_max,max_inclusive:true};
+    const i=+inp.dataset.candidateFloat,candidate=candidates[i],allowed=candidate.allowed_float_range||{min:candidate.float_min,max:candidate.float_max,max_inclusive:true};
     const validate=()=>{
       const v=Number(inp.value),ok=inp.value!==''&&Number.isFinite(v)&&v>=Number(allowed.min)-1e-9&&(allowed.max_inclusive===false?v<Number(allowed.max)-1e-9:v<=Number(allowed.max)+1e-9);
       const card=box.querySelector('.database-candidate[data-candidate="'+i+'"]');if(card)card.classList.toggle('ready',ok);
+      const p=box.querySelector('[data-price-preview="'+i+'"]');if(p)p.textContent=ok?'Referência SCALE: validar ao selecionar':'Referência SCALE: informe o float';
     };inp.addEventListener('input',validate);validate();
   });
-  document.querySelectorAll('.database-candidate').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.database-candidate').forEach(b=>b.onclick=async()=>{
     const i=+b.dataset.candidate,inp=box.querySelector('[data-candidate-float="'+i+'"]');
-    const candidate=items[i],allowed=candidate.allowed_float_range||{min:candidate.float_min,max:candidate.float_max,max_inclusive:true};
+    const candidate=candidates[i],allowed=candidate.allowed_float_range||{min:candidate.float_min,max:candidate.float_max,max_inclusive:true};
     const v=Number(inp?.value),ok=inp&&inp.value!==''&&Number.isFinite(v)&&v>=Number(allowed.min)-1e-9&&(allowed.max_inclusive===false?v<Number(allowed.max)-1e-9:v<=Number(allowed.max)+1e-9);
     if(!ok){$('selectorFeedback').textContent='Informe um float compatível antes de selecionar esta skin.';$('selectorFeedback').hidden=false;inp?.focus();return;}
-    pickGoalCandidate(candidate,null,v);
+    try{
+      const d=await postGoal({candidate:{market_key:candidate.market_key,float_value:v}});
+      const cv=d.candidate_validation;
+      if(!cv||cv.valid!==true||cv.float_compatible===false){
+        $('selectorFeedback').textContent='O backend não aprovou este candidato/float: '+((cv?.reasons||[]).join(' · ')||'incompatível');$('selectorFeedback').hidden=false;return;
+      }
+      pickGoalCandidate({...candidate,price_reference:cv.price_reference||null},null,v);
+    }catch(e){$('selectorFeedback').textContent=e.message||'Não foi possível validar este candidato.';$('selectorFeedback').hidden=false;}
   });
-  document.querySelectorAll('.inventory-pick').forEach(b=>{
-    const c=items[+b.dataset.candidate],assets=inventoryMatchesCandidate(c);
-    b.onclick=()=>pickGoalCandidate(c,assets[+b.dataset.asset],null);
+  document.querySelectorAll('[data-inventory-index]').forEach(b=>b.onclick=()=>{
+    const item=inventoryItems[+b.dataset.inventoryIndex];
+    if(!item||item.eligible!==true)return;
+    pickInventoryDiscoveryItem(item);
   });
+}
+function pickInventoryDiscoveryItem(item){
+  const idx=selectorTargetSlot();if(idx<0||item?.eligible!==true)return;
+  const prior=state.slots[idx];
+  state.slots[idx]={
+    market_key:item.market_key,skin_name:item.skin_name,collection:item.collection,rarity:item.rarity,
+    is_stattrak:item.is_stattrak,weapon:item.weapon,image_url:item.image_url,
+    float_min:item.allowed_float_range?.min??0,float_max:item.allowed_float_range?.max??1,
+    allowed_float_range:item.allowed_float_range,relation_to_target_collection:item.relation_to_target_collection,
+    float_value:Number(item.float_value),origin:'INVENTORY',asset_id:String(item.asset_id),owned:true,
+    price_reference:item.price_reference||null,
+    manual_price_usd:prior?.market_key===item.market_key&&hasNumber(prior?.manual_price_usd)?Number(prior.manual_price_usd):null
+  };
+  renderInputs();resetFinal();showAddedFeedback(item,idx);advanceSelectorAfterAdd();evaluateGoal();
 }
 function pickGoalCandidate(c,asset,simulatedFloat){
   const idx=selectorTargetSlot();if(idx<0)return;
   const prior=state.slots[idx];
-  if(asset){
-    state.slots[idx]={
-      ...c,skin_name:c.skin_name,is_stattrak:state.target?.is_stattrak,
-      float_value:Number(asset.float_value),origin:'INVENTORY',asset_id:String(asset.asset_id),owned:true,
-      reference_price_usd:hasNumber(asset.valuation_usd)?Number(asset.valuation_usd):null,
-      manual_price_usd:prior?.market_key===c.market_key&&hasNumber(prior?.manual_price_usd)?Number(prior.manual_price_usd):null
-    };
-  }else{
-    if(!hasNumber(simulatedFloat))return;
-    state.slots[idx]={
-      ...c,is_stattrak:state.target?.is_stattrak,
-      float_value:Number(simulatedFloat),origin:'DATABASE',owned:false,asset_id:null,
-      reference_price_usd:hasNumber(c.price_usd)?Number(c.price_usd):null,
-      manual_price_usd:prior?.market_key===c.market_key&&hasNumber(prior?.manual_price_usd)?Number(prior.manual_price_usd):null
-    };
-  }
+  if(asset)return;
+  if(!hasNumber(simulatedFloat))return;
+  state.slots[idx]={
+    ...c,is_stattrak:state.target?.is_stattrak,
+    float_value:Number(simulatedFloat),origin:'DATABASE',owned:false,asset_id:null,
+    price_reference:c.price_reference||null,
+    manual_price_usd:prior?.market_key===c.market_key&&hasNumber(prior?.manual_price_usd)?Number(prior.manual_price_usd):null
+  };
   renderInputs();resetFinal();showAddedFeedback(c,idx);advanceSelectorAfterAdd();evaluateGoal();
 }
 function showSearch(items,error=false,message='Falha ao consultar o catálogo.',code=''){
@@ -436,7 +492,7 @@ function showSearch(items,error=false,message='Falha ao consultar o catálogo.',
 }
 function pickLegacy(x){
   const idx=selectorTargetSlot();if(idx<0)return;
-  state.slots[idx]={...x,float_value:defaultFloat(x),owned:false,origin:'DATABASE',reference_price_usd:hasNumber(x.price_usd)?Number(x.price_usd):null,manual_price_usd:null};
+  state.slots[idx]={...x,float_value:defaultFloat(x),owned:false,origin:'DATABASE',price_reference:null,manual_price_usd:null};
   renderInputs();resetFinal();showAddedFeedback(x,idx);advanceSelectorAfterAdd();
 }
 function colorForReturn(v){
@@ -498,7 +554,7 @@ async function simulateLegacy(){
 async function loadDemo(){
   let base={collection:'The Arms Deal 2 Collection',skin_name:'FAMAS | Hexane',rarity:'Mil-Spec Grade',rarity_rank:3,float_min:0,float_max:.4,market_key:'FAMAS | Hexane',is_stattrak:false,image_url:null};
   try{const r=await fetch(API+'?q='+encodeURIComponent('FAMAS | Hexane')+'&limit=6&ui=1');const d=await r.json();const found=(d.items||[]).find(x=>x.market_key==='FAMAS | Hexane'&&!x.is_stattrak);if(found)base=found;}catch(_){}
-  state.slots=Array.from({length:10},()=>({...base,float_value:.10,owned:false,origin:'DATABASE',reference_price_usd:null,manual_price_usd:null}));renderInputs();resetFinal();
+  state.slots=Array.from({length:10},()=>({...base,float_value:.10,owned:false,origin:'DATABASE',price_reference:null,manual_price_usd:null}));renderInputs();resetFinal();
 }
 async function applyInventoryLegacyContext(){
   if(state.goalMode)return;
@@ -509,7 +565,7 @@ async function applyInventoryLegacyContext(){
     const item=(d.items||[]).find(x=>x.market_key===key);if(!item)return;
     const raw=Number(floatParam),float=Number.isFinite(raw)?Math.max(Number(item.float_min),Math.min(Number(item.float_max),raw)):defaultFloat(item);
     const asset=(state.inventory?.items||[]).find(x=>x.match_state==='MATCHED'&&x.market_key===key&&hasNumber(x.float_value)&&Math.abs(Number(x.float_value)-float)<1e-7);
-    state.slots[0]={...item,float_value:float,owned:true,origin:'INVENTORY',asset_id:asset?.asset_id||'snapshot-context',reference_price_usd:hasNumber(asset?.valuation_usd)?Number(asset.valuation_usd):null,manual_price_usd:null};
+    state.slots[0]={...item,float_value:float,owned:true,origin:'INVENTORY',asset_id:asset?.asset_id||'snapshot-context',price_reference:null,manual_price_usd:null};
     renderInputs();
   }catch(_){}
 }
@@ -529,6 +585,7 @@ $('openSelectorBtn').onclick=()=>openSelector();
 $('selectorCloseBtn').onclick=closeSelector;
 document.querySelectorAll('[data-selector-close]').forEach(x=>x.onclick=closeSelector);
 document.querySelectorAll('[data-selector-origin]').forEach(b=>b.onclick=()=>{state.selectorOrigin=b.dataset.selectorOrigin;syncSelectorContext();search();});
+let selectorFilterTimer;['selectorWeapon','selectorCollection'].forEach(id=>$(id).addEventListener('input',()=>{clearTimeout(selectorFilterTimer);selectorFilterTimer=setTimeout(search,300);}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selectorOpen)closeSelector();});
 
 applyOriginContext();
