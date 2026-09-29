@@ -14,6 +14,8 @@ const clean=n=>String(n||'').replace(/^StatTrak™\s+/,'').replace(/^Souvenir\s+
 const fmt=v=>v===null||v===undefined||v===''?'N/D':String(v);
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const weaponOf=item=>{const raw=String(item?.skin_name||item?.market_key||'').replace(/^StatTrak™\s+/,'');const i=raw.indexOf(' | ');return i>0?raw.slice(0,i):'N/D';};
+function rarityMark(rarity,size='compact'){const r=fmt(rarity);return '<span class="rarity-mark '+size+'" data-rarity="'+esc(r)+'"><span>'+esc(r)+'</span></span>';}
+function collectionIdentity(collection,size='compact',mobileTextOnly=false){const c=fmt(collection);return '<span class="collection-identity '+size+(mobileTextOnly?' mobile-text-only':'')+'" title="'+esc(c)+'"><span class="collection-plate" aria-hidden="true">S</span><span class="collection-name">'+esc(c)+'</span></span>';}
 const hasStructuralFilters=()=>state.weapons.length||state.rarities.length||state.collections.length||state.stattrak!=='';
 const hasQuery=()=>state.q.trim().length>0||hasStructuralFilters();
 const filterCount=()=>state.weapons.length+state.rarities.length+state.collections.length+(state.stattrak!==''?1:0);
@@ -77,7 +79,7 @@ function render(items){
  state.items=items;
  $('results').innerHTML=items.map(x=>{const key=x.market_key||x.skin_name||'';const selected=state.selected.has(key);const selectControl=state.selectMode?'<button class="select-skin '+(selected?'selected':'')+'" type="button" data-select-key="'+esc(key)+'" aria-pressed="'+String(selected)+'">'+(selected?'Selecionada':'Adicionar à seleção')+'</button>':'';
  const useControl=state.loadoutSide&&state.loadoutWeapon?'<a class="select-skin selected" href="'+loadoutPickHref(x)+'">Usar neste slot</a>':'';
- return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="skin-meta">'+esc(fmt(x.rarity))+'</div><div class="skin-meta">'+esc(fmt(x.collection))+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
+ return '<article class="skin-card explorer-card"><a class="skin-card-main" href="'+entityHref(x)+'">'+art(x)+'<div class="card-identity"><span class="weapon-label">'+esc(weaponOf(x))+'</span><h3>'+esc(clean(x.skin_name))+'</h3></div><div class="item-classification">'+rarityMark(x.rarity,'compact')+collectionIdentity(x.collection,'compact',true)+'</div><div class="card-badges">'+(x.is_stattrak?'<span class="mini-tag">StatTrak</span>':'')+'<span class="mini-tag muted">float '+esc(fmt(x.float_min))+'–'+esc(fmt(x.float_max))+'</span></div><span class="card-action">Abrir skin →</span></a>'+selectControl+'</article>';}).join('');
  document.querySelectorAll('[data-select-key]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const key=btn.dataset.selectKey;if(state.selected.has(key))state.selected.delete(key);else state.selected.add(key);render(state.items);renderSelection();});
 }
 function hideSuggestions(){const box=$('searchSuggestions');box.hidden=true;box.innerHTML='';$('skinSearch').setAttribute('aria-expanded','false');}
