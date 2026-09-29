@@ -46,7 +46,7 @@
     <div class="goal-step target-step">
       <div class="step-number">1</div>
       <div class="goal-copy">
-        <p class="eyebrow">Skin-alvo</p>
+        <p class="eyebrow">Sua skin-alvo</p>
         <div class="target-card">
           <div id="targetArt" class="target-art"><span>Imagem N/D</span></div>
           <div>
@@ -61,10 +61,10 @@
     <div class="goal-step">
       <div class="step-number">2</div>
       <div class="goal-copy">
-        <p class="eyebrow">Objetivo de desgaste / float</p>
+        <p class="eyebrow">Objetivo</p>
         <h2>Defina o resultado que você quer perseguir.</h2>
         <div class="objective-grid">
-          <label>Desgaste
+          <label>Desgaste desejado
             <select id="wearGoal">
               <option value="">Sem filtro de desgaste</option>
               <option>Factory New</option>
@@ -74,15 +74,15 @@
               <option>Battle-Scarred</option>
             </select>
           </label>
-          <label>Float mínimo
+          <label>Faixa de float desejada · mínimo
             <input id="floatMinGoal" type="number" min="0" max="1" step="0.000001" placeholder="opcional">
           </label>
-          <label>Float máximo
+          <label>Faixa de float desejada · máximo
             <input id="floatMaxGoal" type="number" min="0" max="1" step="0.000001" placeholder="opcional">
           </label>
           <button id="applyGoalBtn" class="button secondary" type="button">Aplicar objetivo</button>
         </div>
-        <p id="objectiveHelper" class="hint">Você pode usar desgaste, faixa de float ou os dois. Quando ambos existem, o backend calcula a interseção válida.</p>
+        <p id="objectiveHelper" class="hint">Opcional. O desgaste define uma faixa de float. Se você informar também uma faixa de float, a SCALE considera apenas a interseção possível entre os dois objetivos.</p>
       </div>
     </div>
 
@@ -97,7 +97,7 @@
           <article><span>Estrutura do contrato</span><strong id="contractValidState">—</strong><small id="contractReason">Aguardando</small></article>
           <article><span>Skin-alvo</span><strong id="targetPossibleState">—</strong><small id="targetPossibleReason">Aguardando</small></article>
           <article><span>Objetivo de float</span><strong id="floatReachableState">—</strong><small id="floatReachableReason">Defina um objetivo</small></article>
-          <article><span>Chance comprometida</span><strong id="targetProbability">—</strong><small id="targetProbabilityRange">Final apenas em 10/10</small></article>
+          <article><span id="targetProbabilityLabel">Chance já comprometida</span><strong id="targetProbability">—</strong><small id="targetProbabilityRange">Faixa possível ao completar: —</small></article>
         </div>
         <div id="progressiveEnvelope" class="envelope-note" hidden></div>
       </div>
@@ -107,7 +107,7 @@
   <section class="lab-shell">
     <div class="lab-toolbar">
       <div class="search-shell">
-        <label for="skinSearch" id="searchLabel">Adicionar skin</label>
+        <label for="skinSearch" id="searchLabel">Adicionar skin ao contrato</label>
         <div class="search-row">
           <input id="skinSearch" autocomplete="off" placeholder="Buscar skin ou coleção">
           <button id="searchBtn" class="button secondary" type="button">Buscar</button>
