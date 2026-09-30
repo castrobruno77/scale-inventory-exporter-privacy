@@ -544,10 +544,11 @@ function outputCard(x){
 function canonicalOutputMap(d){
   return new Map((d.outputs||[]).map(x=>[String(x.id),x]));
 }
+function missingOutputCard(id){return '<article class="output-card partial canonical-mismatch"><div class="output-body"><h3>Resultado indisponível</h3><div class="output-meta">ID canônico '+esc(id)+' não foi encontrado no array outputs. A ordem não foi reconstruída localmente.</div></div></article>';}
 function renderReturnMode(d,map,org){
   const ids=org?.modes?.RETURN?.ordered_output_ids;
   if(!Array.isArray(ids))return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>O backend não retornou RETURN.ordered_output_ids.</span></div>';
-  const cards=ids.map(id=>map.get(String(id))).filter(Boolean).map(outputCard).join('');
+  const cards=ids.map(id=>{const x=map.get(String(id));return x?outputCard(x):missingOutputCard(id);}).join('');
   return '<div class="output-grid">'+cards+'</div>';
 }
 function renderCollectionMode(d,map,org){
@@ -559,9 +560,10 @@ function renderCollectionMode(d,map,org){
   return order.map(collection=>{
     const g=byName.get(String(collection));
     if(!g)return '<section class="output-collection-group"><div class="collection-group-head"><strong>'+esc(collection)+'</strong><span>Grupo canônico indisponível</span></div></section>';
-    const items=(Array.isArray(g.item_ids)?g.item_ids:[]).map(id=>map.get(String(id))).filter(Boolean);
+    const ids=Array.isArray(g.item_ids)?g.item_ids:[];
     const best=hasNumber(g.best_return_pct)?((Number(g.best_return_pct)>=0?'+':'')+Number(g.best_return_pct).toFixed(1)+'%'):'N/D';
-    return '<section class="output-collection-group" data-collection="'+esc(collection)+'"><div class="collection-group-head"><div>'+collectionIdentity(collection,'compact',true)+'</div><span>Melhor retorno '+esc(best)+' · '+items.length+' resultado'+(items.length===1?'':'s')+'</span></div><div class="output-grid">'+items.map(outputCard).join('')+'</div></section>';
+    const cards=ids.map(id=>{const x=map.get(String(id));return x?outputCard(x):missingOutputCard(id);}).join('');
+    return '<section class="output-collection-group" data-collection="'+esc(collection)+'"><div class="collection-group-head"><div>'+collectionIdentity(collection,'compact',true)+'</div><span>Melhor retorno '+esc(best)+' · '+ids.length+' resultado'+(ids.length===1?'':'s')+'</span></div><div class="output-grid">'+cards+'</div></section>';
   }).join('');
 }
 function renderOutputsCanonical(d){
