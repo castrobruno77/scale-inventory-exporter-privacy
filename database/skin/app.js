@@ -44,7 +44,7 @@ function safeFrom(){
 function currentEntityUrl(key){return location.pathname+'?key='+encodeURIComponent(key)+(safeFrom()?'&from='+encodeURIComponent(safeFrom()):'');}
 function applyOriginContext(){
   const from=safeFrom();if(!from)return {type:'none',href:'../'};
-  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);const isInventory=/\/inventory\/?(?:\?|$)/.test(from);
+  const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);const isInventory=/\/inventory\/?(?:\?|$)/.test(from);const isCollection=/\/database\/collections\/collection\/?(?:\?|$)/.test(from);
   $('originContext').hidden=false;
   $('breadcrumbBack').href=from;$('contextBackBtn').href=from;
   if(isLoadout){
@@ -57,6 +57,11 @@ function applyOriginContext(){
     $('originLabel').textContent='Vindo do Inventário';$('originHelper').textContent='Este item foi aberto a partir do snapshot importado ativo.';
     $('contextBackBtn').textContent='Voltar ao Inventário';$('breadcrumbBack').textContent='Inventário';
     return {type:'inventory',href:from};
+  }
+  if(isCollection){
+    $('originLabel').textContent='Vindo de uma coleção';$('originHelper').textContent='Retorne ao Collection Hub sem perder esta skin.';
+    $('contextBackBtn').textContent='Voltar à coleção';$('breadcrumbBack').textContent='Collection Hub';
+    return {type:'collection',href:from};
   }
   if(isTrade){
     $('originLabel').textContent='Vindo de Contratos';
