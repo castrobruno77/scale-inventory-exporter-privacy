@@ -15,8 +15,8 @@
     <a class="brand" href="../../" aria-label="SCALE home">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
       <a href="../../">Início</a>
+      <a class="active" href="../../database/">Skins</a>
       <a href="../../inventory/">Inventário</a>
-      <a class="active" href="../">Skins</a>
       <a href="../../loadout/">Loadout</a>
       <a href="../../tradeup/">Contratos</a>
     </nav>
@@ -29,14 +29,15 @@
   <section class="page-hero db-hero">
     <p class="eyebrow">Coleções</p>
     <h1>Explore coleções.<br><em>Abra o contexto.</em></h1>
-    <p class="lead">Esta experiência usa somente a entidade Collection exposta pelo catálogo vigente. Identidade visual real de coleção permanece indisponível; o fallback autorizado é usado em todo o preview.</p>
+    <p class="lead">Explore coleções, veja quais raridades aparecem nelas e abra as skins que fazem parte de cada conjunto.</p>
+    <div class="catalog-tabs" aria-label="Explorar catálogo"><a href="../">Skins</a><a class="active" href="./">Coleções</a></div>
   </section>
 
   <section class="explorer-shell" aria-labelledby="collections-title">
     <div class="explorer-search">
-      <div><p class="eyebrow">Collection entity</p><h2 id="collections-title">Buscar coleções</h2></div>
+      <div><p class="eyebrow">Catálogo</p><h2 id="collections-title">Buscar coleções</h2></div>
       <div class="search-row"><input id="collectionSearch" autocomplete="off" placeholder="Buscar coleção" aria-label="Buscar coleção"><button id="searchBtn" type="button">Buscar</button></div>
-      <p class="search-help">Busca e resolução pertencem ao backend v24. O frontend não implementa fuzzy, normalização, agregação ou ranking local.</p>
+      <p class="search-help">Busque pelo nome da coleção e refine pelos atributos disponíveis.</p>
     </div>
 
     <div class="filter-toolbar">
@@ -53,12 +54,12 @@
 
     <section id="filtersPanel" class="filters-panel collections-filters" aria-label="Filtros de coleções">
       <div class="filter-group">
-        <div class="filter-head"><strong>Coleção</strong><small>campo canônico</small></div>
+        <div class="filter-head"><strong>Coleção</strong><small>nome</small></div>
         <div class="token-entry"><input id="collectionFilter" placeholder="Ex.: Mirage 2021" aria-label="Filtrar por coleção"><button id="applyCollectionFilter" type="button">Aplicar</button></div>
-        <p class="filter-note">O termo é enviado ao parâmetro collection do contrato v24.</p>
+        <p class="filter-note">Use parte do nome ou o nome completo da coleção.</p>
       </div>
       <div class="filter-group">
-        <div class="filter-head"><strong>Raridade presente</strong><small>backend</small></div>
+        <div class="filter-head"><strong>Raridade presente</strong><small>na coleção</small></div>
         <select id="rarityFilter" class="collection-select" aria-label="Filtrar por raridade presente">
           <option value="">Todas</option>
           <option value="Consumer Grade">Consumer Grade</option>
@@ -91,7 +92,7 @@
   <section class="results-section">
     <div class="results-head">
       <div><p class="eyebrow">Resultados</p><h2 id="resultsTitle">Carregando coleções…</h2></div>
-      <div id="resultsMeta" class="results-meta">Contrato Collection v24</div>
+      <div id="resultsMeta" class="results-meta">Catálogo de coleções</div>
     </div>
     <div id="stateBox" class="state-box">Carregando coleções…</div>
     <section id="results" class="collection-results" aria-live="polite"></section>
@@ -99,7 +100,7 @@
   </section>
 </main>
 
-<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Collections</strong> · entidade Collection v24 · N/D permanece N/D.</span><span>Human Review Fase F · VÉRTICE / SCL-DXP-001</span></div></footer>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Coleções</strong> · navegue das coleções para as skins.</span><span>N/D permanece N/D.</span></div></footer>
 <script src="app.js"></script>
 </body>
 </html>

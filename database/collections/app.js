@@ -27,13 +27,13 @@ async function fetchPage({append=false,offset=0,silent=false}={}){
   const r=await fetch(API+'?'+buildParams(offset).toString(),{signal:state.controller.signal});
   const d=await r.json().catch(()=>({status:'ERROR',error:'INVALID_RESPONSE'}));
   if(seq!==state.seq)return false;
-  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';$('resultsMeta').textContent='Filtros preservados';setState(ERROR_MESSAGES[code]||'Não foi possível consultar a entidade Collection.',code,true);return false;}
+  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';$('resultsMeta').textContent='Seus filtros foram preservados';setState(ERROR_MESSAGES[code]||'Não foi possível carregar as coleções.','',true);return false;}
   const page=Array.isArray(d.items)?d.items:[];const merged=append?[...state.items,...page]:page;render(merged);
   const pg=d.pagination||{};state.hasMore=pg.has_more===true;state.nextOffset=Number.isFinite(Number(pg.next_offset))?Number(pg.next_offset):null;
   if(merged.length){$('resultsTitle').textContent=merged.length+' coleções carregadas';$('resultsMeta').textContent='Ordenação: '+state.sort+(state.hasMore?' · há mais resultados':'');setState(state.hasMore?'Continue explorando ou carregue a próxima página.':'Todos os resultados desta consulta foram carregados.');}
   else{$('resultsTitle').textContent='Nenhuma coleção encontrada.';$('resultsMeta').textContent='Consulta concluída';setState('Nenhuma coleção encontrada para os filtros atuais.');}
   syncUrl();return true;
- }catch(e){if(e?.name==='AbortError')return false;if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';setState('Não foi possível consultar a entidade Collection.','NETWORK_ERROR',true);return false;}
+ }catch(e){if(e?.name==='AbortError')return false;if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';setState('Não foi possível carregar as coleções.','',true);return false;}
  finally{if(seq===state.seq){state.loading=false;updatePagination();$('searchBtn').disabled=false;}}
 }
 function loadFromUrl(){const p=new URLSearchParams(location.search);state.q=p.get('q')||'';state.collection=p.get('collection')||'';state.rarity=p.get('rarity')||'';state.hasStattrak=['true','false'].includes(p.get('has_stattrak'))?p.get('has_stattrak'):'';state.hasConsumer=['true','false'].includes(p.get('has_consumer_grade'))?p.get('has_consumer_grade'):'';state.sort=['default','name_asc','name_desc'].includes(p.get('sort'))?p.get('sort'):'default';updateControls();fetchPage();}

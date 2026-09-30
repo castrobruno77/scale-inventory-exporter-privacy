@@ -46,7 +46,7 @@ async function exactItem(key){
  const r=await fetch(API+'?q='+encodeURIComponent(key)+'&limit=24&ui=1');const d=await r.json().catch(()=>({status:'ERROR'}));if(!r.ok||d.status==='ERROR')throw new Error('CATALOG_ERROR');return (d.items||[]).find(x=>x.market_key===key)||null;
 }
 function arrivalButtons(item,origin,fromInventory=false){
- const t=taxonomyForWeapon(item.weapon);if(!t)return showArrivalError('Erro real','A taxonomia recebida não contém esta arma.');
+ const t=taxonomyForWeapon(item.weapon);if(!t)return showArrivalError('Não foi possível continuar','A taxonomia recebida não contém esta arma.');
  const sides=t.side==='BOTH'?['CT','T']:[t.side];
  $('arrivalPanel').hidden=false;$('arrivalTitle').textContent='Adicionando: '+clean(item.skin_name);$('arrivalText').textContent=sides.length>1?'Escolha onde usar esta skin.':'Para '+sides[0]+' · '+item.weapon;
  $('arrivalActions').innerHTML=sides.map(s=>'<button class="button primary" type="button" data-arrival-side="'+s+'">Selecionar em '+s+'</button>').join('')+(origin?'<a class="button secondary" href="'+esc(origin)+'">'+(fromInventory?'Voltar ao Inventory':'Voltar à skin')+'</a>':'');
@@ -56,7 +56,7 @@ async function consumeContext(){
  const p=new URLSearchParams(location.search);const pick=p.get('pick')||'';const incoming=p.get('skin')||'';const side=p.get('side');const weapon=p.get('weapon')||'';const origin=safeLocalPath(p.get('from')||'');const fromInventory=p.get('inventory')==='1';
  if(side==='CT'||side==='T')state.side=side;
  if(pick){
-  try{const item=await exactItem(pick);if(!item)return showArrivalError('Erro real','A skin escolhida não foi encontrada no catálogo.');if(!weapon)return showArrivalError('Erro real','O slot de destino não foi informado.');if(selectItem(state.side,weapon,item))history.replaceState(null,'',currentUrl(weapon));}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente pelo Database.')}return;
+  try{const item=await exactItem(pick);if(!item)return showArrivalError('Não foi possível continuar','A skin escolhida não foi encontrada no catálogo.');if(!weapon)return showArrivalError('Não foi possível continuar','O slot de destino não foi informado.');if(selectItem(state.side,weapon,item))history.replaceState(null,'',currentUrl(weapon));}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente por Skins.')}return;
  }
  if(incoming){
   try{const item=await exactItem(incoming);if(!item)return showArrivalError('Skin não encontrada.','Volte à skin e tente novamente.');arrivalButtons(item,origin,fromInventory);}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente.')}return;
@@ -64,9 +64,9 @@ async function consumeContext(){
  render();
 }
 async function loadTaxonomy(){
- state.loading=true;setState('Carregando taxonomia de armas…','Consultando CAP 1.2.');
+ state.loading=true;setState('Carregando taxonomia de armas…','Preparando as armas disponíveis.');
  try{const r=await fetch(API+'?limit=1&offset=0&ui=1');const d=await r.json().catch(()=>({status:'ERROR'}));if(!r.ok||d.status==='ERROR'||!Array.isArray(d.weapon_taxonomy))throw new Error('TAXONOMY_ERROR');state.taxonomy=d.weapon_taxonomy;hideState();$('loadoutBody').hidden=false;await consumeContext();}
- catch(_){setState('Não foi possível carregar o Loadout.','A taxonomia canônica não pôde ser obtida. Tente novamente.',true,true)}
+ catch(_){setState('Não foi possível carregar o Loadout.','Não foi possível carregar as armas disponíveis. Tente novamente.',true,true)}
  finally{state.loading=false}
 }
 document.querySelectorAll('[data-side]').forEach(b=>b.onclick=()=>{state.side=b.dataset.side;persist();render()});

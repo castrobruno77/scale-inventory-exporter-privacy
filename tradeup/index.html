@@ -14,11 +14,11 @@
   <div class="wrap nav-wrap">
     <a class="brand" href="../index.html" aria-label="SCALE">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
-      <a href="../index.html">Início</a>
-      <a href="../inventory/">Inventário</a>
+      <a href="../">Início</a>
       <a href="../database/">Skins</a>
+      <a href="../inventory/">Inventário</a>
       <a href="../loadout/">Loadout</a>
-      <a class="active" href="./">Contratos</a>
+      <a class="active" href="../tradeup/">Contratos</a>
     </nav>
   </div>
 </header>
@@ -32,7 +32,7 @@
     </div>
     <div class="hero-status" aria-live="polite">
       <div class="status-dot"></div>
-      <div><strong>Serviço de contratos</strong><span id="engineStatus">aguardando composição</span></div>
+      <div><strong>Contrato</strong><span id="engineStatus">aguardando composição</span></div>
     </div>
   </section>
 
@@ -51,7 +51,7 @@
           <div id="targetArt" class="target-art"><span>Imagem N/D</span></div>
           <div>
             <h2 id="targetName">Carregando skin…</h2>
-            <p id="targetMeta">Consultando o contrato certificado.</p>
+            <p id="targetMeta">Carregando os dados desta skin.</p>
             <div id="targetEligibility" class="inline-state neutral">Verificando elegibilidade…</div>
           </div>
         </div>
@@ -142,7 +142,7 @@
               <input id="selectorCollection" autocomplete="off" placeholder="Ex.: 2021, Dreams">
             </label>
           </div>
-          <div id="selectorRequiredContext" class="selector-required-context">Contexto obrigatório: aguardando backend.</div>
+          <div id="selectorRequiredContext" class="selector-required-context">Compatibilidade: aguardando a primeira seleção.</div>
           <div id="selectorFilterResolution" class="selector-filter-resolution" hidden></div>
         </div>
         <div class="search-shell selector-search-shell">
@@ -164,8 +164,8 @@
     </div>
 
     <div class="origin-legend" id="originLegend" hidden>
-      <span><i class="origin-dot inventory"></i>Inventário importado: asset real do snapshot</span>
-      <span><i class="origin-dot database"></i>Skins: simulação com float escolhido</span>
+      <span><i class="origin-dot inventory"></i>Inventário: item do snapshot importado</span>
+      <span><i class="origin-dot database"></i>Skins: item escolhido no catálogo</span>
     </div>
 
     <div id="inputGrid" class="input-grid" aria-label="10 slots do contrato"></div>
@@ -223,7 +223,7 @@
   </section>
 </main>
 
-<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE</strong> · Contratos · preview reversível</span><span>VÉRTICE · SCL-DXP-001</span></div></footer>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Contratos</strong> · probabilidade não é garantia.</span><span>Dados econômicos ausentes permanecem N/D.</span></div></footer>
 <script src="app.js"></script>
 </body>
 </html>

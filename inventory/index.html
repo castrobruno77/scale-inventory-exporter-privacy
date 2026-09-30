@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SCALE — Inventory Bridge</title>
+<title>SCALE — Inventário</title>
 <meta name="description" content="Importe localmente um snapshot do SCALE Inventory Exporter e use seu inventário como contexto na plataforma.">
 <meta name="theme-color" content="#071014">
 <link rel="stylesheet" href="../platform.css">
@@ -16,8 +16,8 @@
     <a class="brand" href="../" aria-label="SCALE home">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
       <a href="../">Início</a>
-      <a class="active" href="./">Inventário</a>
       <a href="../database/">Skins</a>
+      <a class="active" href="../inventory/">Inventário</a>
       <a href="../loadout/">Loadout</a>
       <a href="../tradeup/">Contratos</a>
     </nav>
@@ -28,15 +28,15 @@
   <section class="page-hero inventory-hero">
     <p class="eyebrow">Inventário</p>
     <h1>Seu inventário, em contexto.</h1>
-    <p class="lead">Importe um snapshot para reconhecer suas skins e usar o que você já tem no Loadout e nos contratos.</p>
-    <div class="snapshot-note"><strong>Snapshot importado</strong><span>Esta leitura não é sincronização Steam ao vivo e não exige login.</span></div>
+    <p class="lead">Importe o JSON do Inventory Exporter para reconhecer suas skins e continuar para Skin Hub, Loadout ou Contratos.</p>
+    <div class="snapshot-note"><strong>Importação local</strong><span>O arquivo é lido no navegador, sem login e sem sincronização Steam.</span></div>
   </section>
 
   <section id="importPanel" class="import-panel">
     <div class="import-copy">
       <p class="eyebrow">Importação local</p>
       <h2>Selecione o JSON exportado.</h2>
-      <p>O arquivo é lido no navegador. O snapshot não é enviado para a SCALE durante a importação local.</p>
+      <p>O arquivo é processado localmente no navegador e usado apenas nesta sessão.</p>
       <p id="catalogStatus" class="catalog-status">Preparando catálogo público para matching local…</p>
     </div>
     <label id="dropZone" class="drop-zone" aria-disabled="true">
@@ -64,9 +64,9 @@
 
     <section class="metric-grid inventory-metrics">
       <article class="metric"><span>Itens no snapshot</span><strong id="totalCount">0</strong><small>assets preservados individualmente</small></article>
-      <article class="metric"><span>Reconhecidos</span><strong id="matchedCount">0</strong><small>match canônico inequívoco</small></article>
+      <article class="metric"><span>Reconhecidos</span><strong id="matchedCount">0</strong><small>reconhecimento no catálogo</small></article>
       <article class="metric"><span>Parciais</span><strong id="partialCount">0</strong><small>dados insuficientes para match completo</small></article>
-      <article class="metric"><span>Fora do catálogo</span><strong id="outsideCount">0</strong><small>registro preservado sem entidade canônica atual</small></article>
+      <article class="metric"><span>Fora do catálogo</span><strong id="outsideCount">0</strong><small>item mantido sem correspondência no catálogo</small></article>
     </section>
 
     <section class="inventory-toolbar">
@@ -84,7 +84,7 @@
   </section>
 </main>
 
-<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Inventário</strong> · snapshot local e temporário · N/D nunca vira zero.</span><span>OPS-031 · VÉRTICE / SCL-DXP-001</span></div></footer>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Inventário</strong> · importação local e temporária.</span><span>N/D permanece N/D.</span></div></footer>
 <script src="app.js"></script>
 </body>
 </html>

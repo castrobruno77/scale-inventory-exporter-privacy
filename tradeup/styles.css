@@ -98,3 +98,15 @@ body.selector-open{overflow:hidden}.selector-launch-copy{display:grid;gap:3px;ma
 .output-card{background:var(--out-bg,linear-gradient(150deg,#0d2229,#09191f 72%));transition:border-color .15s ease,background .15s ease}.return-pill{color:var(--return-pill-color,var(--muted));background:#07141999}.output-card.partial{--out-bg:linear-gradient(150deg,#0d2229,#09191f 72%)!important;--out-border:#31545f!important;--return-pill-color:var(--muted)!important}.output-card.partial .return-pill{color:var(--muted)}
 .output-card .rarity-mark::before{filter:none}.output-card .collection-plate{box-shadow:none}
 @media(max-width:620px){.output-section-head{align-items:stretch}.output-mode-switch{width:100%}.output-mode-switch button{flex:1}.collection-group-head{align-items:flex-start;flex-direction:column}.collection-group-head>span{text-align:left}}
+
+
+
+/* OPS-035 — align Trade Lab with platform shell */
+:root{--bg:#071014;--panel:#0D171B;--panel2:#10252c;--ink:#EAF0F1;--muted:#AEBCC0;--line:#25343A;--line2:#31545f;--accent:#67D7E2;--accent2:#91e6ec}
+body{background:radial-gradient(circle at 82% -8%,#12313a 0,transparent 30%),radial-gradient(circle at 8% 28%,#0b2027 0,transparent 28%),var(--bg)}
+.wrap{max-width:1180px;padding:0 24px}.site-header{background:#071014f2;box-shadow:0 10px 35px #0003}.nav-wrap{min-height:72px}.brand{font-size:18px;letter-spacing:.14em}.nav{gap:20px;flex-wrap:nowrap;overflow-x:auto}.nav a{font-size:12px;white-space:nowrap;padding:8px 0;position:relative}.nav a.active{color:var(--ink)}.nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:1px;height:2px;border-radius:99px;background:var(--accent)}
+.hero{padding:78px 0 44px}.hero-status,.lab-shell,.goal-step{box-shadow:0 24px 65px #0003}.hero-status{background:linear-gradient(150deg,#10252c,#0a181d)}
+.lab-shell{background:linear-gradient(160deg,#0e242b,#09181d);border-color:#31515b}.input-card.filled,.output-card{box-shadow:0 10px 28px #0002}.button{transition:transform .16s ease,background .16s ease}.button:hover:not(:disabled){transform:translateY(-1px)}
+.platform-strip{margin-top:78px}.bridge-grid article{background:linear-gradient(150deg,#101f24,#0b1519)}
+@media(max-width:620px){.wrap{padding:0 14px}.nav-wrap{min-height:auto;align-items:flex-start;flex-direction:column;padding:14px 0;gap:8px}.nav{width:100%}.hero{padding-top:48px}}
+

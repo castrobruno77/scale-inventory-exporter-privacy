@@ -6,3 +6,9 @@
 @media(max-width:1000px){.loadout-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:768px){.loadout-toolbar{top:68px;grid-template-columns:auto 1fr}.loadout-toolbar>.button{grid-column:1/-1}.loadout-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.arrival-panel{align-items:flex-start;flex-direction:column}.arrival-actions{justify-content:flex-start}.equipment-grid{max-width:none}}
 @media(max-width:620px){.loadout-toolbar{top:118px;grid-template-columns:1fr;gap:10px}.side-tabs{width:100%}.side-tabs button{flex:1}.loadout-grid{grid-template-columns:1fr}.arrival-actions{width:100%;flex-direction:column}.arrival-actions .button{width:100%}.slot-actions a,.slot-actions button{min-height:38px}.weapon-section{padding:28px 0}}
+
+
+
+/* OPS-035 coherence */
+.loadout-toolbar{box-shadow:0 16px 42px #0003}.loadout-card{background:linear-gradient(155deg,#101f24,#0b1519);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}.loadout-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px #0004}.loadout-art{background:radial-gradient(circle at 50% 35%,#153039,#091316 68%)}.slot-actions a:hover,.slot-actions button:hover{background:#0d232a}
+
