@@ -433,7 +433,7 @@ function showGoalSearch(candidates,inventoryItems,pagination,inventoryDiscovery)
   ).join('');
   const summary=[];
   if(pagination?.required_context)summary.push('Skins: contexto '+pagination.required_context.rarity_rank+' / '+pagination.required_context.mode);
-  if(inventoryDiscovery)summary.push('Inventário: '+(inventoryDiscovery.eligible_count??0)+' elegíveis de '+(inventoryDiscovery.submitted_count??0)+' MATCHED enviados');
+  if(inventoryDiscovery)summary.push('Inventário: '+(inventoryDiscovery.eligible_count??0)+' elegíveis de '+(inventoryDiscovery.submitted_count??0)+' itens reconhecidos');
   box.innerHTML=(summary.length?'<div class="selector-result-summary">'+esc(summary.join(' · '))+'</div>':'')+databaseHtml+inventoryHtml;
   if(!databaseHtml&&!inventoryHtml)box.innerHTML+='<div class="search-item"><span>Nenhum item elegível encontrado nesta origem/filtro.</span></div>';
   box.hidden=false;
@@ -494,7 +494,7 @@ function pickGoalCandidate(c,asset,simulatedFloat){
 }
 function showSearch(items,error=false,message='Falha ao consultar o catálogo.',code=''){
   const box=$('searchResults');
-  if(error){box.innerHTML='<div class="search-item error">'+esc(message)+(code?' · '+esc(code):'')+'</div>';box.hidden=false;return;}
+  if(error){box.innerHTML='<div class="search-item error">'+esc(message)+'</div>';box.hidden=false;return;}
   if(!items.length){box.innerHTML='<div class="search-item"><span>Nenhum resultado</span></div>';box.hidden=false;return;}
   state.searchItems=items;
   box.innerHTML=items.map((x,i)=>'<button class="search-item" data-pick="'+i+'"><span class="search-thumb">'+art(x.skin_name,x.image_url)+'</span><span class="search-copy"><strong>'+esc(cleanName(x.skin_name))+'</strong><span class="meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</span><span class="meta">float '+x.float_min+'–'+x.float_max+'</span></span><span class="badge">'+(x.is_stattrak?'STATTRAK':'NORMAL')+'</span></button>').join('');
@@ -602,7 +602,7 @@ async function simulateLegacy(){
     else setResultState('error','Não foi possível concluir a leitura econômica','O serviço respondeu sem um estado econômico reconhecido.');
   }catch(e){
     $('summarySection').hidden=true;$('outputsSection').hidden=true;
-    setResultState('error','Não foi possível calcular o contrato',(e.message||'Tente novamente.')+(e.code?' · '+e.code:''));
+    setResultState('error','Não foi possível calcular o contrato',(e.message||'Tente novamente.'));
   }finally{$('simulateBtn').disabled=false;$('simulateBtn').textContent='Calcular contrato';updateLegacyProgress();}
 }
 async function loadDemo(){
