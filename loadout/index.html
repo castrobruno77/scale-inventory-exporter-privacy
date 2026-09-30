@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Loadout Lab v0.1</title>
+<meta name="description" content="Rascunho temporário de loadout de armas e skins na SCALE.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../platform.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../">Início</a>
+      <a href="../inventory/">Inventário</a>
+      <a href="../database/">Skins</a>
+      <a class="active" href="./">Loadout</a>
+      <a href="../tradeup/">Contratos</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap loadout-page">
+  <section class="page-hero loadout-hero">
+    <p class="eyebrow">Loadout</p>
+    <h1>Monte seu loadout.</h1>
+    <p class="lead">Escolha skins para CT e TR, teste combinações e ajuste quando quiser. Este rascunho não altera seu loadout no CS2.</p>
+    <div class="draft-note"><strong>Rascunho temporário</strong><span>Esta composição fica apenas nesta sessão de navegação e ainda não é salva em conta.</span></div>
+  </section>
+
+  <section id="arrivalPanel" class="arrival-panel" hidden aria-live="polite">
+    <div><p class="eyebrow">Contexto recebido</p><h2 id="arrivalTitle">Adicionando skin</h2><p id="arrivalText"></p></div>
+    <div id="arrivalActions" class="arrival-actions"></div>
+  </section>
+
+  <section class="loadout-toolbar">
+    <div class="side-tabs" role="tablist" aria-label="Lado do loadout">
+      <button id="ctTab" role="tab" data-side="CT" aria-selected="true">CT</button>
+      <button id="tTab" role="tab" data-side="T" aria-selected="false">TR</button>
+    </div>
+    <div class="loadout-summary">
+      <strong id="summaryCount">0 slots preenchidos</strong>
+      <span>Cada lado mantém sua própria composição visual.</span>
+    </div>
+    <a id="exploreDatabaseBtn" class="button secondary compact" href="../database/">Ver outras skins</a>
+  </section>
+
+  <div id="loadoutState" class="state-box">Carregando taxonomia de armas…</div>
+
+  <section id="loadoutBody" hidden>
+    <section id="emptyState" class="empty-loadout" hidden>
+      <p class="eyebrow">Rascunho vazio</p>
+      <h2>Seu Loadout está vazio.</h2>
+      <p>Comece escolhendo uma skin ou abra Skins para explorar por arma.</p>
+    </section>
+
+    <section class="weapon-section" data-group="PISTOL">
+      <div class="section-head"><div><p class="eyebrow">Armas</p><h2>Pistolas</h2></div><p class="section-copy">Seleções temporárias do lado atual.</p></div>
+      <div id="pistolGrid" class="loadout-grid"></div>
+    </section>
+
+    <section class="weapon-section" data-group="MID_TIER">
+      <div class="section-head"><div><p class="eyebrow">Armas</p><h2>Intermediárias</h2></div></div>
+      <div id="midGrid" class="loadout-grid"></div>
+    </section>
+
+    <section class="weapon-section" data-group="RIFLE">
+      <div class="section-head"><div><p class="eyebrow">Armas</p><h2>Rifles</h2></div></div>
+      <div id="rifleGrid" class="loadout-grid"></div>
+    </section>
+
+    <section id="equipmentSection" class="weapon-section equipment-section">
+      <div class="section-head"><div><p class="eyebrow">Equipamento especial</p><h2>Zeus</h2></div><p class="section-copy">Tratado separadamente das três categorias principais.</p></div>
+      <div id="zeusGrid" class="loadout-grid equipment-grid"></div>
+    </section>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Loadout</strong> · rascunho temporário · seleção é apenas deste rascunho e não altera o CS2.</span><span>OPS-030 · VÉRTICE / SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>

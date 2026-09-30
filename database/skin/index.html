@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Skin Hub</title>
+<meta name="description" content="Contexto estrutural de uma skin na SCALE.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../../platform.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../../">Início</a>
+      <a href="../../inventory/">Inventário</a>
+      <a class="active" href="../">Skins</a>
+      <a href="../../loadout/">Loadout</a>
+      <a href="../../tradeup/">Contratos</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap entity-page skinhub-v02">
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a id="breadcrumbBack" href="../">Skins</a><span>›</span><span id="crumbName">Skin</span></nav>
+
+  <div id="originContext" class="origin-context" hidden>
+    <div>
+      <strong id="originLabel">Vindo do Database</strong>
+      <span id="originHelper">Sua busca e seus filtros devem continuar reconhecíveis ao retornar.</span>
+    </div>
+    <a id="contextBackBtn" class="button secondary compact" href="../">Voltar aos resultados</a>
+  </div>
+
+  <div id="entityState" class="state-box">Carregando skin…</div>
+
+  <article id="entityHub" class="entity-hub" hidden>
+    <section class="entity-hero skinhub-hero">
+      <div id="entityArt" class="entity-art"><span>Imagem indisponível</span></div>
+      <div class="entity-copy">
+        <p class="eyebrow">Skin</p>
+        <div id="entityIdentityLine" class="identity-line">N/D · N/D</div>
+        <h1 id="entityName">N/D</h1>
+        <p id="entitySubline" class="entity-subline">N/D</p><div id="inventoryOwnership" class="entity-evidence" hidden></div>
+        <div class="entity-actions">
+          <a id="loadoutBtn" class="button secondary" href="../../loadout/">Adicionar esta skin ao Loadout</a>
+        </div>
+        <p class="action-helper">A skin permanece como entidade central. Use as ações abaixo para continuar a partir dela sem transformar capacidades futuras em atalhos falsos.</p>
+      </div>
+    </section>
+
+    <section class="entity-section">
+      <div class="section-head">
+        <div><p class="eyebrow">Identidade</p><h2>O que a SCALE conhece</h2></div>
+        <p class="section-copy">Somente atributos estruturais sustentados pelo catálogo vigente. Dado ausente permanece N/D.</p>
+      </div>
+      <div class="entity-data-grid identity-grid">
+        <div><span>Skin</span><strong id="entityFinish">N/D</strong></div>
+        <div><span>Arma</span><strong id="entityWeapon">N/D</strong></div>
+        <div><span>Raridade</span><strong id="entityRarity">N/D</strong></div>
+        <div><span>Coleção</span><strong id="entityCollection">N/D</strong></div>
+        <div><span>Modalidade</span><strong id="entityMode">N/D</strong></div>
+        <div><span>Identificador</span><strong id="entityKey">N/D</strong></div>
+      </div>
+    </section>
+
+    <section class="entity-section float-section">
+      <div class="section-head">
+        <div><p class="eyebrow">Float</p><h2>Faixa estrutural e desgastes</h2></div>
+        <p class="section-copy">Faixa estrutural da skin, não float de um exemplar específico.</p>
+      </div>
+      <div class="float-context-grid">
+        <article class="float-range-card">
+          <span>Faixa de float</span>
+          <strong id="entityFloatRange">N/D</strong>
+          <small id="entityFloatHelper">Faixa estrutural da skin, não float de um exemplar específico.</small>
+        </article>
+        <article class="wear-card">
+          <span>Desgastes possíveis</span>
+          <div id="entityWears" class="wear-list"><span class="wear-chip unknown">N/D</span></div>
+          <small>Derivado da faixa estrutural de float desta skin.</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="entity-section obtain-section">
+      <div class="section-head obtain-head">
+        <div>
+          <p class="eyebrow">Continuidade</p>
+          <h2>Como obter esta skin</h2>
+        </div>
+        <p class="section-copy">Escolha um caminho disponível. O contrato Goal-Aware recebe esta skin como alvo; elegibilidade, float, probabilidade e economia continuam sendo avaliados pelo backend.</p>
+      </div>
+      <div class="obtain-grid">
+        <article class="obtain-card primary-path">
+          <span class="obtain-kicker">Contrato de troca</span>
+          <h3>Monte um caminho para esta skin</h3>
+          <p>Use skins compatíveis e acompanhe se a skin-alvo e o objetivo escolhido continuam possíveis durante a composição.</p>
+          <a id="tradeLabBtnBottom" class="button primary" href="../../tradeup/">Montar contrato para esta skin</a>
+        </article>
+        <article class="obtain-card">
+          <span class="obtain-kicker">Coleção</span>
+          <h3 id="collectionPathTitle">Explore a coleção</h3>
+          <p id="collectionPathHelper">Veja outras skins da mesma coleção usando o filtro canônico já disponível em Skins.</p>
+          <a id="collectionBtn" class="button secondary" href="../">Ver skins desta coleção</a>
+        </article>
+        <article class="obtain-card">
+          <span class="obtain-kicker">Inventário</span>
+          <h3 id="inventoryPathTitle">Use o que você já tem</h3>
+          <p id="inventoryPathHelper">Um snapshot importado pode contribuir para a composição no Trade Lab sem provar tradability ou marketability.</p>
+          <a id="inventoryBtn" class="button secondary" href="../../inventory/">Abrir Inventário</a>
+        </article>
+      </div>
+    </section>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-row">
+    <span><strong>SCALE Skins</strong> · atributos estruturais sustentados · N/D nunca vira zero.</span>
+    <span>Human Review Fase E · VÉRTICE / SCL-DXP-001</span>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

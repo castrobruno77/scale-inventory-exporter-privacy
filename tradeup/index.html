@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Contratos</title>
+<meta name="description" content="Monte contratos de trade-up, acompanhe a chance da skin-alvo e avalie o resultado com dados certificados.">
+<meta name="theme-color" content="#071419">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-wrap">
+    <a class="brand" href="../index.html" aria-label="SCALE">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../index.html">Início</a>
+      <a href="../inventory/">Inventário</a>
+      <a href="../database/">Skins</a>
+      <a href="../loadout/">Loadout</a>
+      <a class="active" href="./">Contratos</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Contratos</p>
+      <h1 id="pageTitle">Monte o contrato.<br><em>Veja as chances.</em></h1>
+      <p id="pageLead" class="lead">Escolha 10 skins e veja os possíveis resultados, floats previstos e a leitura econômica suportada pelos dados disponíveis.</p>
+    </div>
+    <div class="hero-status" aria-live="polite">
+      <div class="status-dot"></div>
+      <div><strong>Serviço de contratos</strong><span id="engineStatus">aguardando composição</span></div>
+    </div>
+  </section>
+
+  <div id="tradeOriginContext" class="state-banner partial trade-origin-context" hidden>
+    <strong id="tradeOriginTitle">Ponto de partida</strong>
+    <span id="tradeOriginDetail"></span>
+    <a id="tradeOriginBack" class="text-button context-link" href="../database/">Voltar à skin</a>
+  </div>
+
+  <section id="goalPanel" class="goal-panel" hidden>
+    <div class="goal-step target-step">
+      <div class="step-number">1</div>
+      <div class="goal-copy">
+        <p class="eyebrow">Sua skin-alvo</p>
+        <div class="target-card">
+          <div id="targetArt" class="target-art"><span>Imagem N/D</span></div>
+          <div>
+            <h2 id="targetName">Carregando skin…</h2>
+            <p id="targetMeta">Consultando o contrato certificado.</p>
+            <div id="targetEligibility" class="inline-state neutral">Verificando elegibilidade…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="goal-step">
+      <div class="step-number">2</div>
+      <div class="goal-copy">
+        <p class="eyebrow">Objetivo</p>
+        <h2>Defina o resultado que você quer perseguir.</h2>
+        <div class="objective-grid">
+          <label>Desgaste desejado
+            <select id="wearGoal">
+              <option value="">Sem filtro de desgaste</option>
+              <option>Factory New</option>
+              <option>Minimal Wear</option>
+              <option>Field-Tested</option>
+              <option>Well-Worn</option>
+              <option>Battle-Scarred</option>
+            </select>
+          </label>
+          <label>Faixa de float desejada · mínimo
+            <input id="floatMinGoal" type="number" min="0" max="1" step="0.000001" placeholder="opcional">
+          </label>
+          <label>Faixa de float desejada · máximo
+            <input id="floatMaxGoal" type="number" min="0" max="1" step="0.000001" placeholder="opcional">
+          </label>
+          <button id="applyGoalBtn" class="button secondary" type="button">Aplicar objetivo</button>
+        </div>
+        <p id="objectiveHelper" class="hint">Opcional. O desgaste define uma faixa de float. Se você informar também uma faixa de float, a SCALE considera apenas a interseção possível entre os dois objetivos.</p>
+      </div>
+    </div>
+
+    <div class="goal-step">
+      <div class="step-number">3</div>
+      <div class="goal-copy">
+        <div class="section-head compact-head">
+          <div><p class="eyebrow">Composição progressiva</p><h2>Adicione inputs compatíveis.</h2></div>
+          <span id="goalProgress" class="progress-pill">0 de 10 skins</span>
+        </div>
+        <div class="goal-status-grid">
+          <article><span>Estrutura do contrato</span><strong id="contractValidState">—</strong><small id="contractReason">Aguardando</small></article>
+          <article><span>Skin-alvo</span><strong id="targetPossibleState">—</strong><small id="targetPossibleReason">Aguardando</small></article>
+          <article><span>Objetivo de float</span><strong id="floatReachableState">—</strong><small id="floatReachableReason">Defina um objetivo</small></article>
+          <article><span id="targetProbabilityLabel">Chance já comprometida</span><strong id="targetProbability">—</strong><small id="targetProbabilityRange">Faixa possível ao completar: —</small></article>
+        </div>
+        <div id="progressiveEnvelope" class="envelope-note" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lab-shell">
+    <div class="lab-toolbar">
+      <div class="selector-launch-copy">
+        <strong>Composição progressiva</strong>
+        <span>Clique em qualquer slot para escolher ou alterar uma skin sem perder o contexto.</span>
+      </div>
+      <div class="toolbar-actions">
+        <button id="openSelectorBtn" class="button secondary" type="button">Escolher skins</button>
+        <button id="demoBtn" class="button ghost" type="button">Carregar exemplo</button>
+        <button id="clearBtn" class="button ghost" type="button">Limpar composição</button>
+      </div>
+    </div>
+
+    <section id="inputSelector" class="input-selector" role="dialog" aria-modal="true" aria-labelledby="selectorTitle" hidden>
+      <div class="selector-backdrop" aria-hidden="true"></div>
+      <div class="selector-panel">
+        <div class="selector-head">
+          <div>
+            <p class="eyebrow">Seletor de inputs</p>
+            <h2 id="selectorTitle">Escolha uma skin</h2>
+            <p id="selectorContext" class="hint">Próximo slot disponível.</p>
+          </div>
+          <button id="selectorCloseBtn" class="selector-close" type="button" aria-label="Fechar seletor">×</button>
+        </div>
+        <div class="selector-origin-tabs" aria-label="Origem do input">
+          <button class="active" type="button" data-selector-origin="ALL">Todos</button>
+          <button type="button" data-selector-origin="INVENTORY">Inventário</button>
+          <button type="button" data-selector-origin="DATABASE">Skins</button>
+        </div>
+        <div class="selector-filter-panel">
+          <div class="selector-filter-grid">
+            <label>Arma
+              <input id="selectorWeapon" autocomplete="off" placeholder="Ex.: 47, AK47, FAMAS">
+            </label>
+            <label>Coleção
+              <input id="selectorCollection" autocomplete="off" placeholder="Ex.: 2021, Dreams">
+            </label>
+          </div>
+          <div id="selectorRequiredContext" class="selector-required-context">Contexto obrigatório: aguardando backend.</div>
+          <div id="selectorFilterResolution" class="selector-filter-resolution" hidden></div>
+        </div>
+        <div class="search-shell selector-search-shell">
+          <label for="skinSearch" id="searchLabel">Buscar skin ou coleção</label>
+          <div class="search-row">
+            <input id="skinSearch" autocomplete="off" placeholder="Busque ou deixe vazio para explorar">
+            <button id="searchBtn" class="button secondary" type="button">Buscar</button>
+          </div>
+          <div id="selectorFeedback" class="selector-feedback" role="status" aria-live="polite" hidden></div>
+          <div id="searchResults" class="search-results selector-results" hidden></div>
+        </div>
+      </div>
+    </section>
+    <div id="addToast" class="add-toast" role="status" aria-live="polite" hidden>Adicionado</div>
+
+    <div class="section-head">
+      <div><p class="eyebrow">Inputs do contrato</p><h2><span id="slotCounter">0 de 10 skins</span></h2></div>
+      <p id="inputHint" class="hint">Complete os 10 itens para calcular o contrato. Ajuste o float diretamente no card.</p>
+    </div>
+
+    <div class="origin-legend" id="originLegend" hidden>
+      <span><i class="origin-dot inventory"></i>Inventário importado: asset real do snapshot</span>
+      <span><i class="origin-dot database"></i>Skins: simulação com float escolhido</span>
+    </div>
+
+    <div id="inputGrid" class="input-grid" aria-label="10 slots do contrato"></div>
+
+    <div class="contract-footer">
+      <div class="compat" id="compatibility">Complete os 10 itens para calcular o contrato.</div>
+      <button id="simulateBtn" class="button primary" type="button" disabled>Calcular contrato</button>
+    </div>
+    <div id="resultState" class="state-banner" role="status" aria-live="polite" hidden>
+      <strong id="resultStateTitle"></strong>
+      <span id="resultStateDetail"></span>
+    </div>
+    <p class="trade-disclaimer">Trade-ups são probabilísticos. Chance não é garantia. Valores de mercado podem estar incompletos ou mudar após a avaliação; N/D nunca é tratado como zero.</p>
+  </section>
+
+  <section id="summarySection" class="summary-section" hidden>
+    <div class="section-head result-head">
+      <div><p class="eyebrow">Avaliação final</p><h2>Resumo econômico</h2></div>
+      <button id="advancedBtn" class="text-button" type="button">Ver detalhes</button>
+    </div>
+    <div class="metric-grid">
+      <article class="metric"><span>Custo do contrato</span><strong id="economicCost">—</strong><small>valor econômico dos inputs</small></article>
+      <article class="metric"><span>Chance de lucro</span><strong id="profitChance">—</strong><small>quando a cobertura permite</small></article>
+      <article class="metric"><span>Valor esperado</span><strong id="expectedValue">—</strong><small>ponderado pelas probabilidades</small></article>
+      <article class="metric"><span>Pior recuperação</span><strong id="worstRecovery">—</strong><small>entre os resultados avaliados</small></article>
+    </div>
+    <div id="advancedPanel" class="advanced-panel" hidden>
+      <div><span>ROI</span><strong id="roi">—</strong></div>
+      <div><span>Lucro ou perda esperada</span><strong id="expectedProfit">—</strong></div>
+      <div><span>Quanto ainda falta pagar</span><strong id="additionalSpend">—</strong></div>
+      <div><span>Cobertura</span><strong id="coverage">—</strong></div>
+    </div>
+  </section>
+
+  <section id="outputsSection" class="outputs-section" hidden>
+    <div class="section-head output-section-head">
+      <div><p class="eyebrow">Possíveis resultados</p><h2>Resultados do contrato</h2></div>
+      <div class="output-mode-switch" role="group" aria-label="Organização dos resultados">
+        <button type="button" class="active" data-output-mode="RETURN">Retorno</button>
+        <button type="button" data-output-mode="BY_COLLECTION">Por coleção</button>
+      </div>
+    </div>
+    <p class="output-note">A organização vem do backend. A cor verde→amarelo→vermelho representa somente retorno econômico; raridade e coleção continuam sinais independentes.</p>
+    <div id="outputOrganizationMeta" class="output-organization-meta" hidden></div>
+    <div id="outputGroups"></div>
+  </section>
+
+  <section class="platform-strip">
+    <div><span class="eyebrow">Jornada conectada</span><h2>Continue sem recomeçar.</h2></div>
+    <div class="bridge-grid">
+      <article><strong>Skins</strong><span>escolha uma skin-alvo e preserve o contexto</span></article>
+      <article><strong>Inventário</strong><span>diferencie assets reais do snapshot</span></article>
+      <article><strong>Loadout</strong><span>continue explorando sua composição visual CT/TR</span></article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE</strong> · Contratos · preview reversível</span><span>VÉRTICE · SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>

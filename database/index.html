@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Database Explorer v0.2</title>
+<meta name="description" content="Explore o catálogo SCALE por busca e filtros estruturais, preservando contexto entre Database e Skin Hub.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../platform.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../">Início</a>
+      <a href="../inventory/">Inventário</a>
+      <a class="active" href="./">Skins</a>
+      <a href="../loadout/">Loadout</a>
+      <a href="../tradeup/">Contratos</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap database-page">
+  <section class="page-hero db-hero">
+    <p class="eyebrow">Skins</p>
+    <h1>Encontre uma skin.<br><em>Continue a partir dela.</em></h1>
+    <p class="lead">Busque por skin, arma ou coleção. Refine pelos atributos disponíveis e abra qualquer resultado para continuar a análise em contexto.</p>
+    <div class="hero-actions modular-entry"><a class="button secondary" href="collections/">Explorar coleções</a></div>
+  </section>
+  <div id="loadoutContext" class="origin-context" hidden>
+    <div><strong id="loadoutContextTitle">Escolhendo para o Loadout</strong><span id="loadoutContextHelper">Os resultados estão contextualizados para a arma selecionada.</span></div>
+    <a id="loadoutBackBtn" class="button secondary compact" href="../loadout/">Voltar ao Loadout</a>
+  </div>
+  <section class="explorer-shell" aria-labelledby="explorer-title">
+    <div class="explorer-search">
+      <div><p class="eyebrow">Skins</p><h2 id="explorer-title">Buscar skins</h2></div>
+      <div class="search-row reactive-search"><input id="skinSearch" autocomplete="off" placeholder="Buscar por arma, skin ou coleção" aria-label="Buscar por arma, skin ou coleção" aria-controls="searchSuggestions" aria-expanded="false"><div id="searchSuggestions" class="search-suggestions" hidden></div></div>
+      <p class="search-help">Digite parte do nome, arma ou coleção. O catálogo também tenta corrigir buscas aproximadas quando necessário.</p>
+    </div>
+    <div class="filter-toolbar">
+      <button id="filterToggle" class="button secondary compact" type="button" aria-expanded="true">Filtros</button>
+      <button id="selectToggle" class="button secondary compact" type="button" aria-pressed="false">Selecionar</button>
+      <label class="sort-control">Ordenar
+        <select id="sortSelect" aria-label="Ordenar skins">
+          <option value="default">Padrão</option>
+          <option value="name_asc">Nome A–Z</option>
+          <option value="name_desc">Nome Z–A</option>
+          <option value="rarity_asc">Raridade crescente</option>
+          <option value="rarity_desc">Raridade decrescente</option>
+        </select>
+      </label>
+      <button id="clearAllBtn" class="button ghost compact" type="button">Limpar tudo</button>
+    </div>
+    <section id="filtersPanel" class="filters-panel" aria-label="Filtros">
+      <div class="filter-group"><div class="filter-head"><strong>Arma</strong><small>multiseleção</small></div><div class="token-entry"><input id="weaponInput" placeholder="Ex.: 47, AK47, FAMAS" aria-label="Adicionar filtro de arma"><button id="weaponAdd" type="button">Adicionar</button></div><div id="weaponTokens" class="token-list"></div><div id="weaponResolution" class="field-resolution" hidden></div><p class="filter-note">Pode usar parte do nome. A resolução é feita no catálogo, somente entre armas.</p></div>
+      <div class="filter-group"><div class="filter-head"><strong>Raridade</strong><small>multiseleção</small></div><div class="check-grid">
+        <label><input type="checkbox" name="rarity" value="Consumer Grade"> Consumer Grade</label><label><input type="checkbox" name="rarity" value="Industrial Grade"> Industrial Grade</label><label><input type="checkbox" name="rarity" value="Mil-Spec Grade"> Mil-Spec Grade</label><label><input type="checkbox" name="rarity" value="Restricted"> Restricted</label><label><input type="checkbox" name="rarity" value="Classified"> Classified</label><label><input type="checkbox" name="rarity" value="Covert"> Covert</label>
+      </div></div>
+      <div class="filter-group"><div class="filter-head"><strong>Coleção</strong><small>multiseleção</small></div><div class="token-entry"><input id="collectionInput" placeholder="Ex.: 2021, Dreams" aria-label="Adicionar filtro de coleção"><button id="collectionAdd" type="button">Adicionar</button></div><div id="collectionTokens" class="token-list"></div><div id="collectionResolution" class="field-resolution" hidden></div><p class="filter-note">Pode usar parte do nome. A resolução é feita no catálogo, somente entre coleções.</p></div>
+      <div class="filter-group"><div class="filter-head"><strong>StatTrak</strong><small>modalidade</small></div><div class="segmented" role="group" aria-label="Filtro StatTrak"><button type="button" data-stattrak="" class="active">Todos</button><button type="button" data-stattrak="true">StatTrak</button><button type="button" data-stattrak="false">Normal</button></div></div>
+    </section>
+    <div class="search-actions"><button id="searchBtn" class="button primary" type="button">Buscar</button><span>Filtros e ordenação consultam o catálogo diretamente. Preço ainda não é uma ordenação disponível.</span></div>
+    <div id="activeFilters" class="context-rail" hidden><div><span id="activeFilterCount">Nenhum filtro aplicado</span><div id="activeFilterChips" class="active-filter-chips"></div></div><button id="clearFiltersBtn" class="text-button" type="button">Limpar filtros</button></div>
+    <div id="selectionBar" class="selection-bar" hidden><div><strong>Seleção múltipla</strong><span id="selectionCount">0 selecionadas</span></div><div class="selection-actions"><button id="openFirstBtn" class="button secondary compact" type="button" disabled>Abrir primeira skin</button><button id="compareBtn" class="button ghost compact" type="button" disabled title="Comparação ainda não disponível">Comparar seleção</button><button id="clearSelectionBtn" class="text-button" type="button">Limpar seleção</button></div></div>
+    <div id="capabilityNotice" class="capability-notice" hidden><strong>Resultados consultados no catálogo canônico.</strong><span>Busca global e filtros são independentes. Arma e Coleção aceitam termos parciais; a resolução exibida vem do backend.</span></div>
+  </section>
+  <section class="results-section"><div class="results-head"><div><p class="eyebrow">Resultados</p><h2 id="resultsTitle">Comece pela busca ou refine pelos filtros.</h2></div><div id="resultsMeta" class="results-meta">Nenhuma consulta executada</div></div><div id="stateBox" class="state-box">Comece pela busca ou refine pelos filtros.</div><section id="results" class="results explorer-results" aria-live="polite"></section><div class="pagination-row"><button id="loadMoreBtn" class="button secondary" type="button" hidden>Carregar mais</button></div></section>
+</main>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Skins</strong> · catálogo conectado · N/D nunca vira zero.</span><span>OPS-033 · VÉRTICE / SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body></html>
