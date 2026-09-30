@@ -201,11 +201,16 @@
   </section>
 
   <section id="outputsSection" class="outputs-section" hidden>
-    <div class="section-head">
+    <div class="section-head output-section-head">
       <div><p class="eyebrow">Possíveis resultados</p><h2>Resultados do contrato</h2></div>
+      <div class="output-mode-switch" role="group" aria-label="Organização dos resultados">
+        <button type="button" class="active" data-output-mode="RETURN">Retorno</button>
+        <button type="button" data-output-mode="BY_COLLECTION">Por coleção</button>
+      </div>
     </div>
-    <p class="output-note">Probabilidade, float previsto e cobertura são as referências principais. A cor é apenas um sinal secundário.</p>
-    <div id="outputGrid" class="output-grid"></div>
+    <p class="output-note">A organização vem do backend. A cor verde→amarelo→vermelho representa somente retorno econômico; raridade e coleção continuam sinais independentes.</p>
+    <div id="outputOrganizationMeta" class="output-organization-meta" hidden></div>
+    <div id="outputGroups"></div>
   </section>
 
   <section class="platform-strip">
