@@ -46,44 +46,60 @@ function applyOriginContext(){
   const from=safeFrom();if(!from)return {type:'none',href:'../'};
   const isTrade=/\/tradeup\/?(?:\?|$)/.test(from);const isLoadout=/\/loadout\/?(?:\?|$)/.test(from);const isInventory=/\/inventory\/?(?:\?|$)/.test(from);
   $('originContext').hidden=false;
-  $('breadcrumbBack').href=from;$('contextBackBtn').href=from;$('entityBackBtn').href=from;$('backBtnBottom').href=from;
+  $('breadcrumbBack').href=from;$('contextBackBtn').href=from;
   if(isLoadout){
     const q=new URL(from,'https://scale.local').searchParams;const side=q.get('side')||'N/D';const focus=q.get('focus')||'slot';
     $('originLabel').textContent='Vindo do Loadout';$('originHelper').textContent='Slot: '+side+' · '+focus;
-    $('contextBackBtn').textContent='Voltar ao Loadout';$('entityBackBtn').textContent='Voltar ao Loadout';$('backBtnBottom').textContent='Voltar ao Loadout';$('breadcrumbBack').textContent='Loadout Lab';
+    $('contextBackBtn').textContent='Voltar ao Loadout';$('breadcrumbBack').textContent='Loadout Lab';
     return {type:'loadout',href:from};
   }
   if(isInventory){
     $('originLabel').textContent='Vindo do Inventário';$('originHelper').textContent='Este item foi aberto a partir do snapshot importado ativo.';
-    $('contextBackBtn').textContent='Voltar ao Inventário';$('entityBackBtn').textContent='Voltar ao Inventário';$('backBtnBottom').textContent='Voltar ao Inventário';$('breadcrumbBack').textContent='Inventário';
+    $('contextBackBtn').textContent='Voltar ao Inventário';$('breadcrumbBack').textContent='Inventário';
     return {type:'inventory',href:from};
   }
   if(isTrade){
     $('originLabel').textContent='Vindo de Contratos';
     $('originHelper').textContent='Retorne à composição sem perder o contexto atual.';
     $('contextBackBtn').textContent='Voltar aos Contratos';
-    $('entityBackBtn').textContent='Voltar aos Contratos';
-    $('backBtnBottom').textContent='Voltar aos Contratos';
     $('breadcrumbBack').textContent='Contratos';
     return {type:'tradeup',href:from};
   }
   $('originLabel').textContent='Vindo de Skins';
   $('originHelper').textContent='Sua busca e seus filtros devem continuar reconhecíveis ao retornar.';
   $('contextBackBtn').textContent='Voltar aos resultados';
-  $('entityBackBtn').textContent='Voltar aos resultados';
-  $('backBtnBottom').textContent='Voltar aos resultados';
   return {type:'database',href:from};
+}
+function inventoryMatches(x){
+  try{
+    const raw=sessionStorage.getItem('scale_inventory_bridge_v01_session');if(!raw)return {snapshot:false,matches:[]};
+    const snap=JSON.parse(raw);const matches=(snap?.items||[]).filter(i=>i.match_state==='MATCHED'&&i.market_key===x.market_key);
+    return {snapshot:true,snapshotAt:snap.snapshot_at||null,matches};
+  }catch(_){return {snapshot:false,matches:[]}}
 }
 function applyInventoryOwnership(x){
   const box=$('inventoryOwnership');if(!box)return;
   box.hidden=true;box.textContent='';
-  try{
-    const raw=sessionStorage.getItem('scale_inventory_bridge_v01_session');if(!raw)return;
-    const snap=JSON.parse(raw);const matches=(snap?.items||[]).filter(i=>i.match_state==='MATCHED'&&i.market_key===x.market_key);
-    if(!matches.length)return;
+  const inv=inventoryMatches(x);
+  if(inv.matches.length){
     box.hidden=false;
-    box.innerHTML='<span>No inventário importado · '+matches.length+'</span><span>Snapshot: '+esc(snap.snapshot_at?new Date(snap.snapshot_at).toLocaleString('pt-BR'):'N/D')+'</span>';
-  }catch(_){}
+    box.innerHTML='<span>No inventário importado · '+inv.matches.length+'</span><span>Snapshot: '+esc(inv.snapshotAt?new Date(inv.snapshotAt).toLocaleString('pt-BR'):'N/D')+'</span>';
+  }
+  const title=$('inventoryPathTitle'),helper=$('inventoryPathHelper'),btn=$('inventoryBtn');
+  if(!title||!helper||!btn)return;
+  if(inv.matches.length){
+    title.textContent='Você já tem '+inv.matches.length+' exemplar'+(inv.matches.length===1?'':'es');
+    helper.textContent='O snapshot comprova presença destes exemplares. Use o Inventário para revisar os itens; elegibilidade para contrato continua sendo decidida pelo backend.';
+    btn.textContent='Ver meu Inventário';
+  }else if(inv.snapshot){
+    title.textContent='Complete o caminho com seu Inventário';
+    helper.textContent='Há um snapshot importado, mas esta skin não aparece nele como item reconhecido. Outros itens do snapshot ainda podem ser avaliados no Trade Lab.';
+    btn.textContent='Revisar meu Inventário';
+  }else{
+    title.textContent='Use o que você já tem';
+    helper.textContent='Importe um snapshot para disponibilizar seus itens como contexto no Trade Lab. Isso não sincroniza a Steam nem prova tradability.';
+    btn.textContent='Importar Inventário';
+  }
 }
 function render(x){
   $('entityHub').hidden=false;$('entityState').hidden=true;
@@ -106,8 +122,21 @@ function render(x){
   else{$('entityArt').innerHTML='<span>Imagem indisponível</span>';}
   const hubUrl=currentEntityUrl(x.market_key||x.skin_name||'');
   const tradeHref='../../tradeup/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);
-  $('tradeLabBtn').href=tradeHref;$('tradeLabBtnBottom').href=tradeHref;
-  const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);$('loadoutBtn').href=loadoutHref;$('loadoutBtnBottom').href=loadoutHref;
+  $('tradeLabBtnBottom').href=tradeHref;
+  const loadoutHref='../../loadout/?skin='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(hubUrl);
+  $('loadoutBtn').href=loadoutHref;
+  const collection=x.collection||'';
+  if(collection){
+    $('collectionBtn').href='../?collection='+encodeURIComponent(collection);
+    $('collectionPathTitle').textContent='Explore '+collection;
+    $('collectionPathHelper').textContent='Veja outras skins desta coleção usando o filtro canônico já disponível em Skins.';
+    $('collectionBtn').textContent='Ver skins desta coleção';
+  }else{
+    $('collectionBtn').href='../';
+    $('collectionPathTitle').textContent='Coleção indisponível';
+    $('collectionPathHelper').textContent='A coleção desta skin está N/D nos dados atuais. Nenhuma relação foi inventada.';
+    $('collectionBtn').textContent='Explorar Skins';
+  }
   applyInventoryOwnership(x);
   document.title='SCALE — '+clean(name)+' · Skin Hub';
 }
