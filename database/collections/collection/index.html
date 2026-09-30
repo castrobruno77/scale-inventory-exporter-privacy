@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Collection Hub</title>
+<meta name="description" content="Contexto estrutural de uma coleção na SCALE.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../../../platform.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../../../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../../../">Início</a>
+      <a href="../../../inventory/">Inventário</a>
+      <a class="active" href="../../">Skins</a>
+      <a href="../../../loadout/">Loadout</a>
+      <a href="../../../tradeup/">Contratos</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap entity-page collection-hub-page">
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a id="breadcrumbBack" href="../">Coleções</a><span>›</span><span id="crumbName">Coleção</span></nav>
+
+  <div id="originContext" class="origin-context" hidden>
+    <div><strong id="originLabel">Vindo de Coleções</strong><span id="originHelper">Seu contexto anterior pode ser retomado.</span></div>
+    <a id="contextBackBtn" class="button secondary compact" href="../">Voltar</a>
+  </div>
+
+  <div id="entityState" class="state-box">Carregando coleção…</div>
+
+  <article id="entityHub" class="entity-hub" hidden>
+    <section class="entity-hero collection-hero">
+      <div class="collection-fallback-art" aria-hidden="true"><span>S</span></div>
+      <div class="entity-copy">
+        <p class="eyebrow">Collection</p>
+        <div id="collectionIdentityHero" class="collection-hub-identity"></div>
+        <h1 id="collectionName">N/D</h1>
+        <p class="entity-subline">Identidade estrutural do catálogo vigente. Nenhum asset real de coleção é usado neste preview.</p>
+      </div>
+    </section>
+
+    <section class="entity-section">
+      <div class="section-head">
+        <div><p class="eyebrow">Atributos</p><h2>O que o contrato v24 sustenta</h2></div>
+        <p class="section-copy">Freshness do catálogo não é data de lançamento. Campos não contratados não são exibidos.</p>
+      </div>
+      <div class="entity-data-grid collection-attribute-grid">
+        <div><span>Skins</span><strong id="skinCount">N/D</strong></div>
+        <div><span>Variantes</span><strong id="variantCount">N/D</strong></div>
+        <div><span>StatTrak presente</span><strong id="hasStattrak">N/D</strong></div>
+        <div><span>Consumer Grade presente</span><strong id="hasConsumer">N/D</strong></div>
+        <div class="collection-rarity-attribute"><span>Raridades presentes</span><strong id="raritiesPresent">N/D</strong></div>
+        <div><span>Catálogo atualizado</span><strong id="catalogUpdatedAt">N/D</strong></div>
+      </div>
+    </section>
+
+    <section class="entity-section">
+      <div class="section-head">
+        <div><p class="eyebrow">Skins da coleção</p><h2 id="skinsTitle">Carregando skins…</h2></div>
+        <p class="section-copy">Esta lista reutiliza o GET legado de skins com o filtro collection informado pelo Collection contract.</p>
+      </div>
+      <div id="skinsState" class="state-box">Carregando skins…</div>
+      <section id="skinsGrid" class="results explorer-results collection-skin-results" aria-live="polite"></section>
+      <div class="pagination-row"><button id="loadMoreBtn" class="button secondary" type="button" hidden>Carregar mais skins</button></div>
+    </section>
+  </article>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Collection Hub</strong> · contexto estrutural · sem assets reais de coleção.</span><span>Human Review Fase F · VÉRTICE / SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>
