@@ -127,10 +127,10 @@ function render(x){
   $('loadoutBtn').href=loadoutHref;
   const collection=x.collection||'';
   if(collection){
-    $('collectionBtn').href='../?collection='+encodeURIComponent(collection);
+    $('collectionBtn').href='../collections/collection/?collection='+encodeURIComponent(collection)+'&from='+encodeURIComponent(hubUrl);
     $('collectionPathTitle').textContent='Explore '+collection;
-    $('collectionPathHelper').textContent='Veja outras skins desta coleção usando o filtro canônico já disponível em Skins.';
-    $('collectionBtn').textContent='Ver skins desta coleção';
+    $('collectionPathHelper').textContent='Abra o Collection Hub e continue pelas skins pertencentes a esta coleção.';
+    $('collectionBtn').textContent='Abrir coleção';
   }else{
     $('collectionBtn').href='../';
     $('collectionPathTitle').textContent='Coleção indisponível';
