@@ -24,7 +24,9 @@ const state={
   selectorOrigin:'ALL',
   selectorFilters:{weapon:'',collection:''},
   selectorRequiredContext:null,
-  selectorResolvedFilters:null
+  selectorResolvedFilters:null,
+  outputMode:'RETURN',
+  outputEvaluation:null
 };
 
 const ERROR_MESSAGES={
@@ -272,7 +274,7 @@ function updateLegacyProgress(){
   $('simulateBtn').disabled=count!==10;
 }
 function resetFinal(){
-  state.result=null;$('summarySection').hidden=true;$('outputsSection').hidden=true;clearResultState();
+  state.result=null;state.outputEvaluation=null;$('summarySection').hidden=true;$('outputsSection').hidden=true;clearResultState();
 }
 function renderGoalState(d){
   state.goal=d;
@@ -503,10 +505,16 @@ function pickLegacy(x){
   state.slots[idx]={...x,float_value:defaultFloat(x),owned:false,origin:'DATABASE',price_reference:null,manual_price_usd:null};
   renderInputs();resetFinal();showAddedFeedback(x,idx);advanceSelectorAfterAdd();
 }
-function colorForReturn(v){
-  if(!hasNumber(v))return {bg:'hsl(190 28% 15%)',border:'hsl(190 28% 32%)'};
-  const n=Number(v);let h=n>=0?58+Math.min(n,80)/80*72:58-Math.min(Math.abs(n),100)/100*58;h=Math.max(0,Math.min(132,h));
-  return {bg:'hsl('+h+' 55% 15%)',border:'hsl('+h+' 70% 42%)'};
+function economicVisualForReturn(v){
+  if(!hasNumber(v))return {bg:'linear-gradient(150deg,#0d2229,#09191f 72%)',border:'#31545f',pill:'#9fb5bd',state:'nd'};
+  const n=Number(v);
+  let hue;
+  if(n>=0)hue=Math.min(132,78+Math.min(n,100)/100*54);
+  else hue=Math.max(0,58-Math.min(Math.abs(n),100)/100*58);
+  const bg='linear-gradient(150deg,hsl('+hue+' 46% 20%),hsl('+hue+' 42% 12%) 72%)';
+  const border='hsl('+hue+' 68% 46%)';
+  const pill='hsl('+hue+' 78% 72%)';
+  return {bg,border,pill,state:n>=0?'positive':n>=-35?'caution':'negative'};
 }
 function renderSummary(d){
   const e=d.economics||{};$('summarySection').hidden=false;
@@ -520,24 +528,60 @@ function skinEntityHref(x){
   const from=location.pathname+location.search;
   return '../database/skin/?key='+encodeURIComponent(x.market_key||x.skin_name||'')+'&from='+encodeURIComponent(from);
 }
-function renderOutputs(outputs){
-  $('outputsSection').hidden=false;
-  $('outputGrid').innerHTML=outputs.map(x=>{
-    const c=colorForReturn(x.return_pct),partial=!hasNumber(x.return_pct);
-    const targetClass=state.goalMode&&x.market_key===state.targetKey?' target-output':'';
-    return '<article class="output-card '+(partial?'partial':'')+targetClass+'" style="--out-bg:'+c.bg+';--out-border:'+c.border+'">'+
-      '<div class="output-top"><span class="chance">'+pct(x.probability_pct)+'</span><span class="return-pill">'+(hasNumber(x.return_pct)?(Number(x.return_pct)>=0?'+':'')+Number(x.return_pct).toFixed(1)+'%':'N/D')+'</span></div>'+
-      (targetClass?'<span class="target-result-badge">Skin-alvo</span>':'')+
-      '<div class="skin-art">'+art(x.skin_name,x.image_url)+'</div><div class="output-body"><h3>'+esc(cleanName(x.skin_name))+'</h3>'+
-      '<div class="output-meta">Desgaste previsto: '+esc(x.predicted_wear||'N/D')+' · Float previsto: '+(hasNumber(x.predicted_float)?Number(x.predicted_float).toFixed(5):'N/D')+'</div>'+
-      '<div class="output-meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</div>'+
-      '<div class="market-context"><span>Fonte: '+esc(x.market?.source||'N/D')+'</span><span>Confiança: '+esc(x.market?.confidence??'N/D')+'</span><span>Atualizado: '+esc(x.market?.updated_at||'N/D')+'</span></div>'+
-      '<div class="output-money"><div><span>Valor realizável</span><strong>'+money(x.market?.realizable_usd)+'</strong></div><div><span>Lucro ou perda</span><strong>'+(hasNumber(x.profit_usd)?(Number(x.profit_usd)>=0?'+':'-')+'US$ '+Math.abs(Number(x.profit_usd)).toFixed(2):'N/D')+'</strong></div></div>'+
-      '<div class="output-actions"><a class="mini-btn enabled" href="'+skinEntityHref(x)+'">Ver skin</a></div></div></article>';
+function outputCard(x){
+  const visual=economicVisualForReturn(x.return_pct),partial=!hasNumber(x.return_pct);
+  const targetClass=state.goalMode&&x.market_key===state.targetKey?' target-output':'';
+  return '<article class="output-card economic-'+visual.state+' '+(partial?'partial':'')+targetClass+'" style="--out-bg:'+visual.bg+';--out-border:'+visual.border+';--return-pill-color:'+visual.pill+'">'+
+    '<div class="output-top"><span class="chance">'+pct(x.probability_pct)+'</span><span class="return-pill">'+(hasNumber(x.return_pct)?(Number(x.return_pct)>=0?'+':'')+Number(x.return_pct).toFixed(1)+'%':'N/D')+'</span></div>'+
+    (targetClass?'<span class="target-result-badge">Skin-alvo</span>':'')+
+    '<div class="skin-art">'+art(x.skin_name,x.image_url)+'</div><div class="output-body"><h3>'+esc(cleanName(x.skin_name))+'</h3>'+
+    '<div class="output-meta">Desgaste previsto: '+esc(x.predicted_wear||'N/D')+' · Float previsto: '+(hasNumber(x.predicted_float)?Number(x.predicted_float).toFixed(5):'N/D')+'</div>'+
+    '<div class="output-meta item-classification">'+collectionIdentity(x.collection,'dense',true)+rarityMark(x.rarity,'dense')+'</div>'+
+    '<div class="market-context"><span>Fonte: '+esc(x.market?.source||'N/D')+'</span><span>Confiança: '+esc(x.market?.confidence??'N/D')+'</span><span>Atualizado: '+esc(x.market?.updated_at||'N/D')+'</span></div>'+
+    '<div class="output-money"><div><span>Valor realizável</span><strong>'+money(x.market?.realizable_usd)+'</strong></div><div><span>Lucro ou perda</span><strong>'+(hasNumber(x.profit_usd)?(Number(x.profit_usd)>=0?'+':'-')+'US$ '+Math.abs(Number(x.profit_usd)).toFixed(2):'N/D')+'</strong></div></div>'+
+    '<div class="output-actions"><a class="mini-btn enabled" href="'+skinEntityHref(x)+'">Ver skin</a></div></div></article>';
+}
+function canonicalOutputMap(d){
+  return new Map((d.outputs||[]).map(x=>[String(x.id),x]));
+}
+function renderReturnMode(d,map,org){
+  const ids=org?.modes?.RETURN?.ordered_output_ids;
+  if(!Array.isArray(ids))return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>O backend não retornou RETURN.ordered_output_ids.</span></div>';
+  const cards=ids.map(id=>map.get(String(id))).filter(Boolean).map(outputCard).join('');
+  return '<div class="output-grid">'+cards+'</div>';
+}
+function renderCollectionMode(d,map,org){
+  const mode=org?.modes?.BY_COLLECTION;
+  const order=Array.isArray(mode?.collection_order)?mode.collection_order:[];
+  const groups=Array.isArray(mode?.groups)?mode.groups:[];
+  const byName=new Map(groups.map(g=>[String(g.collection),g]));
+  if(!order.length)return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>O backend não retornou BY_COLLECTION.collection_order.</span></div>';
+  return order.map(collection=>{
+    const g=byName.get(String(collection));
+    if(!g)return '<section class="output-collection-group"><div class="collection-group-head"><strong>'+esc(collection)+'</strong><span>Grupo canônico indisponível</span></div></section>';
+    const items=(Array.isArray(g.item_ids)?g.item_ids:[]).map(id=>map.get(String(id))).filter(Boolean);
+    const best=hasNumber(g.best_return_pct)?((Number(g.best_return_pct)>=0?'+':'')+Number(g.best_return_pct).toFixed(1)+'%'):'N/D';
+    return '<section class="output-collection-group" data-collection="'+esc(collection)+'"><div class="collection-group-head"><div>'+collectionIdentity(collection,'compact',true)+'</div><span>Melhor retorno '+esc(best)+' · '+items.length+' resultado'+(items.length===1?'':'s')+'</span></div><div class="output-grid">'+items.map(outputCard).join('')+'</div></section>';
   }).join('');
 }
+function renderOutputsCanonical(d){
+  $('outputsSection').hidden=false;
+  state.outputEvaluation=d;
+  const org=d.output_organization;
+  const map=canonicalOutputMap(d);
+  const meta=$('outputOrganizationMeta');
+  if(org){
+    const r=org.modes?.RETURN||{};
+    meta.textContent='Autoridade: backend canônico · '+(r.known_count??0)+' retorno(s) conhecido(s) · '+(r.nd_count??0)+' N/D';
+    meta.hidden=false;
+  }else{
+    meta.textContent='Organização canônica indisponível';meta.hidden=false;
+  }
+  $('outputGroups').innerHTML=state.outputMode==='BY_COLLECTION'?renderCollectionMode(d,map,org):renderReturnMode(d,map,org);
+  document.querySelectorAll('[data-output-mode]').forEach(b=>b.classList.toggle('active',b.dataset.outputMode===state.outputMode));
+}
 function renderFinalEvaluation(d){
-  renderSummary(d);renderOutputs(d.outputs||[]);
+  renderSummary(d);renderOutputsCanonical(d);
   const es=String(d.economics?.status||'').toUpperCase();
   if(es==='COMPLETE')$('engineStatus').textContent=(d.outputs?.length||0)+' resultados · dados disponíveis';
   else if(es==='PARTIAL')$('engineStatus').textContent=(d.outputs?.length||0)+' resultados · dados parciais';
@@ -584,6 +628,12 @@ $('demoBtn').onclick=loadDemo;
 $('clearBtn').onclick=async()=>{state.slots=Array(10).fill(null);state.selectorSlot=0;resetFinal();renderInputs();syncSelectorContext();if(state.goalMode)await evaluateGoal();};
 $('simulateBtn').onclick=()=>state.goalMode?evaluateGoal():simulateLegacy();
 $('advancedBtn').onclick=()=>{const p=$('advancedPanel');p.hidden=!p.hidden;$('advancedBtn').textContent=p.hidden?'Ver detalhes':'Ocultar detalhes';};
+document.querySelectorAll('[data-output-mode]').forEach(b=>b.onclick=()=>{
+  const mode=b.dataset.outputMode;
+  if(mode!=='RETURN'&&mode!=='BY_COLLECTION')return;
+  state.outputMode=mode;
+  if(state.outputEvaluation)renderOutputsCanonical(state.outputEvaluation);
+});
 $('applyGoalBtn').onclick=async()=>{
   $('objectiveHelper').classList.remove('error');
   $('objectiveHelper').textContent='Opcional. O desgaste define uma faixa de float. Se você informar também uma faixa de float, a SCALE considera apenas a interseção possível entre os dois objetivos.';
