@@ -31,10 +31,10 @@ async function loadCatalog(){
   }
   if(!state.catalog.size)throw new Error('EMPTY_CATALOG');
   state.catalogReady=true;$('fileInput').disabled=false;$('dropZone').setAttribute('aria-disabled','false');
-  $('catalogStatus').textContent=state.catalog.size+' variantes canônicas disponíveis para matching local.';
+  $('catalogStatus').textContent=state.catalog.size+' variações disponíveis para reconhecimento local.';
  }catch(_){
   $('catalogStatus').textContent='Não foi possível preparar o catálogo. Recarregue a página para tentar novamente.';
-  showError('ERROR · Catálogo indisponível','A importação não foi habilitada porque o matching canônico não pode ser garantido.');
+  showError('Catálogo indisponível','Não foi possível preparar o catálogo necessário para reconhecer os itens.');
  }
 }
 function showError(title,detail){$('errorBox').hidden=false;$('errorBox').innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(detail)+'</span>'}
@@ -89,7 +89,7 @@ function tradeUrl(x){const p=new URLSearchParams();p.set('inventoryKey',x.market
 function card(x){
  const matched=x.match_state==='MATCHED';
  const actions=matched?'<div class="inventory-actions"><a href="'+skinUrl(x)+'">Abrir skin</a>'+(x.weapon?'<a href="'+loadoutUrl(x)+'">Loadout</a>':'')+(x.float_value!==null&&x.float_state!=='NOT_APPLICABLE'?'<a href="'+tradeUrl(x)+'">Trade Lab</a>':'')+'</div>':'<div class="inventory-actions single"><a href="../database/?q='+encodeURIComponent(x.market_hash_name||x.display_name)+'">Explorar no Database</a></div>';
- return '<article class="inventory-card '+statusClass(x.match_state)+'"><div class="inventory-card-head"><span class="asset-id">asset '+esc(x.asset_id)+'</span><span class="match-badge '+statusClass(x.match_state)+'">'+statusLabel(x.match_state)+'</span></div><div class="inventory-art">'+art(x)+'</div><div class="inventory-body"><h3>'+esc(clean(x.display_name))+'</h3><p>'+esc(fmt(x.collection))+' · '+esc(fmt(x.rarity))+'</p><div class="inventory-meta"><div><span>Float</span><strong>'+esc(floatText(x))+'</strong></div><div><span>Preço no snapshot</span><strong>'+esc(priceText(x))+'</strong></div><div><span>StatTrak</span><strong>'+esc(x.stattrak===true?'Sim':x.stattrak===false?'Não':'N/D')+'</strong></div><div><span>Market key</span><strong>'+esc(fmt(x.market_key))+'</strong></div></div>'+(matched?'':'<div class="raw-note">Registro preservado exatamente como ownership do snapshot; atributos canônicos não foram inventados.</div>')+'</div>'+actions+'</article>';
+ return '<article class="inventory-card '+statusClass(x.match_state)+'"><div class="inventory-card-head"><span class="asset-id">asset '+esc(x.asset_id)+'</span><span class="match-badge '+statusClass(x.match_state)+'">'+statusLabel(x.match_state)+'</span></div><div class="inventory-art">'+art(x)+'</div><div class="inventory-body"><h3>'+esc(clean(x.display_name))+'</h3><p>'+esc(fmt(x.collection))+' · '+esc(fmt(x.rarity))+'</p><div class="inventory-meta"><div><span>Float</span><strong>'+esc(floatText(x))+'</strong></div><div><span>Preço no snapshot</span><strong>'+esc(priceText(x))+'</strong></div><div><span>StatTrak</span><strong>'+esc(x.stattrak===true?'Sim':x.stattrak===false?'Não':'N/D')+'</strong></div><div><span>Identificador</span><strong>'+esc(fmt(x.market_key))+'</strong></div></div>'+(matched?'':'<div class="raw-note">Item preservado como veio no snapshot; atributos ausentes continuam N/D.</div>')+'</div>'+actions+'</article>';
 }
 function renderSnapshot(){
  const s=state.snapshot;if(!s)return;
@@ -105,16 +105,16 @@ function renderItems(){
  $('inventoryState').hidden=items.length>0;if(!items.length){$('inventoryState').hidden=false;$('inventoryState').textContent='Nenhum item corresponde a este filtro.'}
 }
 async function readFile(file){
- clearError();if(!state.catalogReady){showError('ERROR · Catálogo ainda não está pronto','Aguarde o catálogo público ser preparado antes de importar.');return}
- if(!file||file.size>5*1024*1024){showError('ERROR · Arquivo inválido','Use um JSON de até 5 MB exportado pelo SCALE Inventory Exporter.');return}
- let doc;try{doc=JSON.parse(await file.text())}catch(_){showError('ERROR · JSON malformado','O arquivo não pôde ser interpretado como JSON válido. Nenhum snapshot foi criado.');return}
+ clearError();if(!state.catalogReady){showError('Catálogo ainda não está pronto','Aguarde o catálogo público ser preparado antes de importar.');return}
+ if(!file||file.size>5*1024*1024){showError('Arquivo inválido','Use um JSON de até 5 MB exportado pelo SCALE Inventory Exporter.');return}
+ let doc;try{doc=JSON.parse(await file.text())}catch(_){showError('JSON inválido','O arquivo não pôde ser interpretado como JSON válido. Nenhum snapshot foi criado.');return}
  try{state.snapshot=validateAndNormalize(doc);persist();renderSnapshot()}
  catch(e){
   state.snapshot=null;
   const code=String(e.message||'IMPORT_ERROR');
-  if(code==='SCHEMA_INCOMPATIBLE')showError('ERROR · Schema incompatível','Este JSON não usa o schema scale.inventory_export.v0.8.1. Nenhum snapshot foi criado.');
-  else if(code.startsWith('DUPLICATE_ASSET_ID:'))showError('ERROR · Asset duplicado','O mesmo asset_id aparece mais de uma vez. A importação falhou fechada e nenhum ownership parcial foi criado.');
-  else showError('ERROR · Snapshot incompatível','Campos obrigatórios do Inventory Exporter estão ausentes ou inválidos. Nenhum snapshot foi criado.');
+  if(code==='SCHEMA_INCOMPATIBLE')showError('Formato incompatível','Este arquivo não corresponde ao formato compatível do Inventory Exporter.');
+  else if(code.startsWith('DUPLICATE_ASSET_ID:'))showError('Item duplicado','O mesmo item aparece mais de uma vez no arquivo. Nenhum snapshot parcial foi criado.');
+  else showError('Snapshot incompatível','Alguns dados obrigatórios do Inventory Exporter estão ausentes ou inválidos.');
  }
 }
 $('fileInput').onchange=e=>readFile(e.target.files?.[0]);$('replaceInput').onchange=e=>readFile(e.target.files?.[0]);$('clearSnapshotBtn').onclick=clearSnapshot;
