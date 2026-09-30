@@ -94,7 +94,7 @@ function applyInventoryOwnership(x){
   if(!title||!helper||!btn)return;
   if(inv.matches.length){
     title.textContent='Você já tem '+inv.matches.length+' exemplar'+(inv.matches.length===1?'':'es');
-    helper.textContent='O snapshot comprova presença destes exemplares. Use o Inventário para revisar os itens; elegibilidade para contrato continua sendo decidida pelo backend.';
+    helper.textContent='O snapshot confirma que estes itens estão no inventário importado. A compatibilidade com um contrato é verificada ao montar a composição.';
     btn.textContent='Ver meu Inventário';
   }else if(inv.snapshot){
     title.textContent='Complete o caminho com seu Inventário';
@@ -139,7 +139,7 @@ function render(x){
   }else{
     $('collectionBtn').href='../';
     $('collectionPathTitle').textContent='Coleção indisponível';
-    $('collectionPathHelper').textContent='A coleção desta skin está N/D nos dados atuais. Nenhuma relação foi inventada.';
+    $('collectionPathHelper').textContent='A coleção desta skin não está disponível nos dados atuais.';
     $('collectionBtn').textContent='Explorar Skins';
   }
   applyInventoryOwnership(x);
