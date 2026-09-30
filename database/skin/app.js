@@ -98,11 +98,11 @@ function applyInventoryOwnership(x){
     btn.textContent='Ver meu Inventário';
   }else if(inv.snapshot){
     title.textContent='Complete o caminho com seu Inventário';
-    helper.textContent='Há um snapshot importado, mas esta skin não aparece nele como item reconhecido. Outros itens do snapshot ainda podem ser avaliados no Trade Lab.';
+    helper.textContent='Há um snapshot importado, mas esta skin não aparece nele como item reconhecido. Outros itens do snapshot ainda podem ser avaliados em Contratos.';
     btn.textContent='Revisar meu Inventário';
   }else{
     title.textContent='Use o que você já tem';
-    helper.textContent='Importe um snapshot para disponibilizar seus itens como contexto no Trade Lab. Isso não sincroniza a Steam nem prova tradability.';
+    helper.textContent='Importe um snapshot para usar seus itens como contexto em Contratos. Isso não sincroniza a Steam.';
     btn.textContent='Importar Inventário';
   }
 }
