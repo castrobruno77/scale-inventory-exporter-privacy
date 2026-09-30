@@ -78,7 +78,7 @@ Portanto:
 
 ## VETOR
 
-Nenhum mismatch concreto de payload/query/Collection v24/Goal-Aware foi observado neste ciclo. OPS-036 não foi acionada. Nenhuma compensação local foi adicionada.
+OPS-036 foi aberta em paralelo pelo NEXO e concluída pelo VETOR em HOF-VETOR-20260930-OPS036-RUNTIME-RECERT-V25-9a2f6d43. tradeup-public v25 está ACTIVE no mesmo endpoint. GET Skin/Collection/Hub foi recertificado em runtime real; o único bug encontrado foi limit inválido causando HTTP500, corrigido para INVALID_LIMIT HTTP400. O frontend atual já envia limit inteiro, portanto nenhuma mudança nem workaround é necessária. O antigo GET runtime GAP foi encerrado; permanece apenas GAP não bloqueante de body→response POST v25 arbitrário.
 
 ## Gates preservados
 
