@@ -15,8 +15,8 @@
     <a class="brand" href="../../" aria-label="SCALE home">SCALE<span>.</span></a>
     <nav class="nav" aria-label="Navegação principal">
       <a href="../../">Início</a>
+      <a class="active" href="../../database/">Skins</a>
       <a href="../../inventory/">Inventário</a>
-      <a class="active" href="../">Skins</a>
       <a href="../../loadout/">Loadout</a>
       <a href="../../tradeup/">Contratos</a>
     </nav>
@@ -28,8 +28,8 @@
 
   <div id="originContext" class="origin-context" hidden>
     <div>
-      <strong id="originLabel">Vindo do Database</strong>
-      <span id="originHelper">Sua busca e seus filtros devem continuar reconhecíveis ao retornar.</span>
+      <strong id="originLabel">Vindo de Skins</strong>
+      <span id="originHelper">Sua busca e seus filtros ficam disponíveis ao retornar.</span>
     </div>
     <a id="contextBackBtn" class="button secondary compact" href="../">Voltar aos resultados</a>
   </div>
@@ -47,14 +47,14 @@
         <div class="entity-actions">
           <a id="loadoutBtn" class="button secondary" href="../../loadout/">Adicionar esta skin ao Loadout</a>
         </div>
-        <p class="action-helper">A skin permanece como entidade central. Use as ações abaixo para continuar a partir dela sem transformar capacidades futuras em atalhos falsos.</p>
+        <p class="action-helper">Continue a partir desta skin usando somente as ações disponíveis.</p>
       </div>
     </section>
 
     <section class="entity-section">
       <div class="section-head">
         <div><p class="eyebrow">Identidade</p><h2>O que a SCALE conhece</h2></div>
-        <p class="section-copy">Somente atributos estruturais sustentados pelo catálogo vigente. Dado ausente permanece N/D.</p>
+        <p class="section-copy">Atributos disponíveis no catálogo. Quando um dado não existe, ele permanece N/D.</p>
       </div>
       <div class="entity-data-grid identity-grid">
         <div><span>Skin</span><strong id="entityFinish">N/D</strong></div>
@@ -91,13 +91,13 @@
           <p class="eyebrow">Continuidade</p>
           <h2>Como obter esta skin</h2>
         </div>
-        <p class="section-copy">Escolha um caminho disponível. O contrato Goal-Aware recebe esta skin como alvo; elegibilidade, float, probabilidade e economia continuam sendo avaliados pelo backend.</p>
+        <p class="section-copy">Escolha como continuar. Ao abrir Contratos, esta skin segue como seu alvo e a avaliação acontece durante a composição.</p>
       </div>
       <div class="obtain-grid">
         <article class="obtain-card primary-path">
           <span class="obtain-kicker">Contrato de troca</span>
           <h3>Monte um caminho para esta skin</h3>
-          <p>Use skins compatíveis e acompanhe se a skin-alvo e o objetivo escolhido continuam possíveis durante a composição.</p>
+          <p>Adicione skins e acompanhe se esta skin e o objetivo escolhido continuam possíveis durante a composição.</p>
           <a id="tradeLabBtnBottom" class="button primary" href="../../tradeup/">Montar contrato para esta skin</a>
         </article>
         <article class="obtain-card">
@@ -109,7 +109,7 @@
         <article class="obtain-card">
           <span class="obtain-kicker">Inventário</span>
           <h3 id="inventoryPathTitle">Use o que você já tem</h3>
-          <p id="inventoryPathHelper">Um snapshot importado pode contribuir para a composição no Trade Lab sem provar tradability ou marketability.</p>
+          <p id="inventoryPathHelper">Use itens reconhecidos no seu snapshot como ponto de partida para explorar a composição.</p>
           <a id="inventoryBtn" class="button secondary" href="../../inventory/">Abrir Inventário</a>
         </article>
       </div>
@@ -117,12 +117,7 @@
   </article>
 </main>
 
-<footer class="footer">
-  <div class="wrap footer-row">
-    <span><strong>SCALE Skins</strong> · atributos estruturais sustentados · N/D nunca vira zero.</span>
-    <span>Human Review Fase E · VÉRTICE / SCL-DXP-001</span>
-  </div>
-</footer>
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Skin Hub</strong> · identidade, contexto e próximos caminhos.</span><span>N/D permanece N/D.</span></div></footer>
 <script src="app.js"></script>
 </body>
 </html>
