@@ -132,14 +132,14 @@ async function fetchPage({append=false,offset=0,silent=false}={}){
  try{
   const r=await fetch(API+'?'+buildParams(offset).toString(),{signal:queryController.signal});const d=await r.json().catch(()=>({status:'ERROR',error:'INVALID_RESPONSE'}));
   if(seq!==querySeq)return false;
-  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);setResultsHeading('Não foi possível concluir a busca.','Query e filtros preservados');setState((ERROR_MESSAGES[code]||'Não foi possível concluir a busca. Tente novamente sem perder seus filtros.')+' · '+code,true);state.hasMore=false;state.nextOffset=null;return false;}
+  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);setResultsHeading('Não foi possível concluir a busca.','Query e filtros preservados');setState((ERROR_MESSAGES[code]||'Não foi possível concluir a busca. Tente novamente sem perder seus filtros.'),true);state.hasMore=false;state.nextOffset=null;return false;}
   const page=Array.isArray(d.items)?d.items:[];const merged=append?[...state.items,...page]:page;render(merged);
   const pg=d.pagination||{};state.hasMore=pg.has_more===true;state.nextOffset=Number.isFinite(Number(pg.next_offset))?Number(pg.next_offset):null;
   state.lastSearchMode=d.search?.mode||'NONE';state.lastEffectiveSort=d.sort?.effective||state.sort;state.fieldFilters=d.field_filters||null;renderFilterControls();
   const fieldModes=[...(state.fieldFilters?.weapon?.terms||[]),...(state.fieldFilters?.collection?.terms||[])];
   const hasFieldFuzzy=fieldModes.some(t=>t?.mode==='FUZZY_FALLBACK');
   const hasFieldNoMatch=fieldModes.some(t=>t?.mode==='NO_MATCH');
-  const searchNote=state.lastSearchMode==='FUZZY_FALLBACK'?'Busca global aproximada aplicada pelo catálogo':(state.q?'Busca global direta':(hasFieldFuzzy?'Filtro aproximado resolvido pelo catálogo':(hasFieldNoMatch?'Filtro sem correspondência canônica':'Filtros estruturais')));
+  const searchNote=state.lastSearchMode==='FUZZY_FALLBACK'?'Busca global aproximada aplicada pelo catálogo':(state.q?'Busca global direta':(hasFieldFuzzy?'Filtro aproximado resolvido pelo catálogo':(hasFieldNoMatch?'Filtro sem correspondência':'Filtros estruturais')));
   const sortNote=state.lastEffectiveSort==='relevance'?'ordem por relevância do catálogo':(state.lastEffectiveSort==='default'?'ordem padrão':'ordenação '+state.lastEffectiveSort.replace('_',' '));
   if(merged.length){setResultsHeading(merged.length+' skins carregadas',searchNote+' · '+sortNote+(state.hasMore?' · há mais resultados':''));setState(state.hasMore?'Continue explorando ou carregue a próxima página.':'Todos os resultados desta consulta foram carregados.');}
   else{setResultsHeading('Nenhuma skin encontrada.','Consulta completa para os filtros atuais');setState('Nenhuma skin encontrada. Tente outro termo ou ajuste os filtros.');}
