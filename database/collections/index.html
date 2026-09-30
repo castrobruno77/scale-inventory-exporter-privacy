@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCALE — Collections Explorer</title>
+<meta name="description" content="Explore coleções do catálogo estrutural da SCALE.">
+<meta name="theme-color" content="#071014">
+<link rel="stylesheet" href="../../platform.css">
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="wrap nav-shell">
+    <a class="brand" href="../../" aria-label="SCALE home">SCALE<span>.</span></a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="../../">Início</a>
+      <a href="../../inventory/">Inventário</a>
+      <a class="active" href="../">Skins</a>
+      <a href="../../loadout/">Loadout</a>
+      <a href="../../tradeup/">Contratos</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap database-page collections-page">
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../">Skins</a><span>›</span><span>Coleções</span></nav>
+
+  <section class="page-hero db-hero">
+    <p class="eyebrow">Coleções</p>
+    <h1>Explore coleções.<br><em>Abra o contexto.</em></h1>
+    <p class="lead">Esta experiência usa somente a entidade Collection exposta pelo catálogo vigente. Identidade visual real de coleção permanece indisponível; o fallback autorizado é usado em todo o preview.</p>
+  </section>
+
+  <section class="explorer-shell" aria-labelledby="collections-title">
+    <div class="explorer-search">
+      <div><p class="eyebrow">Collection entity</p><h2 id="collections-title">Buscar coleções</h2></div>
+      <div class="search-row"><input id="collectionSearch" autocomplete="off" placeholder="Buscar coleção" aria-label="Buscar coleção"><button id="searchBtn" type="button">Buscar</button></div>
+      <p class="search-help">Busca e resolução pertencem ao backend v24. O frontend não implementa fuzzy, normalização, agregação ou ranking local.</p>
+    </div>
+
+    <div class="filter-toolbar">
+      <button id="filterToggle" class="button secondary compact" type="button" aria-expanded="true">Filtros</button>
+      <label class="sort-control">Ordenar
+        <select id="sortSelect" aria-label="Ordenar coleções">
+          <option value="default">Padrão</option>
+          <option value="name_asc">Nome A–Z</option>
+          <option value="name_desc">Nome Z–A</option>
+        </select>
+      </label>
+      <button id="clearBtn" class="button ghost compact" type="button">Limpar</button>
+    </div>
+
+    <section id="filtersPanel" class="filters-panel collections-filters" aria-label="Filtros de coleções">
+      <div class="filter-group">
+        <div class="filter-head"><strong>Coleção</strong><small>campo canônico</small></div>
+        <div class="token-entry"><input id="collectionFilter" placeholder="Ex.: Mirage 2021" aria-label="Filtrar por coleção"><button id="applyCollectionFilter" type="button">Aplicar</button></div>
+        <p class="filter-note">O termo é enviado ao parâmetro collection do contrato v24.</p>
+      </div>
+      <div class="filter-group">
+        <div class="filter-head"><strong>Raridade presente</strong><small>backend</small></div>
+        <select id="rarityFilter" class="collection-select" aria-label="Filtrar por raridade presente">
+          <option value="">Todas</option>
+          <option value="Consumer Grade">Consumer Grade</option>
+          <option value="Industrial Grade">Industrial Grade</option>
+          <option value="Mil-Spec Grade">Mil-Spec Grade</option>
+          <option value="Restricted">Restricted</option>
+          <option value="Classified">Classified</option>
+          <option value="Covert">Covert</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-head"><strong>StatTrak</strong><small>presença na coleção</small></div>
+        <div class="segmented" role="group" aria-label="Filtro de presença StatTrak">
+          <button type="button" data-st="" class="active">Todos</button>
+          <button type="button" data-st="true">Com StatTrak</button>
+          <button type="button" data-st="false">Sem StatTrak</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-head"><strong>Consumer Grade</strong><small>presença na coleção</small></div>
+        <div class="segmented" role="group" aria-label="Filtro de Consumer Grade">
+          <button type="button" data-consumer="" class="active">Todos</button>
+          <button type="button" data-consumer="true">Com Consumer</button>
+          <button type="button" data-consumer="false">Sem Consumer</button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="results-section">
+    <div class="results-head">
+      <div><p class="eyebrow">Resultados</p><h2 id="resultsTitle">Carregando coleções…</h2></div>
+      <div id="resultsMeta" class="results-meta">Contrato Collection v24</div>
+    </div>
+    <div id="stateBox" class="state-box">Carregando coleções…</div>
+    <section id="results" class="collection-results" aria-live="polite"></section>
+    <div class="pagination-row"><button id="loadMoreBtn" class="button secondary" type="button" hidden>Carregar mais</button></div>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap footer-row"><span><strong>SCALE Collections</strong> · entidade Collection v24 · N/D permanece N/D.</span><span>Human Review Fase F · VÉRTICE / SCL-DXP-001</span></div></footer>
+<script src="app.js"></script>
+</body>
+</html>
