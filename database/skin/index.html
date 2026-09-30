@@ -45,11 +45,9 @@
         <h1 id="entityName">N/D</h1>
         <p id="entitySubline" class="entity-subline">N/D</p><div id="inventoryOwnership" class="entity-evidence" hidden></div>
         <div class="entity-actions">
-          <a id="tradeLabBtn" class="button primary" href="../../tradeup/">Montar contrato para esta skin</a>
-          <a id="loadoutBtn" class="button secondary" href="../../loadout/">Adicionar ao Loadout</a>
-          <a id="entityBackBtn" class="button secondary" href="../">Voltar às Skins</a>
+          <a id="loadoutBtn" class="button secondary" href="../../loadout/">Adicionar esta skin ao Loadout</a>
         </div>
-        <p class="action-helper">Escolha esta skin como alvo e monte um contrato progressivamente. A SCALE preserva a skin-alvo, mas não promete que o objetivo continuará possível.</p>
+        <p class="action-helper">A skin permanece como entidade central. Use as ações abaixo para continuar a partir dela sem transformar capacidades futuras em atalhos falsos.</p>
       </div>
     </section>
 
@@ -87,16 +85,33 @@
       </div>
     </section>
 
-    <section class="entity-section action-section">
-      <div>
-        <p class="eyebrow">Próxima ação</p>
-        <h2>Como obter esta skin</h2>
-        <p class="section-copy">Monte um contrato usando skins compatíveis e acompanhe a chance desta skin continuar possível. Validade, chance e objetivo de float são avaliados pelo serviço certificado.</p>
+    <section class="entity-section obtain-section">
+      <div class="section-head obtain-head">
+        <div>
+          <p class="eyebrow">Continuidade</p>
+          <h2>Como obter esta skin</h2>
+        </div>
+        <p class="section-copy">Escolha um caminho disponível. O contrato Goal-Aware recebe esta skin como alvo; elegibilidade, float, probabilidade e economia continuam sendo avaliados pelo backend.</p>
       </div>
-      <div class="next-action-panel">
-        <a id="tradeLabBtnBottom" class="button primary" href="../../tradeup/">Montar contrato para esta skin</a>
-        <a id="loadoutBtnBottom" class="button secondary" href="../../loadout/">Adicionar ao Loadout</a>
-        <a id="backBtnBottom" class="button secondary" href="../">Voltar às Skins</a>
+      <div class="obtain-grid">
+        <article class="obtain-card primary-path">
+          <span class="obtain-kicker">Contrato de troca</span>
+          <h3>Monte um caminho para esta skin</h3>
+          <p>Use skins compatíveis e acompanhe se a skin-alvo e o objetivo escolhido continuam possíveis durante a composição.</p>
+          <a id="tradeLabBtnBottom" class="button primary" href="../../tradeup/">Montar contrato para esta skin</a>
+        </article>
+        <article class="obtain-card">
+          <span class="obtain-kicker">Coleção</span>
+          <h3 id="collectionPathTitle">Explore a coleção</h3>
+          <p id="collectionPathHelper">Veja outras skins da mesma coleção usando o filtro canônico já disponível em Skins.</p>
+          <a id="collectionBtn" class="button secondary" href="../">Ver skins desta coleção</a>
+        </article>
+        <article class="obtain-card">
+          <span class="obtain-kicker">Inventário</span>
+          <h3 id="inventoryPathTitle">Use o que você já tem</h3>
+          <p id="inventoryPathHelper">Um snapshot importado pode contribuir para a composição no Trade Lab sem provar tradability ou marketability.</p>
+          <a id="inventoryBtn" class="button secondary" href="../../inventory/">Abrir Inventário</a>
+        </article>
       </div>
     </section>
   </article>
@@ -105,7 +120,7 @@
 <footer class="footer">
   <div class="wrap footer-row">
     <span><strong>SCALE Skins</strong> · atributos estruturais sustentados · N/D nunca vira zero.</span>
-    <span>OPS-029 · VÉRTICE / SCL-DXP-001</span>
+    <span>Human Review Fase E · VÉRTICE / SCL-DXP-001</span>
   </div>
 </footer>
 <script src="app.js"></script>
