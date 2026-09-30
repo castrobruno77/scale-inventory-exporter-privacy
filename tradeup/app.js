@@ -173,7 +173,7 @@ function renderSelectorAuthority(pagination=null,inventory=null){
   }else if(inventory?.filters) state.selectorResolvedFilters=inventory.filters;
   const ctx=state.selectorRequiredContext;
   $('selectorRequiredContext').textContent=ctx
-    ? 'Contexto obrigatório do backend: raridade rank '+ctx.rarity_rank+' · '+(ctx.mode==='STATTRAK'?'StatTrak':'Normal')
+    ? 'Compatibilidade atual: raridade '+ctx.rarity_rank+' · '+(ctx.mode==='STATTRAK'?'StatTrak':'Normal')
     : 'Contexto obrigatório: definido pelo contrato Goal-Aware.';
   const w=resolutionText('weapon'),c=resolutionText('collection');
   const box=$('selectorFilterResolution');
@@ -284,7 +284,7 @@ function renderGoalState(d){
   const cEl=$('contractValidState');
   cEl.textContent=c.valid===true?'Contrato válido até aqui':c.valid===false?'Este contrato precisa de ajuste':'—';
   cEl.className=c.valid===true?'ok-text':c.valid===false?'bad-text':'';
-  $('contractReason').textContent=c.valid===true?'Estrutura aceita pelo contrato VETOR':(c.reasons||[]).map(r=>ERROR_MESSAGES[r]||r).join(' · ')||'Aguardando';
+  $('contractReason').textContent=c.valid===true?'Estrutura válida até aqui':(c.reasons||[]).map(r=>ERROR_MESSAGES[r]||r).join(' · ')||'Aguardando';
 
   $('targetPossibleState').textContent=t.possible===true?'A skin-alvo ainda é possível':t.possible===false?'A skin-alvo não é mais possível com esta composição':t.possible===null?'—':'—';
   $('targetPossibleState').className=t.possible===true?'ok-text':t.possible===false?'bad-text':'';
@@ -357,7 +357,7 @@ async function evaluateGoal(){
       return;
     }
     $('engineStatus').textContent='não foi possível atualizar';
-    setResultState('error','Não foi possível atualizar o contrato',(e.message||'Tente novamente.')+(e.code?' · '+e.code:''));
+    setResultState('error','Não foi possível atualizar o contrato',(e.message||'Tente novamente.'));
   }
 }
 async function loadTarget(){
@@ -380,7 +380,7 @@ async function loadTarget(){
     $('targetEligibility').className='inline-state '+(g.target?.eligible?'positive':'negative');
     if(!g.target?.eligible){
       $('skinSearch').disabled=true;$('searchBtn').disabled=true;
-      setResultState('error','Esta skin não pode ser usada como alvo','O contrato certificado não encontrou predecessor elegível para esta skin/modalidade.');
+      setResultState('error','Esta skin não pode ser usada como alvo','Não há um caminho de contrato compatível para esta skin nesta modalidade.');
     }
   }catch(e){
     $('targetName').textContent='Não foi possível carregar a skin-alvo';
@@ -402,7 +402,7 @@ async function search(){
       if(state.selectorOrigin!=='DATABASE'){
         const assets=matchedInventoryAssets();
         if(assets.length>500){
-          $('selectorFeedback').textContent='Inventário MATCHED excede o limite certificado de 500 assets para uma consulta.';$('selectorFeedback').hidden=false;showGoalSearch([],[],null,null);return;
+          $('selectorFeedback').textContent='Seu snapshot tem mais itens reconhecidos do que esta busca consegue processar de uma vez.';$('selectorFeedback').hidden=false;showGoalSearch([],[],null,null);return;
         }
         extra.inventory_query={q,...filters,assets};
       }
@@ -454,7 +454,7 @@ function showGoalSearch(candidates,inventoryItems,pagination,inventoryDiscovery)
       const d=await postGoal({candidate:{market_key:candidate.market_key,float_value:v}});
       const cv=d.candidate_validation;
       if(!cv||cv.valid!==true||cv.float_compatible===false){
-        $('selectorFeedback').textContent='O backend não aprovou este candidato/float: '+((cv?.reasons||[]).join(' · ')||'incompatível');$('selectorFeedback').hidden=false;return;
+        $('selectorFeedback').textContent='Esta combinação não é compatível: '+((cv?.reasons||[]).join(' · ')||'incompatível');$('selectorFeedback').hidden=false;return;
       }
       pickGoalCandidate({...candidate,price_reference:cv.price_reference||null},null,v);
     }catch(e){$('selectorFeedback').textContent=e.message||'Não foi possível validar este candidato.';$('selectorFeedback').hidden=false;}
@@ -544,10 +544,10 @@ function outputCard(x){
 function canonicalOutputMap(d){
   return new Map((d.outputs||[]).map(x=>[String(x.id),x]));
 }
-function missingOutputCard(id){return '<article class="output-card partial canonical-mismatch"><div class="output-body"><h3>Resultado indisponível</h3><div class="output-meta">ID canônico '+esc(id)+' não foi encontrado no array outputs. A ordem não foi reconstruída localmente.</div></div></article>';}
+function missingOutputCard(id){return '<article class="output-card partial canonical-mismatch"><div class="output-body"><h3>Resultado indisponível</h3><div class="output-meta">Resultado '+esc(id)+' não foi recebido. A ordem não foi reconstruída.</div></div></article>';}
 function renderReturnMode(d,map,org){
   const ids=org?.modes?.RETURN?.ordered_output_ids;
-  if(!Array.isArray(ids))return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>O backend não retornou RETURN.ordered_output_ids.</span></div>';
+  if(!Array.isArray(ids))return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>A organização por retorno não está disponível nesta resposta.</span></div>';
   const cards=ids.map(id=>{const x=map.get(String(id));return x?outputCard(x):missingOutputCard(id);}).join('');
   return '<div class="output-grid">'+cards+'</div>';
 }
@@ -556,10 +556,10 @@ function renderCollectionMode(d,map,org){
   const order=Array.isArray(mode?.collection_order)?mode.collection_order:[];
   const groups=Array.isArray(mode?.groups)?mode.groups:[];
   const byName=new Map(groups.map(g=>[String(g.collection),g]));
-  if(!order.length)return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>O backend não retornou BY_COLLECTION.collection_order.</span></div>';
+  if(!order.length)return '<div class="state-banner partial"><strong>Organização indisponível</strong><span>A organização por coleção não está disponível nesta resposta.</span></div>';
   return order.map(collection=>{
     const g=byName.get(String(collection));
-    if(!g)return '<section class="output-collection-group"><div class="collection-group-head"><strong>'+esc(collection)+'</strong><span>Grupo canônico indisponível</span></div></section>';
+    if(!g)return '<section class="output-collection-group"><div class="collection-group-head"><strong>'+esc(collection)+'</strong><span>Grupo indisponível</span></div></section>';
     const ids=Array.isArray(g.item_ids)?g.item_ids:[];
     const best=hasNumber(g.best_return_pct)?((Number(g.best_return_pct)>=0?'+':'')+Number(g.best_return_pct).toFixed(1)+'%'):'N/D';
     const cards=ids.map(id=>{const x=map.get(String(id));return x?outputCard(x):missingOutputCard(id);}).join('');
@@ -574,10 +574,10 @@ function renderOutputsCanonical(d){
   const meta=$('outputOrganizationMeta');
   if(org){
     const r=org.modes?.RETURN||{};
-    meta.textContent='Autoridade: backend canônico · '+(r.known_count??0)+' retorno(s) conhecido(s) · '+(r.nd_count??0)+' N/D';
+    meta.textContent='Ordem do cálculo · '+(r.known_count??0)+' retorno(s) conhecido(s) · '+(r.nd_count??0)+' N/D';
     meta.hidden=false;
   }else{
-    meta.textContent='Organização canônica indisponível';meta.hidden=false;
+    meta.textContent='Organização indisponível';meta.hidden=false;
   }
   $('outputGroups').innerHTML=state.outputMode==='BY_COLLECTION'?renderCollectionMode(d,map,org):renderReturnMode(d,map,org);
   document.querySelectorAll('[data-output-mode]').forEach(b=>b.classList.toggle('active',b.dataset.outputMode===state.outputMode));
