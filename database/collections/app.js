@@ -27,7 +27,7 @@ async function fetchPage({append=false,offset=0,silent=false}={}){
   const r=await fetch(API+'?'+buildParams(offset).toString(),{signal:state.controller.signal});
   const d=await r.json().catch(()=>({status:'ERROR',error:'INVALID_RESPONSE'}));
   if(seq!==state.seq)return false;
-  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';$('resultsMeta').textContent='Filtros preservados';setState(ERROR_MESSAGES[code]||'Não foi possível consultar a entidade Collection.',code,true);return false;}
+  if(!r.ok||d.status==='ERROR'){const code=d.error||('HTTP_'+r.status);if(!append)render([]);state.hasMore=false;state.nextOffset=null;$('resultsTitle').textContent='Não foi possível carregar as coleções.';$('resultsMeta').textContent='Seus filtros foram preservados';setState(ERROR_MESSAGES[code]||'Não foi possível carregar as coleções.',code,true);return false;}
   const page=Array.isArray(d.items)?d.items:[];const merged=append?[...state.items,...page]:page;render(merged);
   const pg=d.pagination||{};state.hasMore=pg.has_more===true;state.nextOffset=Number.isFinite(Number(pg.next_offset))?Number(pg.next_offset):null;
   if(merged.length){$('resultsTitle').textContent=merged.length+' coleções carregadas';$('resultsMeta').textContent='Ordenação: '+state.sort+(state.hasMore?' · há mais resultados':'');setState(state.hasMore?'Continue explorando ou carregue a próxima página.':'Todos os resultados desta consulta foram carregados.');}
