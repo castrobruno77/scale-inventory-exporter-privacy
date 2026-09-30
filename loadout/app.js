@@ -56,7 +56,7 @@ async function consumeContext(){
  const p=new URLSearchParams(location.search);const pick=p.get('pick')||'';const incoming=p.get('skin')||'';const side=p.get('side');const weapon=p.get('weapon')||'';const origin=safeLocalPath(p.get('from')||'');const fromInventory=p.get('inventory')==='1';
  if(side==='CT'||side==='T')state.side=side;
  if(pick){
-  try{const item=await exactItem(pick);if(!item)return showArrivalError('Erro real','A skin escolhida não foi encontrada no catálogo.');if(!weapon)return showArrivalError('Erro real','O slot de destino não foi informado.');if(selectItem(state.side,weapon,item))history.replaceState(null,'',currentUrl(weapon));}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente pelo Database.')}return;
+  try{const item=await exactItem(pick);if(!item)return showArrivalError('Não foi possível continuar','A skin escolhida não foi encontrada no catálogo.');if(!weapon)return showArrivalError('Não foi possível continuar','O slot de destino não foi informado.');if(selectItem(state.side,weapon,item))history.replaceState(null,'',currentUrl(weapon));}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente por Skins.')}return;
  }
  if(incoming){
   try{const item=await exactItem(incoming);if(!item)return showArrivalError('Skin não encontrada.','Volte à skin e tente novamente.');arrivalButtons(item,origin,fromInventory);}catch(_){showArrivalError('Não foi possível carregar esta skin.','Tente novamente.')}return;
