@@ -159,21 +159,54 @@ async function fetchJson(url: string, init: RequestInit, timeoutMs = 20000) {
 async function probeCsDeals(): Promise<ProbeResult> {
   const key = envAny("CSDEALS_API_KEY", "CS_DEALS_API_KEY", "CSD_API_KEY");
   if (!key) return missing("csdeals", "missing API key environment variable");
-  const url = "https://api.cs.deals/public/v1/listings?app_id=730&limit=500";
+  let cursor: string | null = null;
+  let totalLatency = 0;
+  let totalCount = 0;
+  let lastHeaders: Record<string, string> = {};
+  let allForFreshness: any[] = [];
+  let found: any = null;
+  let lastStatus: number | null = null;
+  let nextCursor = false;
+
   try {
-    const { res, body, latency_ms } = await fetchJson(url, {
-      headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
-    });
-    const items = arrFrom(body);
+    for (let page = 0; page < 3; page++) {
+      const u = new URL("https://api.cs.deals/public/v1/listings");
+      u.searchParams.set("app_id", "730");
+      u.searchParams.set("limit", "500");
+      if (cursor) u.searchParams.set("cursor", cursor);
+
+      const { res, body, latency_ms } = await fetchJson(u.toString(), {
+        headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
+      });
+      lastStatus = res.status;
+      totalLatency += latency_ms;
+      lastHeaders = rateHeaders(res.headers);
+      const items = arrFrom(body);
+      totalCount += items.length;
+      allForFreshness = allForFreshness.concat(items);
+
+      found = items.find((it: any) =>
+        it?.cs_paint_wear != null &&
+        it?.price != null &&
+        it?.market_hash_name
+      ) ?? found;
+
+      cursor = body?.next_cursor != null ? String(body.next_cursor) : null;
+      nextCursor = cursor != null;
+
+      if (!res.ok || found || !cursor) break;
+      await new Promise((r) => setTimeout(r, 1100));
+    }
+
     return {
-      source: "csdeals", ok: res.ok, status: res.status, latency_ms,
-      count: items.length,
-      next_cursor: body?.next_cursor != null,
-      rate_headers: rateHeaders(res.headers),
-      freshness: timestamps(items),
-      fields: safeFields(items[0], "csdeals"),
-      sample: safeSample(items[0], "csdeals"),
-      error: res.ok ? null : (body?.message ?? body?.error ?? `HTTP ${res.status}`),
+      source: "csdeals", ok: lastStatus === 200, status: lastStatus, latency_ms: totalLatency,
+      count: totalCount,
+      next_cursor: nextCursor,
+      rate_headers: lastHeaders,
+      freshness: timestamps(allForFreshness),
+      fields: safeFields(found, "csdeals"),
+      sample: safeSample(found, "csdeals"),
+      error: lastStatus === 200 ? (found ? null : "No float-bearing listing found in first 3 pages") : `HTTP ${lastStatus}`,
     };
   } catch (e) { return failed("csdeals", e); }
 }
@@ -184,20 +217,22 @@ async function probeWaxpeer(): Promise<ProbeResult> {
   const u = new URL("https://api.waxpeer.com/v2/get-items-list");
   u.searchParams.set("game", "csgo");
   u.searchParams.set("limit", "100");
+  u.searchParams.set("search", "AK-47 | Redline");
   u.searchParams.set("api", key);
   try {
     const { res, body, latency_ms } = await fetchJson(u.toString(), {
       headers: { Accept: "application/json" },
     });
     const items = arrFrom(body);
+    const found = items.find((it: any) => it?.float != null && it?.price != null) ?? items[0] ?? null;
     return {
       source: "waxpeer", ok: res.ok, status: res.status, latency_ms,
       count: items.length,
       next_cursor: (body?.next_cursor ?? body?.cursor) != null,
       rate_headers: rateHeaders(res.headers),
       freshness: timestamps(items),
-      fields: safeFields(items[0], "waxpeer"),
-      sample: safeSample(items[0], "waxpeer"),
+      fields: safeFields(found, "waxpeer"),
+      sample: safeSample(found, "waxpeer"),
       error: res.ok ? null : (body?.msg ?? body?.message ?? body?.error ?? `HTTP ${res.status}`),
     };
   } catch (e) { return failed("waxpeer", e); }
