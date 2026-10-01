@@ -1,4 +1,5 @@
 import nacl from "npm:tweetnacl@1.0.3";
+import rareCatalogFile from "./ops045_rare_catalog.json" with { type: "json" };
 
 type ProbeResult = {
   source: string;
@@ -314,13 +315,230 @@ function failed(source: string, e: unknown): ProbeResult {
   return missing(source, e instanceof Error ? e.message : String(e));
 }
 
+
+type RareCatalogRow = { collection: string; skin_name: string; rarity: string; float_min: number; float_max: number };
+type RareListing = {
+  source: "DMarket";
+  offer_id: string;
+  collection: string;
+  skin: string;
+  rarity: string;
+  variant: "NORMAL" | "SOUVENIR" | "STATTRAK";
+  wear: string | null;
+  float: number;
+  normalized_float: number;
+  price_usd: number;
+  captured_at: string;
+  native_created_at: string | null;
+};
+
+const RARE_CATALOG: RareCatalogRow[] = ((rareCatalogFile as any)?.rows ?? []) as RareCatalogRow[];
+const TRADEUP_INPUT_RARITIES = new Set(["Consumer Grade","Industrial Grade","Mil-Spec Grade","Restricted","Classified"]);
+
+function median(values: number[]): number | null {
+  const xs = values.filter(Number.isFinite).sort((a,b)=>a-b);
+  if (!xs.length) return null;
+  const m=Math.floor(xs.length/2);
+  return xs.length%2 ? xs[m] : (xs[m-1]+xs[m])/2;
+}
+
+function wearFromTitle(title: string): string | null {
+  const m=title.match(/\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)$/);
+  return m?.[1] ?? null;
+}
+
+function stripVariantAndWear(title: string): { base:string; variant:"NORMAL"|"SOUVENIR"|"STATTRAK" } {
+  let x=title.trim();
+  let variant:"NORMAL"|"SOUVENIR"|"STATTRAK"="NORMAL";
+  if (x.startsWith("Souvenir ")) { variant="SOUVENIR"; x=x.slice("Souvenir ".length); }
+  if (/^StatTrak(?:™)?\s+/.test(x)) { variant="STATTRAK"; x=x.replace(/^StatTrak(?:™)?\s+/,""); }
+  x=x.replace(/\s+\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)$/,"");
+  return {base:x,variant};
+}
+
+async function dmarketOffersByTitle(title: string, limit=100) {
+  const publicKey = envAny("DMARKET_PUBLIC_KEY", "DMARKET_API_PUBLIC_KEY", "DMARKET_KEY");
+  const secretHex = envAny("DMARKET_SECRET_KEY", "DMARKET_API_SECRET_KEY", "DMARKET_SECRET");
+  if (!publicKey || !secretHex) throw new Error("DMarket credentials unavailable");
+  const path="/marketplace-api/v2/offers";
+  const params=new URLSearchParams();
+  params.set("gameId","a8db");
+  params.set("title",title);
+  params.set("orderBy","price");
+  params.set("orderDir","asc");
+  params.set("limit",String(limit));
+  params.set("offerType","all");
+  const query=params.toString();
+  const timestamp=Math.floor(Date.now()/1000).toString();
+  const unsigned="GET"+path+"?"+query+timestamp;
+  const sig=nacl.sign.detached(new TextEncoder().encode(unsigned),dmarketSecretKey(secretHex));
+  const {res,body,latency_ms}=await fetchJson("https://api.dmarket.com"+path+"?"+query,{
+    headers:{
+      "X-Api-Key":publicKey.toLowerCase(),
+      "X-Sign-Date":timestamp,
+      "X-Request-Sign":"dmar ed25519 "+bytesToHex(sig),
+      Accept:"application/json"
+    }
+  },25000);
+  return {status:res.status,ok:res.ok,items:arrFrom(body),latency_ms,rate_headers:rateHeaders(res.headers)};
+}
+
+async function runRareScan() {
+  const startedAt=new Date().toISOString();
+  const t0=performance.now();
+  const catalog=RARE_CATALOG.filter(r=>TRADEUP_INPUT_RARITIES.has(r.rarity));
+  const jobs=catalog.flatMap(row=>[
+    {row,query:row.skin_name,kind:"BASE"},
+    {row,query:"Souvenir "+row.skin_name,kind:"SOUVENIR"}
+  ]);
+  const seen=new Set<string>();
+  const listings:RareListing[]=[];
+  const errors:any[]=[];
+  const latencies:number[]=[];
+  const statuses:Record<string,number>={};
+  let lastRateHeaders:Record<string,string>={};
+
+  const batchSize=8;
+  for(let i=0;i<jobs.length;i+=batchSize){
+    const batch=jobs.slice(i,i+batchSize);
+    const settled=await Promise.all(batch.map(async j=>{
+      try { return {j,r:await dmarketOffersByTitle(j.query,j.kind==="SOUVENIR"?30:100)}; }
+      catch(e){ return {j,error:e instanceof Error?e.message:String(e)}; }
+    }));
+    for(const x of settled){
+      if("error" in x){ errors.push({skin:x.j.row.skin_name,kind:x.j.kind,error:x.error}); continue; }
+      const r=x.r;
+      latencies.push(r.latency_ms); lastRateHeaders=r.rate_headers;
+      statuses[String(r.status)]=(statuses[String(r.status)]??0)+1;
+      if(!r.ok){ errors.push({skin:x.j.row.skin_name,kind:x.j.kind,status:r.status}); continue; }
+      for(const item of r.items){
+        const title=String(item?.attributes?.title ?? item?.title ?? "");
+        const parsed=stripVariantAndWear(title);
+        if(parsed.base!==x.j.row.skin_name) continue;
+        const cs2=item?.attributes?.cs2 ?? {};
+        const fv=Number(cs2?.float);
+        const cents=Number(item?.priceCents);
+        if(!Number.isFinite(fv)||!Number.isFinite(cents)||cents<=0) continue;
+        const span=x.j.row.float_max-x.j.row.float_min;
+        if(!(span>0)) continue;
+        const nf=(fv-x.j.row.float_min)/span;
+        if(!Number.isFinite(nf)||nf<0||nf>1.001) continue;
+        const id=String(item?.offerId ?? (title+":"+cents+":"+fv));
+        if(seen.has(id)) continue;
+        seen.add(id);
+        listings.push({
+          source:"DMarket",offer_id:id,collection:x.j.row.collection,skin:x.j.row.skin_name,
+          rarity:x.j.row.rarity,variant:parsed.variant,wear:wearFromTitle(title),
+          float:fv,normalized_float:nf,price_usd:cents/100,
+          captured_at:startedAt,native_created_at:item?.createdAt ?? null
+        });
+      }
+    }
+    if(i+batchSize<jobs.length) await new Promise(r=>setTimeout(r,1050));
+  }
+
+  const low=listings.filter(x=>x.normalized_float<=0.20);
+  const candidates:any[]=[];
+  for(const x of low){
+    const st=x.variant==="STATTRAK";
+    const near=low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
+      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id &&
+      Math.abs(p.normalized_float-x.normalized_float)<=0.08);
+    const fallback=near.length>=4?near:low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
+      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id);
+    const ref=median(fallback.map(p=>p.price_usd));
+    if(ref==null||fallback.length<4||ref<=0) continue;
+    const gap=(ref-x.price_usd)/ref*100;
+    if(gap<15) continue;
+    candidates.push({
+      collection:x.collection,skin:x.skin,rarity:x.rarity,variant:x.variant,wear:x.wear,
+      float:x.float,normalized_float:Number(x.normalized_float.toFixed(6)),
+      price_usd:Number(x.price_usd.toFixed(2)),source:x.source,
+      comparison:{method:near.length>=4?"MEDIAN_NEARBY_NORMALIZED_FLOAT":"MEDIAN_LOW_FLOAT_GROUP",reference_usd:Number(ref.toFixed(2)),peer_count:fallback.length},
+      gap_pct:Number(gap.toFixed(2)),captured_at:x.captured_at,
+      native_created_at:x.native_created_at,
+      reason:"low normalized float ("+(x.normalized_float*100).toFixed(1)+"% of item range) + "+gap.toFixed(1)+"% below comparable "+(st?"StatTrak":"Normal/Souvenir")+" peers"
+    });
+  }
+  candidates.sort((a,b)=>b.gap_pct-a.gap_pct || a.normalized_float-b.normalized_float || a.price_usd-b.price_usd);
+
+  const souvenirCount=listings.filter(x=>x.variant==="SOUVENIR").length;
+  const normalCount=listings.filter(x=>x.variant==="NORMAL").length;
+  const stattrak=listings.filter(x=>x.variant==="STATTRAK");
+  const stattrakCollections=[...new Set(stattrak.map(x=>x.collection))].sort();
+
+  const finishedAt=new Date().toISOString();
+  const durationMs=Math.round(performance.now()-t0);
+  latencies.sort((a,b)=>a-b);
+  const p95=latencies.length?latencies[Math.min(latencies.length-1,Math.floor(latencies.length*0.95))]:null;
+
+  return {
+    ops:"OPS-045",mode:"RARE_COLLECTION_RADAR_V0",started_at:startedAt,finished_at:finishedAt,duration_ms:durationMs,
+    allowlist_collections:[...new Set(catalog.map(x=>x.collection))].sort(),
+    catalog_tradeup_input_skins:catalog.length,
+    calls:{attempted:jobs.length,statuses,errors:errors.slice(0,20),error_count:errors.length,latency_avg_ms:latencies.length?Math.round(latencies.reduce((a,b)=>a+b,0)/latencies.length):null,latency_p95_ms:p95,rate_headers:lastRateHeaders},
+    listings:{evaluated:listings.length,normal:normalCount,souvenir:souvenirCount,stattrak:stattrak.length,low_float_20pct:low.length},
+    stattrak_validation:{observed_listing_count:stattrak.length,collections:stattrakCollections,note:stattrak.length?"Observed in fresh DMarket results; kept separate from Normal/Souvenir.":"No StatTrak listing observed in fresh DMarket title scans; this is observational, not a catalog impossibility claim."},
+    thresholds:{normalized_float_max:0.20,gap_pct_min:15,provisional:true},
+    opportunities:candidates.slice(0,30),
+    opportunity_count:candidates.length,
+    buy_order_comparison:"N/D — not supported by this controlled DMarket scan",
+    freshness:{source:"DMarket",captured_at:startedAt,age_at_completion_seconds:Math.round((Date.parse(finishedAt)-Date.parse(startedAt))/1000),meaning:"SCALE capture time for current marketplace API responses; native listing createdAt is preserved separately."},
+    caveats:[
+      "Normal and Souvenir are pooled for non-StatTrak peer comparison; Souvenir remains provenance metadata only.",
+      "StatTrak is separated when observed.",
+      "Local peer median is scan-specific comparison evidence, not a global reference_price.",
+      "No stale Supabase market snapshots are used to create actionable opportunities."
+    ]
+  };
+}
+
+function waxpeerUsd(raw:any):number|null{
+  const n=Number(raw); if(!Number.isFinite(n)||n<=0) return null;
+  return n>10000?n/100000:n;
+}
+
+async function crosscheckWaxpeer(names:string[]){
+  const key=envAny("WAXPEER_API_KEY","WAXPEER_KEY","WAXPEER_API");
+  if(!key) throw new Error("Waxpeer credential unavailable");
+  const out:any[]=[];
+  for(let i=0;i<names.length;i++){
+    const name=names[i];
+    const u=new URL("https://api.waxpeer.com/v2/get-items-list");
+    u.searchParams.set("game","csgo");u.searchParams.set("limit","100");u.searchParams.set("search",name);u.searchParams.set("api",key);
+    const {res,body,latency_ms}=await fetchJson(u.toString(),{headers:{Accept:"application/json"}},25000);
+    const items=arrFrom(body).filter((it:any)=>{
+      const title=String(it?.name ?? it?.market_hash_name ?? "");
+      return stripVariantAndWear(title).base===name;
+    });
+    const sample=items.filter((it:any)=>Number.isFinite(Number(it?.float))&&waxpeerUsd(it?.price)!=null)
+      .map((it:any)=>({name:String(it?.name??it?.market_hash_name??""),variant:stripVariantAndWear(String(it?.name??it?.market_hash_name??"")).variant,float:Number(it.float),price_usd:waxpeerUsd(it.price)}))
+      .sort((a:any,b:any)=>Number(a.price_usd)-Number(b.price_usd)).slice(0,10);
+    out.push({skin:name,status:res.status,ok:res.ok,latency_ms,count:items.length,sample});
+    if(i<names.length-1) await new Promise(r=>setTimeout(r,3100));
+  }
+  return {source:"Waxpeer",captured_at:new Date().toISOString(),results:out};
+}
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
+  if (url.pathname === "/rare-scan") {
+    try { return Response.json(await runRareScan()); }
+    catch (e) { return Response.json({ops:"OPS-045",error:e instanceof Error?e.message:String(e)}, {status:500}); }
+  }
+
+  if (url.pathname === "/rare-crosscheck") {
+    const names=(url.searchParams.get("names")??"").split(";;").map(s=>s.trim()).filter(Boolean).slice(0,10);
+    if(!names.length) return Response.json({error:"names required, separated by ;;, max 10"},{status:400});
+    try { return Response.json({ops:"OPS-045",...(await crosscheckWaxpeer(names))}); }
+    catch(e){ return Response.json({ops:"OPS-045",error:e instanceof Error?e.message:String(e)},{status:500}); }
+  }
+
   if (url.pathname === "/health") {
     return Response.json({
       ok: true,
       service: "scale-radar",
-      ops: "OPS-040",
+      ops: "OPS-045",
       secrets_present: {
         csdeals: !!envAny("CSDEALS_API_KEY", "CS_DEALS_API_KEY", "CSD_API_KEY"),
         waxpeer: !!envAny("WAXPEER_API_KEY", "WAXPEER_KEY", "WAXPEER_API"),
@@ -342,7 +560,7 @@ Deno.serve(async (req) => {
     const captured_at = new Date().toISOString();
     const results = await Promise.all(jobs);
     return Response.json({
-      ops: "OPS-040",
+      ops: "OPS-045",
       captured_at,
       results,
       note: "Sanitized runtime probe. No API keys or signatures are returned.",
@@ -351,8 +569,8 @@ Deno.serve(async (req) => {
 
   return Response.json({
     service: "scale-radar",
-    ops: "OPS-040",
-    endpoints: ["/health", "/probe?source=all", "/probe?source=csdeals", "/probe?source=waxpeer", "/probe?source=dmarket"],
+    ops: "OPS-045",
+    endpoints: ["/health","/rare-scan","/rare-crosscheck?names=SKIN1;;SKIN2","/probe?source=all","/probe?source=csdeals","/probe?source=waxpeer","/probe?source=dmarket"],
   });
 });
 
