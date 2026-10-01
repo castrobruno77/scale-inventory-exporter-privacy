@@ -320,3 +320,5 @@ Deno.serve(async (req) => {
     endpoints: ["/health", "/probe?source=all", "/probe?source=csdeals", "/probe?source=waxpeer", "/probe?source=dmarket"],
   });
 });
+
+// OPS-040 rebuild trigger: dynamic runtime configuration applied.
