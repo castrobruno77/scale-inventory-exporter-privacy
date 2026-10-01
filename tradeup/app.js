@@ -183,9 +183,39 @@ function renderSelectorAuthority(pagination=null,inventory=null){
 function nextEmptySlot(){return state.slots.findIndex(v=>!v);}
 function selectorTargetSlot(){return Number.isInteger(state.selectorSlot)?state.selectorSlot:nextEmptySlot();}
 function selectorOriginLabel(){return state.selectorOrigin==='INVENTORY'?'Inventário':state.selectorOrigin==='DATABASE'?'Skins':'Inventário + Skins';}
+function legacyCompatibilityContext(excludeSlot=null){
+  const entries=state.slots
+    .map((item,index)=>({item,index}))
+    .filter(x=>x.item&&x.index!==excludeSlot);
+  if(!entries.length)return {status:'FREE',rarity:null,is_stattrak:null};
+  let rarity=null,isStattrak=null;
+  for(const {item} of entries){
+    if(!item.rarity||typeof item.is_stattrak!=='boolean')return {status:'CONFLICT',rarity:null,is_stattrak:null};
+    const itemRarity=String(item.rarity);
+    if(rarity===null){rarity=itemRarity;isStattrak=item.is_stattrak;continue;}
+    if(rarity!==itemRarity||isStattrak!==item.is_stattrak)return {status:'CONFLICT',rarity:null,is_stattrak:null};
+  }
+  return {status:'LOCKED',rarity,is_stattrak:isStattrak};
+}
+function legacyCandidateGuard(candidate,excludeSlot=null){
+  if(!candidate?.rarity||typeof candidate?.is_stattrak!=='boolean')return {ok:false,message:'Não foi possível confirmar raridade e modalidade deste item.'};
+  const ctx=legacyCompatibilityContext(excludeSlot);
+  if(ctx.status==='CONFLICT')return {ok:false,message:'Os inputs restantes já estão incompatíveis. Remova ou altere itens até restabelecer uma única raridade e modalidade.'};
+  if(ctx.status==='FREE')return {ok:true,context:ctx};
+  const ok=String(candidate.rarity)===ctx.rarity&&candidate.is_stattrak===ctx.is_stattrak;
+  return ok
+    ? {ok:true,context:ctx}
+    : {ok:false,context:ctx,message:'Este input não combina com o contrato atual. Use '+ctx.rarity+' · '+(ctx.is_stattrak?'StatTrak':'Normal')+'.'};
+}
 function syncSelectorContext(){
   const idx=selectorTargetSlot();
-  $('selectorContext').textContent=idx>=0?'Selecionando slot '+String(idx+1).padStart(2,'0')+' · origem: '+selectorOriginLabel():'Contrato completo · altere um input existente para substituir.';
+  let text=idx>=0?'Selecionando slot '+String(idx+1).padStart(2,'0')+' · origem: '+selectorOriginLabel():'Contrato completo · altere um input existente para substituir.';
+  if(!state.goalMode&&idx>=0){
+    const ctx=legacyCompatibilityContext(idx);
+    if(ctx.status==='LOCKED')text+=' · contrato: '+ctx.rarity+' · '+(ctx.is_stattrak?'StatTrak':'Normal');
+    else if(ctx.status==='CONFLICT')text+=' · ajuste os inputs incompatíveis antes de adicionar';
+  }
+  $('selectorContext').textContent=text;
   document.querySelectorAll('[data-selector-origin]').forEach(b=>b.classList.toggle('active',b.dataset.selectorOrigin===state.selectorOrigin));
 }
 function openSelector(slot=null){
@@ -213,6 +243,10 @@ async function duplicateInput(index){
   const target=nextEmptySlot();
   if(target<0){setResultState('partial','Contrato completo','Remova ou altere um input antes de duplicar.');return;}
   if(!canDuplicate(source)){setResultState('partial','Asset real não é duplicado','Use o seletor para escolher outro exemplar do Inventário ou uma simulação de Skins.');return;}
+  if(!state.goalMode){
+    const guard=legacyCandidateGuard(source,target);
+    if(!guard.ok){setResultState('partial','Input incompatível',guard.message);return;}
+  }
   state.slots[target]={...source,asset_id:null,owned:false,origin:'DATABASE'};
   renderInputs();resetFinal();showAddedFeedback(source,target);
   if(state.goalMode)await evaluateGoal();else updateLegacyProgress();
@@ -410,7 +444,24 @@ async function search(){
       renderSelectorAuthority(d.candidate_pagination||null,d.inventory_discovery||null);
       showGoalSearch(d.candidates||[],(d.inventory_discovery?.items||[]).filter(x=>x.eligible===true),d.candidate_pagination||null,d.inventory_discovery||null);
     }else{
-      const r=await fetch(API+'?q='+encodeURIComponent(q)+'&limit=18&ui=1');
+      const idx=selectorTargetSlot();
+      const ctx=legacyCompatibilityContext(idx);
+      if(ctx.status==='CONFLICT'){
+        $('selectorFeedback').textContent='Os inputs restantes já estão incompatíveis. Remova ou altere itens antes de adicionar outro input.';
+        $('selectorFeedback').hidden=false;
+        showSearch([],true,'Ajuste os inputs incompatíveis antes de continuar.');
+        return;
+      }
+      const filters=selectorFilterPayload();
+      const p=new URLSearchParams();
+      p.set('q',q);p.set('limit','18');p.set('offset','0');p.set('ui','1');
+      if(filters.weapon)p.set('weapon',filters.weapon);
+      if(filters.collection)p.set('collection',filters.collection);
+      if(ctx.status==='LOCKED'){
+        p.set('rarity',ctx.rarity);
+        p.set('stattrak',ctx.is_stattrak?'true':'false');
+      }
+      const r=await fetch(API+'?'+p.toString());
       const d=await r.json().catch(()=>({status:'ERROR'}));
       if(!r.ok||d.status==='ERROR'){const e=apiError(d,r.status);showSearch([],true,e.message,e.code);return;}
       showSearch(d.items||[]);
@@ -502,6 +553,12 @@ function showSearch(items,error=false,message='Falha ao consultar o catálogo.',
 }
 function pickLegacy(x){
   const idx=selectorTargetSlot();if(idx<0)return;
+  const guard=legacyCandidateGuard(x,idx);
+  if(!guard.ok){
+    $('selectorFeedback').textContent=guard.message;$('selectorFeedback').hidden=false;
+    setResultState('partial','Input incompatível',guard.message);
+    return;
+  }
   state.slots[idx]={...x,float_value:defaultFloat(x),owned:false,origin:'DATABASE',price_reference:null,manual_price_usd:null};
   renderInputs();resetFinal();showAddedFeedback(x,idx);advanceSelectorAfterAdd();
 }
@@ -619,6 +676,8 @@ async function applyInventoryLegacyContext(){
     const item=(d.items||[]).find(x=>x.market_key===key);if(!item)return;
     const raw=Number(floatParam),float=Number.isFinite(raw)?Math.max(Number(item.float_min),Math.min(Number(item.float_max),raw)):defaultFloat(item);
     const asset=(state.inventory?.items||[]).find(x=>x.match_state==='MATCHED'&&x.market_key===key&&hasNumber(x.float_value)&&Math.abs(Number(x.float_value)-float)<1e-7);
+    const guard=legacyCandidateGuard(item,0);
+    if(!guard.ok){setResultState('partial','Input incompatível',guard.message);return;}
     state.slots[0]={...item,float_value:float,owned:true,origin:'INVENTORY',asset_id:asset?.asset_id||'snapshot-context',price_reference:null,manual_price_usd:null};
     renderInputs();
   }catch(_){}
