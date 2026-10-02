@@ -330,6 +330,7 @@ type RareListing = {
   price_usd: number;
   captured_at: string;
   native_created_at: string | null;
+  listing_link: string | null;
 };
 
 const RARE_CATALOG: RareCatalogRow[] = ((rareCatalogFile as any)?.rows ?? []) as RareCatalogRow[];
@@ -340,6 +341,15 @@ function median(values: number[]): number | null {
   if (!xs.length) return null;
   const m=Math.floor(xs.length/2);
   return xs.length%2 ? xs[m] : (xs[m-1]+xs[m])/2;
+}
+
+function percentile(values:number[], p:number): number | null {
+  const xs=values.filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!xs.length) return null;
+  const pos=(xs.length-1)*Math.min(1,Math.max(0,p));
+  const lo=Math.floor(pos), hi=Math.ceil(pos);
+  if(lo===hi) return xs[lo];
+  return xs[lo]+(xs[hi]-xs[lo])*(pos-lo);
 }
 
 function wearFromTitle(title: string): string | null {
@@ -430,7 +440,8 @@ async function runRareScan() {
           source:"DMarket",offer_id:id,collection:x.j.row.collection,skin:x.j.row.skin_name,
           rarity:x.j.row.rarity,variant:parsed.variant,wear:wearFromTitle(title),
           float:fv,normalized_float:nf,price_usd:cents/100,
-          captured_at:startedAt,native_created_at:item?.createdAt ?? null
+          captured_at:startedAt,native_created_at:item?.createdAt ?? null,
+          listing_link:typeof item?.url==="string"?item.url:(typeof item?.link==="string"?item.link:null)
         });
       }
     }
@@ -564,7 +575,8 @@ async function runRareScanBounded(params:{source:string;collection:string;rarity
           source:"DMarket",offer_id:id,collection:x.j.row.collection,skin:x.j.row.skin_name,
           rarity:x.j.row.rarity,variant:parsed.variant,wear:wearFromTitle(title),
           float:fv,normalized_float:nf,price_usd:cents/100,
-          captured_at:new Date().toISOString(),native_created_at:item?.createdAt ?? null
+          captured_at:new Date().toISOString(),native_created_at:item?.createdAt ?? null,
+          listing_link:typeof item?.url==="string"?item.url:(typeof item?.link==="string"?item.link:null)
         });
         accepted++;
       }
@@ -575,46 +587,102 @@ async function runRareScanBounded(params:{source:string;collection:string;rarity
     emit({event:"batch_done",batch_start:i,batch_size:batch.length,jobs_completed:completed,jobs_error:errors.length,listings_received:listings.length});
   }
 
-  const low=listings.filter(x=>x.normalized_float<=0.20);
+  const low=listings.filter(x=>x.normalized_float<=0.20 && x.variant!=="STATTRAK");
   const candidates:any[]=[];
   for(const x of low){
-    const st=x.variant==="STATTRAK";
-    const near=low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
-      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id &&
+    const near=low.filter(p=>p.offer_id!==x.offer_id &&
       Math.abs(p.normalized_float-x.normalized_float)<=0.08);
-    const fallback=near.length>=4?near:low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
-      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id);
+    const fallback=near.length>=4?near:low.filter(p=>p.offer_id!==x.offer_id);
     const ref=median(fallback.map(p=>p.price_usd));
     if(ref==null||fallback.length<4||ref<=0) continue;
-    const gap=(ref-x.price_usd)/ref*100;
-    if(gap<15) continue;
+    const localGap=(ref-x.price_usd)/ref*100;
+    if(localGap<15) continue;
+
+    const equalOrBetter=listings.filter(p=>
+      p.variant!=="STATTRAK" &&
+      p.collection===x.collection &&
+      p.rarity===x.rarity &&
+      p.offer_id!==x.offer_id &&
+      p.normalized_float<=x.normalized_float+1e-9
+    );
+    const prices=equalOrBetter.map(p=>p.price_usd).filter(Number.isFinite).sort((a,b)=>a-b);
+    const cheapest=equalOrBetter.slice().sort((a,b)=>a.price_usd-b.price_usd || a.normalized_float-b.normalized_float)[0] ?? null;
+    const robustGap=cheapest&&cheapest.price_usd>0 ? (cheapest.price_usd-x.price_usd)/cheapest.price_usd*100 : null;
+    const classification =
+      equalOrBetter.length<4 || !cheapest ? "INSUFFICIENT_EVIDENCE" :
+      robustGap!==null && robustGap>=15 ? "CERTIFIED_SURVIVOR" :
+      "REJECTED_BY_COMPARATOR";
+
     candidates.push({
-      skin:x.skin,variant:x.variant,wear:x.wear,float:x.float,
+      classification,
+      skin:x.skin,variant:x.variant,wear:x.wear,
+      float:x.float,normalized_float:Number(x.normalized_float.toFixed(6)),
       price_usd:Number(x.price_usd.toFixed(2)),
-      reference:{method:near.length>=4?"MEDIAN_NEARBY_NORMALIZED_FLOAT":"MEDIAN_LOW_FLOAT_GROUP",price_usd:Number(ref.toFixed(2)),peer_count:fallback.length},
-      gap_pct:Number(gap.toFixed(2)),timestamp:x.captured_at
+      offer_id:x.offer_id,
+      listing_link:x.listing_link,
+      local_reference:{
+        method:near.length>=4?"MEDIAN_NEARBY_NORMALIZED_FLOAT":"MEDIAN_LOW_FLOAT_GROUP",
+        price_usd:Number(ref.toFixed(2)),
+        peer_count:fallback.length,
+        gap_pct:Number(localGap.toFixed(2))
+      },
+      robust_comparator:{
+        rule:"CHEAPEST_EQUAL_OR_BETTER_NORMALIZED_FLOAT",
+        peer_count:equalOrBetter.length,
+        cheapest_price_usd:cheapest?Number(cheapest.price_usd.toFixed(2)):null,
+        cheapest_offer_id:cheapest?.offer_id ?? null,
+        cheapest_listing_link:cheapest?.listing_link ?? null,
+        cheapest_float:cheapest?.float ?? null,
+        cheapest_normalized_float:cheapest?Number(cheapest.normalized_float.toFixed(6)):null,
+        gap_pct:robustGap===null?null:Number(robustGap.toFixed(2)),
+        price_percentiles_usd:{
+          p25:percentile(prices,0.25)===null?null:Number(percentile(prices,0.25)!.toFixed(2)),
+          p50:percentile(prices,0.50)===null?null:Number(percentile(prices,0.50)!.toFixed(2)),
+          p75:percentile(prices,0.75)===null?null:Number(percentile(prices,0.75)!.toFixed(2))
+        }
+      },
+      timestamp:x.captured_at
     });
   }
-  candidates.sort((a,b)=>b.gap_pct-a.gap_pct || a.float-b.float || a.price_usd-b.price_usd);
+  candidates.sort((a,b)=>{
+    const rank=(v:string)=>v==="CERTIFIED_SURVIVOR"?0:v==="INSUFFICIENT_EVIDENCE"?1:2;
+    return rank(a.classification)-rank(b.classification) ||
+      (b.robust_comparator?.gap_pct??-999)-(a.robust_comparator?.gap_pct??-999) ||
+      a.normalized_float-b.normalized_float ||
+      a.price_usd-b.price_usd;
+  });
 
+  const certified=candidates.filter(x=>x.classification==="CERTIFIED_SURVIVOR");
+  const rejected=candidates.filter(x=>x.classification==="REJECTED_BY_COMPARATOR");
+  const insufficient=candidates.filter(x=>x.classification==="INSUFFICIENT_EVIDENCE");
   const finishedAt=new Date().toISOString();
   const durationMs=Math.round(performance.now()-t0);
-  emit({event:"finish",jobs_planned:jobs.length,jobs_completed:completed,jobs_error:errors.length,listings_received:listings.length,candidates:candidates.length,duration_ms:durationMs});
+  emit({event:"finish",jobs_planned:jobs.length,jobs_completed:completed,jobs_error:errors.length,listings_received:listings.length,candidates:candidates.length,certified_survivors:certified.length,rejected_by_comparator:rejected.length,insufficient_evidence:insufficient.length,duration_ms:durationMs});
 
   return {
-    ops:"OPS-045",mode:"MINI_SCAN",status:completed===jobs.length?"PASS":"PARTIAL",
+    ops:"OPS-045",mode:"MINI_SCAN_ROBUST_COMPARATOR",status:completed===jobs.length?"PASS":"PARTIAL",
     params,jobs:{planned:jobs.length,completed,error:errors.length},
     listings_received:listings.length,
     freshness:{captured_at:finishedAt,age_at_completion_seconds:0,meaning:"SCALE response completion time; each listing also carries its own captured_at/native_created_at."},
     duration_ms:durationMs,
     rate_limit_observed:rateHeaders,
     opportunities:candidates,
+    robust_validation:{
+      original_signal_count:candidates.length,
+      certified_survivors:certified.length,
+      rejected_by_comparator:rejected.length,
+      insufficient_evidence:insufficient.length,
+      top_10_survivors:certified.slice(0,10),
+      result:completed!==jobs.length?"PARTIAL":(insufficient.length>0?"PARTIAL":"PASS")
+    },
     errors,
     progress,
     caveats:[
       "Normal and Souvenir are pooled as equivalent trade-up inputs; provenance remains in variant.",
       "StatTrak, if returned incidentally, is never pooled with Normal/Souvenir.",
-      "Reference is local to this bounded scan and is not a global reference_price."
+      "Reference is local to this bounded scan and is not a global reference_price.",
+      "Robust comparator uses all accepted non-StatTrak Normal+Souvenir listings with normalized float equal to or better than each candidate.",
+      "CERTIFIED_SURVIVOR requires at least 4 equal-or-better peers and candidate price at least 15% below the cheapest such peer."
     ]
   };
 }
