@@ -356,7 +356,7 @@ function stripVariantAndWear(title: string): { base:string; variant:"NORMAL"|"SO
   return {base:x,variant};
 }
 
-async function dmarketOffersByTitle(title: string, limit=100) {
+async function dmarketOffersByTitle(title: string, limit=100, timeoutMs=25000) {
   const publicKey = envAny("DMARKET_PUBLIC_KEY", "DMARKET_API_PUBLIC_KEY", "DMARKET_KEY");
   const secretHex = envAny("DMARKET_SECRET_KEY", "DMARKET_API_SECRET_KEY", "DMARKET_SECRET");
   if (!publicKey || !secretHex) throw new Error("DMarket credentials unavailable");
@@ -379,7 +379,7 @@ async function dmarketOffersByTitle(title: string, limit=100) {
       "X-Request-Sign":"dmar ed25519 "+bytesToHex(sig),
       Accept:"application/json"
     }
-  },25000);
+  },timeoutMs);
   return {status:res.status,ok:res.ok,items:arrFrom(body),latency_ms,rate_headers:rateHeaders(res.headers)};
 }
 
@@ -493,6 +493,132 @@ async function runRareScan() {
   };
 }
 
+async function runRareScanBounded(params:{source:string;collection:string;rarity:string;max_jobs:number;concurrency:number;timeout_ms:number;deadline_ms:number}) {
+  const startedAt=new Date().toISOString();
+  const t0=performance.now();
+  const deadlineAt=Date.now()+params.deadline_ms;
+  const catalog=RARE_CATALOG.filter(r=>r.collection===params.collection && r.rarity===params.rarity && TRADEUP_INPUT_RARITIES.has(r.rarity));
+  const jobs=catalog.flatMap(row=>[
+    {row,query:row.skin_name,kind:"BASE"},
+    {row,query:"Souvenir "+row.skin_name,kind:"SOUVENIR"}
+  ]).slice(0,params.max_jobs);
+  const seen=new Set<string>();
+  const listings:RareListing[]=[];
+  const errors:any[]=[];
+  const progress:any[]=[];
+  const rateHeaders:any[]=[];
+  let completed=0;
+
+  const emit=(evt:any)=>{
+    const e={ts:new Date().toISOString(),...evt};
+    progress.push(e);
+    console.log(JSON.stringify({ops:"OPS-045",mode:"MINI_SCAN_PROGRESS",...e}));
+  };
+
+  emit({event:"start",source:params.source,collection:params.collection,rarity:params.rarity,jobs_planned:jobs.length});
+
+  for(let i=0;i<jobs.length;i+=params.concurrency){
+    if(Date.now()>=deadlineAt){
+      emit({event:"deadline",batch_start:i,remaining:jobs.length-i});
+      break;
+    }
+    const batch=jobs.slice(i,i+params.concurrency);
+    const settled=await Promise.all(batch.map(async (j,offset)=>{
+      const remaining=Math.max(1000,deadlineAt-Date.now());
+      const timeout=Math.min(params.timeout_ms,remaining);
+      const jobIndex=i+offset;
+      emit({event:"job_start",job_index:jobIndex,skin:j.row.skin_name,kind:j.kind,timeout_ms:timeout});
+      try {
+        const r=await dmarketOffersByTitle(j.query,j.kind==="SOUVENIR"?30:100,timeout);
+        return {j,r,jobIndex};
+      } catch(e){
+        return {j,error:e instanceof Error?e.message:String(e),jobIndex};
+      }
+    }));
+    for(const x of settled){
+      if("error" in x){
+        errors.push({job_index:x.jobIndex,skin:x.j.row.skin_name,kind:x.j.kind,error:x.error});
+        emit({event:"job_error",job_index:x.jobIndex,skin:x.j.row.skin_name,kind:x.j.kind,error:x.error});
+        completed++;
+        continue;
+      }
+      const r=x.r;
+      rateHeaders.push({job_index:x.jobIndex,...r.rate_headers});
+      let accepted=0;
+      for(const item of r.items){
+        const title=String(item?.attributes?.title ?? item?.title ?? "");
+        const parsed=stripVariantAndWear(title);
+        if(parsed.base!==x.j.row.skin_name) continue;
+        const cs2=item?.attributes?.cs2 ?? {};
+        const fv=Number(cs2?.float);
+        const cents=Number(item?.priceCents);
+        if(!Number.isFinite(fv)||!Number.isFinite(cents)||cents<=0) continue;
+        const span=x.j.row.float_max-x.j.row.float_min;
+        if(!(span>0)) continue;
+        const nf=(fv-x.j.row.float_min)/span;
+        if(!Number.isFinite(nf)||nf<0||nf>1.001) continue;
+        const id=String(item?.offerId ?? (title+":"+cents+":"+fv));
+        if(seen.has(id)) continue;
+        seen.add(id);
+        listings.push({
+          source:"DMarket",offer_id:id,collection:x.j.row.collection,skin:x.j.row.skin_name,
+          rarity:x.j.row.rarity,variant:parsed.variant,wear:wearFromTitle(title),
+          float:fv,normalized_float:nf,price_usd:cents/100,
+          captured_at:new Date().toISOString(),native_created_at:item?.createdAt ?? null
+        });
+        accepted++;
+      }
+      if(!r.ok) errors.push({job_index:x.jobIndex,skin:x.j.row.skin_name,kind:x.j.kind,status:r.status});
+      completed++;
+      emit({event:r.ok?"job_done":"job_error",job_index:x.jobIndex,skin:x.j.row.skin_name,kind:x.j.kind,status:r.status,raw_items:r.items.length,accepted_listings:accepted,latency_ms:r.latency_ms,rate_headers:r.rate_headers});
+    }
+    emit({event:"batch_done",batch_start:i,batch_size:batch.length,jobs_completed:completed,jobs_error:errors.length,listings_received:listings.length});
+  }
+
+  const low=listings.filter(x=>x.normalized_float<=0.20);
+  const candidates:any[]=[];
+  for(const x of low){
+    const st=x.variant==="STATTRAK";
+    const near=low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
+      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id &&
+      Math.abs(p.normalized_float-x.normalized_float)<=0.08);
+    const fallback=near.length>=4?near:low.filter(p=>p.collection===x.collection && p.rarity===x.rarity &&
+      (p.variant==="STATTRAK")===st && p.offer_id!==x.offer_id);
+    const ref=median(fallback.map(p=>p.price_usd));
+    if(ref==null||fallback.length<4||ref<=0) continue;
+    const gap=(ref-x.price_usd)/ref*100;
+    if(gap<15) continue;
+    candidates.push({
+      skin:x.skin,variant:x.variant,wear:x.wear,float:x.float,
+      price_usd:Number(x.price_usd.toFixed(2)),
+      reference:{method:near.length>=4?"MEDIAN_NEARBY_NORMALIZED_FLOAT":"MEDIAN_LOW_FLOAT_GROUP",price_usd:Number(ref.toFixed(2)),peer_count:fallback.length},
+      gap_pct:Number(gap.toFixed(2)),timestamp:x.captured_at
+    });
+  }
+  candidates.sort((a,b)=>b.gap_pct-a.gap_pct || a.float-b.float || a.price_usd-b.price_usd);
+
+  const finishedAt=new Date().toISOString();
+  const durationMs=Math.round(performance.now()-t0);
+  emit({event:"finish",jobs_planned:jobs.length,jobs_completed:completed,jobs_error:errors.length,listings_received:listings.length,candidates:candidates.length,duration_ms:durationMs});
+
+  return {
+    ops:"OPS-045",mode:"MINI_SCAN",status:completed===jobs.length?"PASS":"PARTIAL",
+    params,jobs:{planned:jobs.length,completed,error:errors.length},
+    listings_received:listings.length,
+    freshness:{captured_at:finishedAt,age_at_completion_seconds:0,meaning:"SCALE response completion time; each listing also carries its own captured_at/native_created_at."},
+    duration_ms:durationMs,
+    rate_limit_observed:rateHeaders,
+    opportunities:candidates,
+    errors,
+    progress,
+    caveats:[
+      "Normal and Souvenir are pooled as equivalent trade-up inputs; provenance remains in variant.",
+      "StatTrak, if returned incidentally, is never pooled with Normal/Souvenir.",
+      "Reference is local to this bounded scan and is not a global reference_price."
+    ]
+  };
+}
+
 function waxpeerUsd(raw:any):number|null{
   const n=Number(raw); if(!Number.isFinite(n)||n<=0) return null;
   return n>10000?n/100000:n;
@@ -523,8 +649,17 @@ async function crosscheckWaxpeer(names:string[]){
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   if (url.pathname === "/rare-scan") {
-    try { return Response.json(await runRareScan()); }
-    catch (e) { return Response.json({ops:"OPS-045",error:e instanceof Error?e.message:String(e)}, {status:500}); }
+    const source=url.searchParams.get("source")??"DMarket";
+    const collection=url.searchParams.get("collection")??"";
+    const rarity=url.searchParams.get("rarity")??"";
+    const maxJobs=Math.min(10,Math.max(1,Number(url.searchParams.get("max_jobs")??"10")));
+    const concurrency=Math.min(2,Math.max(1,Number(url.searchParams.get("concurrency")??"2")));
+    const timeoutMs=Math.min(15000,Math.max(10000,Number(url.searchParams.get("timeout_ms")??"12000")));
+    const deadlineMs=Math.min(90000,Math.max(10000,Number(url.searchParams.get("deadline_ms")??"85000")));
+    if(source!=="DMarket") return Response.json({ops:"OPS-045",error:"source must be DMarket for this bounded test"},{status:400});
+    if(collection!=="The 2021 Mirage Collection"||rarity!=="Consumer Grade") return Response.json({ops:"OPS-045",error:"bounded OPS-045 authorization allows only The 2021 Mirage Collection × Consumer Grade"},{status:400});
+    try { return Response.json(await runRareScanBounded({source,collection,rarity,max_jobs:maxJobs,concurrency,timeout_ms:timeoutMs,deadline_ms:deadlineMs})); }
+    catch (e) { return Response.json({ops:"OPS-045",mode:"MINI_SCAN",status:"ERROR",error:e instanceof Error?e.message:String(e)}, {status:500}); }
   }
 
   if (url.pathname === "/rare-crosscheck") {
