@@ -742,6 +742,7 @@ Deno.serve(async (req) => {
       ok: true,
       service: "scale-radar",
       ops: "OPS-045",
+      revision: "OPS045_ROBUST_COMPARATOR_V1",
       secrets_present: {
         csdeals: !!envAny("CSDEALS_API_KEY", "CS_DEALS_API_KEY", "CSD_API_KEY"),
         waxpeer: !!envAny("WAXPEER_API_KEY", "WAXPEER_KEY", "WAXPEER_API"),
